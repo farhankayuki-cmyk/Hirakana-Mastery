@@ -1,0 +1,17 @@
+{
+  "name": "HiraKana Mastery Kayuki",
+  "short_name": "HiraKana",
+  "description": "Latihan baca hiragana dan katakana ala Kayuki Nihongo Gakkou: kartu, ujian kenaikan, dan laporan progres.",
+  "lang": "id",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#102b50",
+  "theme_color": "#102b50",
+  "icons": [
+    {"src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any"},
+    {"src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any"},
+    {"src": "icons/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable"}
+  ]
+}
