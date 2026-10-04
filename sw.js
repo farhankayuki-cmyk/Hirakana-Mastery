@@ -1,11 +1,11 @@
 /* Service worker HiraKana Mastery Kayuki.
    Ganti angka VERSI kalau mau memaksa semua perangkat mengambil file baru. */
-const VERSI = 'hirakana-v9';
+const VERSI = 'hirakana-v10';
 const INTI = [
   './', 'index.html', 'manifest.webmanifest',
   'fonts/gothic.woff2', 'fonts/mincho.woff2', 'fonts/kyokasho.woff2', 'fonts/tangan.woff2', 'fonts/kuas.woff2',
   'icons/icon-192.png', 'icons/icon-512.png', 'icons/icon-maskable-512.png', 'icons/apple-touch-icon.png',
-  'kayuki-config.js', 'kayuki-sync.js'            /* file portal; dilewati kalau belum ada di folder ini */
+  'kayuki-sync.js'                                /* penyambung kelas online */
 ];
 
 self.addEventListener('install', e => {

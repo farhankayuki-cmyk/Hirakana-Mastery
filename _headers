@@ -6,3 +6,5 @@
   Cache-Control: no-cache
 /manifest.webmanifest
   Cache-Control: no-cache
+/kayuki-sync.js
+  Cache-Control: no-cache

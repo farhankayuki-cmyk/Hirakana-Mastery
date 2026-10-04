@@ -26,7 +26,7 @@ Fitur pasang dan offline **tidak jalan kalau file dibuka langsung dari HP/PC** (
 - **GitHub Pages**: upload isi folder ke repo, aktifkan Pages.
 - **Portal Kayuki sendiri**: taruh folder ini di hosting portal, misalnya `portal.domain/hirakana/`.
 
-Kalau mau tersambung ke portal, taruh `kayuki-config.js` dan `kayuki-sync.js` **di folder yang sama** dengan `index.html`. Service worker otomatis ikut menyimpannya untuk offline.
+Sinkron ke kelas online memakai `kayuki-sync.js` (sudah ada di folder ini, tersambung ke Supabase Kayuki). Siswa gabung kelas lewat tab Progres; tanpa gabung, semuanya tetap tersimpan di HP.
 
 ## 2. Cara siswa memasang
 - **Android (Chrome)**: buka alamatnya, ketuk tombol **📲 Pasang aplikasi** di bagian atas, atau menu ⋮ lalu *Instal aplikasi*.
