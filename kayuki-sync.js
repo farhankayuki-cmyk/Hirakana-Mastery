@@ -146,32 +146,47 @@
   function css() {
     if (document.getElementById('ks-css')) return;
     var s = document.createElement('style'); s.id = 'ks-css';
-    s.textContent = '.ks{display:flex;flex-direction:column;gap:8px;font-size:14px}.ks input{font:inherit;padding:9px 11px;border:1.5px solid var(--line,#d6e1f7);border-radius:10px;background:var(--surface,#fff);color:var(--ink,#0e1c48);min-width:0;flex:1}.ks .r{display:flex;gap:8px;flex-wrap:wrap;align-items:center}.ks button{font:inherit;font-weight:700;padding:9px 14px;border-radius:10px;border:1.5px solid var(--line,#d6e1f7);background:var(--surface,#fff);color:var(--ink,#0e1c48);cursor:pointer}.ks button.p{background:#1d63d8;border-color:#1d63d8;color:#fff}.ks .m{color:var(--ink-2,#4b5b88);font-size:12.5px}.ks .e{color:#c0392b;font-size:12.5px}.ks .ok{color:#1f9d6b;font-weight:700}';
+    s.textContent = '.ks{display:flex;flex-direction:column;gap:8px;font-size:14px}.ks input{font:inherit;padding:9px 11px;border:1.5px solid var(--line,#d6e1f7);border-radius:10px;background:var(--surface,#fff);color:var(--ink,#0e1c48);min-width:0;flex:1}.ks .r{display:flex;gap:8px;flex-wrap:wrap;align-items:center}.ks button{font:inherit;font-weight:700;padding:9px 14px;border-radius:10px;border:1.5px solid var(--line,#d6e1f7);background:var(--surface,#fff);color:var(--ink,#0e1c48);cursor:pointer}.ks button.p{background:#1d63d8;border-color:#1d63d8;color:#fff}.ks .m{color:var(--ink-2,#4b5b88);font-size:12.5px}.ks .e{color:#c0392b;font-size:12.5px}.ks .ok{color:#1f9d6b;font-weight:700}.ks .kt{overflow-x:auto}.ks table{width:100%;border-collapse:collapse;font-size:13px;font-variant-numeric:tabular-nums}.ks th,.ks td{text-align:left;padding:6px 8px;border-bottom:1px solid var(--line,#d6e1f7);white-space:nowrap}.ks th{font-size:12px;color:var(--ink-2,#4b5b88);font-weight:600}.ks tr.c{cursor:pointer}.ks .kd{border-top:1.5px solid var(--line,#d6e1f7);padding-top:10px;display:flex;flex-direction:column;gap:8px}.ks .sc{display:inline-flex;gap:4px}.ks .sc button{padding:6px 10px}.ks textarea{font:inherit;padding:9px 11px;border:1.5px solid var(--line,#d6e1f7);border-radius:10px;background:var(--surface,#fff);color:var(--ink,#0e1c48);min-height:64px}';
     document.head.appendChild(s);
   }
   function fmtT(iso) { try { return new Date(iso).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }); } catch (e) { return ''; } }
-  var panelPaint = null;
+  var panelPaint = null, showSen = false;
+  function senseiLink() {
+    return '<div class="ks" style="margin-top:10px"><div class="r"><button data-ks="sen">' + (showSen ? 'Tutup mode sensei' : 'Saya sensei') + '</button></div>' + (showSen ? '<div id="ks-sensei"></div>' : '') + '</div>';
+  }
+  function masukanHTML() {
+    if (app === 'mensetsu') return '';
+    var m = rd(LS.inb, { penilaian: [] }), p = (m.penilaian || []).filter(function (x) { return x.app === app; })[0];
+    if (!p) return '';
+    var rub = RUBRIK[app] || [];
+    return '<div class="m"><b>Penilaian sensei</b> · ' + fmtD(p.waktu) + (p.oleh ? ' · ' + esc(p.oleh) : '') + ' · rata-rata <b>' + avg(p.sc) + '/5</b><br>' +
+      p.sc.map(function (v, i) { return esc(rub[i] || ('Aspek ' + (i + 1))) + ' ' + v + '/5'; }).join(' · ') + (p.catatan ? '<br>Catatan: ' + esc(p.catatan) : '') + '</div>';
+  }
   function mountPanel(el, o) {
     if (!el) return; css();
     var msg = '';
     function paint() {
+      var ae = document.activeElement;
+      if (ae && el.contains(ae) && /^(INPUT|TEXTAREA)$/.test(ae.tagName)) return; /* jangan hapus ketikan yang sedang ditulis */
       var s = state();
       if (s.gabung) {
         el.innerHTML = '<div class="ks"><div><span class="ok">Terhubung</span> ke kelas <b>' + esc(s.kelas) + '</b> sebagai <b>' + esc(s.nama) + '</b></div>' +
           '<div class="m">' + (s.antre ? s.antre + ' data menunggu dikirim' : 'Semua data sudah terkirim') + (s.terakhir ? ' · terakhir ' + fmtT(s.terakhir) : '') + (s.online ? '' : ' · sedang offline') + '</div>' +
           (s.galat ? '<div class="e">' + esc(s.galat) + '</div>' : '') +
-          '<div class="r"><button data-ks="sync" class="p">Sinkronkan sekarang</button><button data-ks="out">Keluar dari kelas</button></div></div>';
+          masukanHTML() + '<div class="r"><button data-ks="sync" class="p">Sinkronkan sekarang</button><button data-ks="out">Keluar dari kelas</button></div></div>' + senseiLink();
       } else {
         el.innerHTML = '<div class="ks"><div class="m">Gabung kelas supaya sensei bisa melihat progresmu dan memberi catatan. Tanpa gabung, progres tetap tersimpan di HP ini.</div>' +
           '<div class="r"><input id="ks-kode" placeholder="Kode kelas" autocapitalize="characters" autocomplete="off"><input id="ks-nama" placeholder="Nama lengkap" autocomplete="name" value="' + esc(o && o.nama) + '"></div>' +
           (msg ? '<div class="e">' + esc(msg) + '</div>' : '') +
-          '<div class="r"><button data-ks="join" class="p">Gabung kelas</button></div></div>';
+          '<div class="r"><button data-ks="join" class="p">Gabung kelas</button></div></div>' + senseiLink();
       }
+      if (showSen) mountSensei(el.querySelector('#ks-sensei'), o);
     }
     el.addEventListener('click', function (e) {
       var b = e.target.closest && e.target.closest('[data-ks]'); if (!b) return;
       var a = b.getAttribute('data-ks');
       if (a === 'sync') { b.textContent = 'Mengirim...'; flush().then(paint); }
+      if (a === 'sen') { showSen = !showSen; return paint(); }
       if (a === 'out') { if (confirm('Keluar dari kelas? Data di HP ini tetap ada.')) { keluar(); msg = ''; paint(); } }
       if (a === 'join') {
         var k = el.querySelector('#ks-kode').value, n = el.querySelector('#ks-nama').value;
@@ -179,8 +194,125 @@
         gabung(k, n).then(function () { msg = ''; paint(); }).catch(function (er) { msg = er.message; paint(); });
       }
     });
+    el.__ksPaintHook = paint;
     var i = listeners.indexOf(panelPaint); if (i >= 0) listeners.splice(i, 1);
     panelPaint = paint; listeners.push(paint); paint();
+  }
+
+  /* ---------- dasbor sensei (dipakai di Kayuki, Mensetsu, HiraKana) ---------- */
+  var RUBRIK = {
+    mensetsu: ['Suara & pelafalan', 'Kontak mata & ekspresi', 'Sikap, duduk & ojigi', 'Isi jawaban', 'Tata bahasa & kesopanan'],
+    kayuki: ['Kosakata', 'Tata bahasa', 'Kanji', 'Membaca', 'Kesiapan ujian'],
+    hirakana: ['Pengenalan huruf', 'Kecepatan baca', 'Ketepatan', 'Konsistensi latihan']
+  };
+  var NAMA_APP = { mensetsu: 'Mensetsu', kayuki: 'Kayuki Latihan', hirakana: 'HiraKana' };
+  var KMODE = { latihan: 'Latihan', shiken: 'Shiken', kenaikan: 'Ujian kenaikan', penempatan: 'Tes penempatan', simulasi: 'Simulasi', tes: 'Tes' };
+  var SS = { rows: null, sel: null, det: null, err: '', busy: false, app: 'mensetsu', sc: null, note: '', nama: rd('kayuki-sync-sn', '') };
+  function avg(a) { var t = 0; for (var i = 0; i < a.length; i++) t += a[i]; return (t / a.length).toFixed(1); }
+  function fmtD(iso) { try { return new Date(iso).toLocaleDateString('id-ID', { day: 'numeric', month: 'short' }); } catch (e) { return ''; } }
+  function ringkas(h) {
+    var d = h.data || {}, skor = null, tot = null;
+    if (d.skor != null && d.total) { skor = d.skor; tot = d.total; }
+    else if (d.h != null && d.n) { skor = d.h; tot = d.n; }
+    var jenis = (KMODE[d.mode] || d.mode || '-') + (d.bab && !Array.isArray(d.bab) ? ' · ' + d.bab : '') + (d.lulus === true ? ' ✓' : d.lulus === false ? ' ✗' : '');
+    return [jenis, tot ? skor + '/' + tot : '–', tot ? Math.round(skor / tot * 100) + '%' : (d.pct != null ? d.pct + '%' : '–')];
+  }
+  function mountSensei(el, o) {
+    if (!el) return; css();
+    if (o && o.nama && !SS.nama) SS.nama = o.nama;
+    var root = el;
+    function load() {
+      SS.busy = true; SS.err = ''; paint();
+      return sensei.rekap().then(function (r) { SS.rows = r; return SS.sel ? sensei.detail(SS.sel).then(function (d) { SS.det = d; }) : null; })
+        .catch(function (e) { SS.err = e.message; if (!SS.rows) SS.rows = []; })
+        .then(function () { SS.busy = false; paint(); });
+    }
+    function open(id) {
+      SS.sel = id; SS.det = null; SS.err = ''; SS.sc = null; SS.note = ''; paint();
+      sensei.detail(id).then(function (d) { SS.det = d; paint(); }).catch(function (e) { SS.err = e.message; paint(); });
+    }
+    function paint() {
+      var kk = sk();
+      if (!kk) {
+        root.innerHTML = '<div class="ks"><div class="m">Masuk dengan kode kelas dan kunci sensei. Kunci hanya tersimpan di HP ini.</div>' +
+          '<div class="r"><input id="kso-kode" placeholder="Kode kelas" autocapitalize="characters" autocomplete="off"><input id="kso-key" type="password" placeholder="Kunci sensei" autocomplete="off"></div>' +
+          '<div class="r"><input id="kso-nama" placeholder="Nama sensei (muncul di catatan)" value="' + esc(SS.nama) + '"></div>' +
+          (SS.err ? '<div class="e">' + esc(SS.err) + '</div>' : '') +
+          '<div class="r"><button class="p" data-kso="login">Masuk</button></div></div>';
+        return;
+      }
+      if (!SS.rows && !SS.busy && !SS.err) { setTimeout(load, 0); }
+      var rows = SS.rows || [], h = '<div class="ks"><div class="r" style="justify-content:space-between"><b>Kelas ' + esc(kk.kode) + ' · ' + rows.length + ' siswa</b><span><button data-kso="reload">' + (SS.busy ? 'Memuat...' : 'Muat ulang') + '</button> <button data-kso="logout">Keluar</button></span></div>';
+      if (SS.err) h += '<div class="e">' + esc(SS.err) + '</div>';
+      if (rows.length) {
+        h += '<div class="kt"><table><thead><tr><th>Nama</th><th>Mensetsu</th><th>HiraKana</th><th>Kayuki</th><th>Terakhir</th><th>Nilai</th><th>Aktif</th></tr></thead><tbody>';
+        rows.forEach(function (r) {
+          var s = r.status || {}, ht = r.hasil_terakhir, nl = r.nilai_terakhir;
+          h += '<tr class="c" data-kso-id="' + esc(r.id) + '"><td><b>' + esc(r.nama) + '</b></td><td>' + (s['mensetsu|hafal'] || 0) + '</td><td>' + (s['hirakana|hafal'] || 0) + '</td><td>' + ((s['kayuki|lulus'] || 0) + (s['kayuki|lancar'] || 0)) + ' bab</td><td>' + (ht ? esc(NAMA_APP[ht.app] || ht.app) + ' ' + ringkas(ht)[1] : '–') + '</td><td>' + (nl ? avg(nl.sc) : '–') + '</td><td>' + fmtD(r.terakhir) + '</td></tr>';
+        });
+        h += '</tbody></table></div><div class="m">Kolom: jumlah item hafal (Mensetsu, HiraKana) dan bab Kayuki yang lulus. Ketuk nama untuk detail.</div>';
+      } else if (!SS.busy) h += '<div class="m">Belum ada siswa yang bergabung. Bagikan kode kelas ke siswa.</div>';
+      if (SS.sel && SS.det) h += detail();
+      else if (SS.sel) h += '<div class="m">Memuat detail...</div>';
+      root.innerHTML = h + '</div>';
+    }
+    function detail() {
+      var d = SS.det, cnt = {}, g = { mensetsu: [], kayuki: [], hirakana: [] };
+      (d.status || []).forEach(function (x) { var k = x.a + '|' + x.v; cnt[k] = (cnt[k] || 0) + 1; });
+      (d.hasil || []).forEach(function (x) { if (g[x.app]) g[x.app].push(x); });
+      var rub = RUBRIK[SS.app]; if (!SS.sc || SS.sc.length !== rub.length) SS.sc = rub.map(function () { return 3; });
+      var h = '<div class="kd"><div class="r" style="justify-content:space-between"><div><b style="font-size:16px">' + esc(d.nama) + '</b><div class="m">Terakhir aktif ' + fmtD(d.terakhir) + '</div></div><button data-kso="close">Tutup</button></div>';
+      Object.keys(g).forEach(function (a) {
+        var st = ['hafal', 'ragu', 'belum', 'lulus', 'lancar'].filter(function (v) { return cnt[a + '|' + v]; }).map(function (v) { return v + ' ' + cnt[a + '|' + v]; }).join(' · ');
+        if (!g[a].length && !st) return;
+        h += '<div class="m" style="margin-top:8px"><b>' + NAMA_APP[a] + '</b>' + (st ? ' · ' + st : '') + '</div>';
+        if (g[a].length) {
+          h += '<div class="kt"><table><thead><tr><th>Tanggal</th><th>Jenis</th><th>Skor</th><th>Nilai</th></tr></thead><tbody>';
+          g[a].slice(0, 6).forEach(function (x) { var r = ringkas(x); h += '<tr><td>' + fmtD(x.waktu) + '</td><td>' + esc(r[0]) + '</td><td>' + r[1] + '</td><td>' + r[2] + '</td></tr>'; });
+          h += '</tbody></table></div>';
+        }
+      });
+      var pen = d.penilaian || [];
+      if (pen.length) {
+        h += '<div class="m" style="margin-top:8px"><b>Riwayat penilaian tatap muka</b></div><div class="kt"><table><thead><tr><th>Tanggal</th><th>Aplikasi</th><th>Rata²</th><th>Catatan</th></tr></thead><tbody>';
+        pen.slice(0, 6).forEach(function (p) { h += '<tr><td>' + fmtD(p.waktu) + '</td><td>' + esc(NAMA_APP[p.app] || p.app) + '</td><td><b>' + avg(p.sc) + '</b></td><td>' + esc(p.catatan || '') + '</td></tr>'; });
+        h += '</tbody></table></div>';
+      }
+      h += '<div class="m" style="margin-top:10px"><b>Penilaian tatap muka baru</b></div><div class="r">' +
+        Object.keys(RUBRIK).map(function (a) { return '<button data-kso-app="' + a + '"' + (SS.app === a ? ' class="p"' : '') + '>' + NAMA_APP[a] + '</button>'; }).join('') + '</div>';
+      rub.forEach(function (a, i) {
+        h += '<div class="r" style="justify-content:space-between"><span>' + esc(a) + '</span><span class="sc">' + [1, 2, 3, 4, 5].map(function (n) { return '<button data-kso-sc="' + i + ':' + n + '"' + (SS.sc[i] === n ? ' class="p"' : '') + '>' + n + '</button>'; }).join('') + '</span></div>';
+      });
+      h += '<textarea id="kso-note" placeholder="Catatan untuk siswa…">' + esc(SS.note) + '</textarea><div class="r"><button class="p" data-kso="nilai">Kirim penilaian ke siswa</button><span class="m">Rata-rata ' + avg(SS.sc) + '/5 · diterima siswa saat online</span></div></div>';
+      return h;
+    }
+    if (!root.__kso) {
+      root.__kso = true;
+      root.addEventListener('input', function (e) { if (e.target && e.target.id === 'kso-note') SS.note = e.target.value; if (e.target && e.target.id === 'kso-nama') SS.nama = e.target.value; });
+      root.addEventListener('click', function (e) {
+        var t = e.target; if (!t || !t.closest) return;
+        var row = t.closest('[data-kso-id]'); if (row) return open(row.getAttribute('data-kso-id'));
+        var ap = t.closest('[data-kso-app]'); if (ap) { SS.app = ap.getAttribute('data-kso-app'); SS.sc = null; return paint(); }
+        var sc = t.closest('[data-kso-sc]'); if (sc) { var p = sc.getAttribute('data-kso-sc').split(':'); SS.sc[+p[0]] = +p[1]; return paint(); }
+        var b = t.closest('[data-kso]'); if (!b) return; var a = b.getAttribute('data-kso');
+        if (a === 'login') {
+          var k = (root.querySelector('#kso-kode') || {}).value, key = (root.querySelector('#kso-key') || {}).value;
+          SS.nama = (root.querySelector('#kso-nama') || {}).value || SS.nama; wr('kayuki-sync-sn', SS.nama);
+          if (!k || !key) { SS.err = 'Isi kode kelas dan kunci sensei.'; return paint(); }
+          sensei.simpanKunci(k, key); SS.rows = null; SS.err = '';
+          return sensei.rekap().then(function (r) { SS.rows = r; paint(); }).catch(function (er) { sensei.lupa(); SS.err = er.message; paint(); });
+        }
+        if (a === 'logout') { sensei.lupa(); SS.rows = null; SS.sel = null; SS.det = null; SS.err = ''; return paint(); }
+        if (a === 'reload') return load();
+        if (a === 'close') { SS.sel = null; SS.det = null; return paint(); }
+        if (a === 'nilai' && SS.sel) {
+          b.disabled = true; b.textContent = 'Mengirim...';
+          sensei.nilai(SS.sel, SS.app, SS.sc.slice(), SS.note, SS.nama).then(function () { SS.note = ''; SS.sc = null; return load(); })
+            .catch(function (er) { SS.err = er.message; paint(); });
+        }
+      });
+    }
+    paint();
   }
 
   function init(o) {
@@ -195,6 +327,6 @@
   window.KayukiSync = {
     init: init, simpanStatus: simpanStatus, simpanHasil: simpanHasil, gabung: gabung, keluar: keluar, flush: flush,
     state: state, onChange: function (f) { listeners.push(f); }, masukan: function () { return rd(LS.inb, { penilaian: [], catatan: [] }); },
-    mountPanel: mountPanel, sensei: sensei, versi: 2
+    mountPanel: mountPanel, mountSensei: mountSensei, sensei: sensei, versi: 3
   };
 })();
