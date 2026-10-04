@@ -77,6 +77,6 @@ Tanpa mengganti angka itu, perangkat tetap mengambil versi baru diam-diam dan ta
 
 - **Kalimat は を へ**: menu Ujian, tombol "Kalimat" (ada materi aturan sebelum latihan pertama). Juga ada di Kartu (filter "Kalimat").
 - **Streak harian**: chip 🔥 di atas dan kotak 7 hari di menu Ujian. Satu sesi latihan atau 12 kartu dibuka dihitung belajar hari itu.
-- **Tes Penempatan** (hiragana): huruf satuan plus baca kata 2–4 huruf, per rumpun. Rumpun yang dikuasai terbuka otomatis, huruf lemah dikirim ke tab Huruf.
+- **Tes Penempatan** (hiragana dan katakana, sesuai tombol yang aktif): huruf satuan plus baca kata 2–4 huruf, per rumpun. Rumpun yang dikuasai terbuka otomatis, huruf lemah dikirim ke tab Huruf.
 - **Katakana**: tombol あ Hiragana / ア Katakana di bawah tab. Rumpun Katakana 1–4 lalu Ujian Akhir Katakana, dengan Kartu, Ujian Kenaikan, Kilat Huruf, Latihan Penguat, Peta Huruf (plus set "ー & serapan"), dan materi Katakana. Pengecoh khas katakana: シ/ツ, ソ/ン, ー (panjang vs pendek), ッ, bunyi serapan.
 - Kosakata katakana ada di array `KATA_SRC` (bagian bawah index.html). Kata dari buku Bab 1–15 plus tambahan Kayuki; tinggal tambah baris `['カタカナ','arti']` untuk menambah kata.

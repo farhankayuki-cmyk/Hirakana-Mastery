@@ -2263,23 +2263,24 @@ function noteStudy(){
    Tiga tahap (rumpun 1, 2, 3), campur dua arah. Rumpun yang dikuasai
    (>= 90% dan tidak lambat) dibuka otomatis, huruf yang lemah dicatat.
    ===================================================================== */
-const PT_N={'1':[8,4],'2':[7,4],'3':[6,4]};  /* [huruf, kata] per tahap */
+const PT_N={'1':[8,4],'2':[7,4],'3':[6,4],k1:[8,4],k2:[7,4],k3:[6,4],k4:[6,4]};  /* [huruf, kata] per tahap */
 const PT_WQ=[2,3,3,4];  /* kata: 2 huruf, 3 huruf, 3 huruf, 4 huruf ke atas */
-const PT_G=['1','2','3'];
+const ptOrder=()=>SC==='k'?['k1','k2','k3','k4']:['1','2','3'];
 let PT=null;
 const PT_SLOW_MS=9000;
 function rowName(u){
- for(const set of Object.keys(ROWS))for(const r of ROWS[set])if(r.cells.includes(u))return r.name;
+ const K=isK(u),t=K?toHira(u):u;
+ for(const set of Object.keys(ROWS))for(const r of ROWS[set])if(r.cells.includes(t))return K?toKata(r.name):r.name;
  return '';
 }
 function ptSample(g){
- const pool=letterPool(g).filter(c=>!'ぢづ'.includes(c.jp));
+ const pool=letterPool(g).filter(c=>!'ぢづヂヅ'.includes(c.jp));
  const by={};pool.forEach(c=>{const r=rowName(c.jp)||c.jp;(by[r]=by[r]||[]).push(c)});
  const rows=shuffleArr(Object.keys(by)).map(r=>shuffleArr(by[r]));
  const out=[],n=Math.min(PT_N[g][0],pool.length);
  while(out.length<n&&rows.some(r=>r.length))rows.forEach(r=>{if(out.length<n&&r.length)out.push(r.shift())});
  /* kata 2-4 huruf: dipilih dari rumpun ini, tidak diulang */
- const W=allCards.filter(c=>c.g===Number(g)&&ulen(c)>=2);
+ const W=srcOf(g).filter(c=>inGrp(c,g)&&ulen(c)>=2);
  const used=new Set(),words=[];
  PT_WQ.slice(0,PT_N[g][1]).forEach(L=>{
   let cand=shuffleArr(W.filter(c=>!used.has(c.jp)&&(L>=4?ulen(c)>=4:ulen(c)===L)));
@@ -2288,9 +2289,9 @@ function ptSample(g){
  });
  return shuffleArr([...out,...words]);
 }
-function startPlacement(){PT={stage:0,res:[]};ptStage()}
+function startPlacement(){PT={stage:0,res:[],order:ptOrder()};ptStage()}
 function ptStage(){
- const g=PT_G[PT.stage];
+ const g=PT.order[PT.stage];
  if(!g){ptFinish();return}
  startTest('tempat',{items:ptSample(g),grp:g});
 }
@@ -2308,9 +2309,9 @@ function endTempat(){
  const sl=st(RL),sw=st(RW),wpct=sw.t?Math.round(sw.b/sw.t*100):100;
  const lvl=pct>=90&&wpct>=75&&(avg==null||avg<=10)?'hafal':pct>=60?'sebagian':'awal';
  PT.res.push({g,pct,benar,total,avg,wrong,slow,lvl,sl,sw,wpct,wrongW:wrongW.map(c=>c.jp+' ('+c.romaji+')')});
- const last=PT.stage>=PT_G.length-1;
+ const last=PT.stage>=PT.order.length-1;
  if(lvl==='awal'||last){ptFinish();return}
- const nxt=PT_G[PT.stage+1];
+ const nxt=PT.order[PT.stage+1];
  const icon={hafal:'✅',sebagian:'🟡'}[lvl];
  $('resBox').innerHTML=`<div class="hero">${icon}</div><h2>Tahap ${PT.stage+1} selesai · ${GRP[g].short}</h2>
  <div class="big-result"><div class="sc">${benar} / ${total}</div><div>${pct}%</div></div>
@@ -2327,10 +2328,11 @@ function ptFinish(){
  for(const r of res){
   if(r.lvl!=='hafal')break;
   const p=S.prog[r.g]||(S.prog[r.g]={});
-  if(!p.lulus){p.lulus=true;p.tempat=true;p.tgl=ymd();p.pct=r.pct;if(r.avg!=null)p.avg=r.avg;opened.push(r.g);syncStatus('hira:rumpun-'+r.g,'hafal')}
+  if(!p.lulus){p.lulus=true;p.tempat=true;p.tgl=ymd();p.pct=r.pct;if(r.avg!=null)p.avg=r.avg;opened.push(r.g);syncStatus((r.g[0]==='k'?'kata:':'hira:')+'rumpun-'+r.g,'hafal')}
  }
  const weakU=[...new Set(res.flatMap(r=>[...r.wrong,...r.slow]))];
- S.placement={d:ymd(),res:res.map(r=>({g:r.g,pct:r.pct,benar:r.benar,total:r.total,avg:r.avg,lvl:r.lvl,wpct:r.wpct})),weak:weakU.slice(0,30)};
+ const plObj={d:ymd(),res:res.map(r=>({g:r.g,pct:r.pct,benar:r.benar,total:r.total,avg:r.avg,lvl:r.lvl,wpct:r.wpct})),weak:weakU.slice(0,30)};
+ if(SC==='k')S.placementK=plObj;else S.placement=plObj;
  saveS();
  const sn=touchDay();
  const byRow=u=>{const o={};u.forEach(x=>{const k=rowName(x)||x;(o[k]=o[k]||[]).push(x)});return Object.entries(o).map(([k,v])=>`${k}: ${v.map(x=>`${x} (${RM(x)})`).join(', ')}`).join(' · ')};
@@ -2345,7 +2347,7 @@ function ptFinish(){
   if(r.lvl==='hafal'&&opened.includes(r.g))h+=`<div class="tipx">🔓 Rumpun ini kulewati, nggak perlu Ujian Kenaikan.</div>`;
   h+='</div>';
  });
- const done=new Set(res.map(r=>r.g)),skipped=PT_G.filter(g=>!done.has(g));
+ const done=new Set(res.map(r=>r.g)),skipped=PT.order.filter(g=>!done.has(g));
  if(skipped.length)h+=`<div class="tipx center">Tahap ${skipped.map(g=>GRP[g].short).join(', ')} belum diuji. Selesaikan dulu bagian di atas.</div>`;
  const tg=currentTarget();
  h+=`<h3>Langkah yang kusarankan</h3>`;
@@ -2364,20 +2366,18 @@ function ptFinish(){
  PT=null;
 }
 function openHurufWith(units){
- HV.sc='h';HV.sel=new Set(units.filter(canSel));
+ HV.sc=SC;HV.sel=new Set(units.map(u=>isK(u)?toHira(u):u).filter(canSel));
  const u0=[...HV.sel][0];if(u0)HV.set=findLoc(u0)||'dasar';
  HV.open=null;HV.mode='h2m';renderHuruf();show('viewHuruf');
  toast('Huruf yang lemah sudah kupilih. Tinggal tekan Mulai Latihan.');
 }
 function paintMenuExtras(){
- if(SC==='k'){
-  $('ptBox').innerHTML=`<div class="ptpromo"><div class="pti">🎌</div><div class="mid"><div class="t">Materi Katakana</div><div class="d">Cara bedain シ/ツ dan ソ/ン, tanda ー, ッ, dan bunyi serapan seperti ティ dan ファ.</div></div><button class="primary" id="btnMK">Buka materi</button></div>`;
-  $('btnMK').onclick=showMateriKata;paintStreak();return;
- }
- const p=S.placement;
- let h=`<div class="ptpromo"><div class="pti">🎯</div><div class="mid"><div class="t">Tes Penempatan</div><div class="d">Sudah pernah belajar hiragana? Tes singkat (sekitar 35 soal: huruf satuan plus baca kata 2–4 huruf) buat tahu bagian mana yang benar-benar sudah kamu kuasai. Rumpun yang sudah dikuasai bisa dilewati.</div>${p?`<div class="d">Terakhir: ${fmtD(p.d)} · ${p.res.map(r=>`${GRP[r.g].short} ${r.pct}%`).join(' · ')}</div>`:''}</div><button class="primary" id="btnPT">${p?'Ulangi tes':'Mulai tes'}</button></div>`;
+ const K=SC==='k',p=K?S.placementK:S.placement,nm=K?'katakana':'hiragana';
+ let h=`<div class="ptpromo"><div class="pti">🎯</div><div class="mid"><div class="t">Tes Penempatan ${K?'Katakana':'Hiragana'}</div><div class="d">Sudah pernah belajar ${nm}? Tes singkat (sekitar ${K?'40':'35'} soal: huruf satuan plus baca kata 2–4 huruf) buat tahu bagian mana yang benar-benar sudah kamu kuasai. Rumpun yang sudah dikuasai bisa dilewati.</div>${p?`<div class="d">Terakhir: ${fmtD(p.d)} · ${p.res.map(r=>`${GRP[r.g].short} ${r.pct}%`).join(' · ')}</div>`:''}</div><button class="primary" id="btnPT">${p?'Ulangi tes':'Mulai tes'}</button></div>`;
+ if(K)h+=`<div class="ptpromo"><div class="pti">🎌</div><div class="mid"><div class="t">Materi Katakana</div><div class="d">Cara bedain シ/ツ dan ソ/ン, tanda ー, ッ, dan bunyi serapan seperti ティ dan ファ.</div></div><button id="btnMK">Buka materi</button></div>`;
  $('ptBox').innerHTML=h;
  $('btnPT').onclick=()=>startPlacement();
+ if(K)$('btnMK').onclick=showMateriKata;
  paintStreak();
 }
 
