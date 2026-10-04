@@ -1,6 +1,6 @@
 /* Service worker HiraKana Mastery Kayuki.
    Ganti angka VERSI kalau mau memaksa semua perangkat mengambil file baru. */
-const VERSI = 'hirakana-v2';
+const VERSI = 'hirakana-v3';
 const INTI = [
   './', 'index.html', 'manifest.webmanifest',
   'icons/icon-192.png', 'icons/icon-512.png', 'icons/icon-maskable-512.png', 'icons/apple-touch-icon.png',

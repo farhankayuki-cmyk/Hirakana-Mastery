@@ -57,3 +57,12 @@ Tanpa mengganti angka itu, perangkat tetap mengambil versi baru diam-diam dan ta
 ## 5. Yang perlu diketahui
 - Semua data siswa (riwayat, kunci rumpun, huruf lemah) tersimpan **di perangkat masing-masing**. Ganti HP atau hapus data browser berarti mulai dari awal, kecuali sudah tersinkron ke portal.
 - Safari di iPhone bisa menghapus data situs yang lama tidak dibuka. Aplikasi yang sudah dipasang di layar utama lebih aman dari itu.
+
+## Tab baru: 🔤 Huruf (peta huruf)
+
+- Tabel huruf berwarna sesuai penguasaan (belum / baru kenal / hampir / hafal), dihitung dari semua latihan dan ujian di perangkat ini.
+- Ketuk huruf: cara ingat (jembatan keledai), suara, huruf yang sering tertukar, animasi urutan menulis, dan papan latihan menulis (tanpa penilaian, tidak diujikan).
+- Ketuk nama baris (あ行, か行, ...) untuk memilih huruf yang mau dilatih. Rumpun 2 dan 3 terbuka mengikuti aturan Ujian Kenaikan.
+- Empat cara latihan: Lihat huruf, Lihat bacaan, Dengar suara, Huruf mirip.
+- Katakana: bentuk, cara ingat, suara, dan urutan tulis sudah bisa dilihat. Latihan dan ujian katakana menyusul.
+- Data urutan goresan: KanjiVG, hak cipta (C) Ulrich Apel, lisensi CC BY-SA 3.0 (https://kanjivg.tagaini.net). Data goresan di dalam `index.html` tunduk pada lisensi ini.
