@@ -255,6 +255,22 @@ button.primary{background:linear-gradient(135deg,#2f80ff,#1448b8);border-color:#
 /* papan latihan menulis */
 .wpov{position:fixed;inset:0;background:#0a1626cc;z-index:60;display:flex;align-items:center;justify-content:center;padding:12px;overflow:auto}
 .wpov[hidden]{display:none}
+.matbox{max-width:520px;width:100%;background:#fff;border-radius:20px;padding:14px 16px;max-height:92vh;overflow:auto}
+.matrow{display:flex;gap:12px;align-items:flex-start;background:#f4f8fd;border-radius:14px;padding:10px 12px;margin:8px 0;font-size:.92rem}
+.matrow>b{font-size:2rem;color:var(--navy);line-height:1.1;min-width:2.2rem;text-align:center}
+.qbox .big.sm{font-size:clamp(1.5rem,6.5vw,2.3rem);line-height:1.6}
+.streakbox{background:linear-gradient(135deg,#fff3dc,#fff);border:2px solid #f2b134;border-radius:18px;padding:10px 12px;margin:6px 0 10px;text-align:center}
+.streakbox .sbig{font-size:1.15rem;color:#8a5a00}
+.streakbox .dots{display:flex;justify-content:center;gap:8px;margin:8px 0 2px}
+.streakbox .dots span{display:flex;flex-direction:column;align-items:center;font-size:.68rem;color:#64748b;gap:3px}
+.streakbox .dots i{width:22px;height:22px;border-radius:50%;background:#e5ebf3;display:block}
+.streakbox .dots .on i{background:#f2b134;box-shadow:0 0 0 3px #f2b13444}
+.streakbox .dots .td{font-weight:800;color:var(--navy)}
+.ptpromo{display:flex;gap:10px;align-items:center;background:#eef6ff;border:2px solid #9cc4f2;border-radius:18px;padding:12px;margin:6px 0 12px}
+.ptpromo .pti{font-size:1.8rem}.ptpromo .mid{flex:1}.ptpromo .t{font-weight:800;color:var(--navy)}.ptpromo .d{font-size:.82rem;color:#4a5b70;margin-top:2px}
+.ptcard{border:2px solid #d8e2ee;border-radius:16px;padding:10px 12px;margin:8px 0;background:#fff}
+.ptcard.hafal{border-color:#2fbf8a;background:#f0fbf6}.ptcard.sebagian{border-color:#f2b134;background:#fff8e6}.ptcard.awal{border-color:#e5736a;background:#fff3f2}
+.ptcard .pth{display:flex;justify-content:space-between;gap:8px;font-size:.95rem}
 .wpbox{background:#fff;border-radius:20px;border:2px solid var(--blue);padding:14px;width:min(380px,100%)}
 .wp-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
 .wp-title{font-weight:800;color:var(--navy)}
@@ -309,6 +325,7 @@ button.primary{background:linear-gradient(135deg,#2f80ff,#1448b8);border-color:#
 <button class="chip" id="optInstall" hidden>📲 Pasang aplikasi</button>
 <button class="chip" id="netChip" hidden disabled>📴 Mode offline</button>
 <button class="chip on" id="optAuto">🗣️ Baca otomatis: nyala</button>
+<button class="chip" id="optStreak">🔥 Mulai streak</button>
 <button class="chip" id="optFont">🔠 Gaya huruf: Gothic</button>
 </div>
 
@@ -324,6 +341,7 @@ button.primary{background:linear-gradient(135deg,#2f80ff,#1448b8);border-color:#
 <select id="filter" aria-label="Pilih jumlah huruf">
 <option value="huruf">Huruf tunggal</option>
 <option value="all">Semua kosakata</option>
+<option value="kal">Kalimat (は を へ)</option>
 <option value="2">2 huruf</option>
 <option value="3">3 huruf</option>
 <option value="4">4 huruf atau lebih</option>
@@ -389,6 +407,8 @@ button.primary{background:linear-gradient(135deg,#2f80ff,#1448b8);border-color:#
 <!-- ================= MENU UJIAN ================= -->
 <section id="viewMenu" hidden>
 <div class="panel">
+<div id="streakMenu"></div>
+<div id="ptBox"></div>
 <h2>Peta belajar hiragana</h2>
 <div class="map" id="mapBox"></div>
 <p class="tipx center" id="grpDesc"></p>
@@ -468,6 +488,12 @@ button.primary{background:linear-gradient(135deg,#2f80ff,#1448b8);border-color:#
 <p class="wp-note">Ikuti garis merah putus-putus pakai jari. Belum ada penilaian otomatis, ini buat membiasakan urutan dan arah goresan.</p>
 </div></div>
 
+<div id="matov" class="wpov" hidden>
+<div class="wpbox matbox">
+<div class="wp-head"><span class="wp-title">📖 Aturan Partikel は を へ</span><button class="wp-x" id="matX" aria-label="Tutup">×</button></div>
+<div id="matBody"></div>
+<div class="wp-nav"><button id="matSay">🔊 Dengar contoh</button><button class="primary" id="matGo">Mengerti, mulai latihan</button></div>
+</div></div>
 <div class="toast" id="toast" hidden></div>
 <div class="sheet" id="iosHelp" hidden><div class="sheetbox"><h3>📲 Pasang di iPhone / iPad</h3>
 <div>1. Buka halaman ini di <b>Safari</b>.<br>2. Ketuk tombol <b>Bagikan</b> (kotak dengan panah ke atas).<br>3. Pilih <b>Tambah ke Layar Utama</b>, lalu ketuk <b>Tambah</b>.<br>Setelah itu ikon HiraKana muncul di layar utama dan bisa dibuka tanpa internet.</div>
@@ -527,6 +553,7 @@ function diffUnits(a,b){
  return d.length?d:ua;
 }
 function memUpdate(card,ok,o){
+ if(card.sentence){const W=MEM.w[card.jp]||(MEM.w[card.jp]={w:0,c:0,t:0});ok?W.c++:(W.w++,W.t=Date.now());memSave();return}
  const now=Date.now(),W=MEM.w[card.jp]||(MEM.w[card.jp]={w:0,c:0,t:0});
  if(ok){W.c++;toks(card.jp).forEach(u=>{(MEM.u[u]||(MEM.u[u]={w:0,c:0,t:0})).c++})}
  else{W.w++;W.t=now;diffUnits(card.jp,o&&o.kana).forEach(u=>{const x=MEM.u[u]||(MEM.u[u]={w:0,c:0,t:0});x.w++;x.t=now})}
@@ -583,8 +610,9 @@ async function syncFlush(){
 function syncHasil(x){syncPush({t:'h',x})}
 function syncStatus(k,v){syncPush({t:'s',k,v})}
 
-const ERRNAME={tenten:'Tenten (゛) & maru (゜)',mirip:'Huruf yang bentuknya mirip',panjang:'Bunyi panjang',urutan:'Urutan huruf tertukar',bunyi:'Vokal / konsonan keliru',kecil:'ゃゅょ / っ kecil tertukar dengan huruf biasa',sokuon:'Jeda っ (konsonan dobel)',waktu:'Waktu habis (belum sempat dijawab)'};
+const ERRNAME={partikel:'Partikel は を へ (dibaca wa, o, e)',tenten:'Tenten (゛) & maru (゜)',mirip:'Huruf yang bentuknya mirip',panjang:'Bunyi panjang',urutan:'Urutan huruf tertukar',bunyi:'Vokal / konsonan keliru',kecil:'ゃゅょ / っ kecil tertukar dengan huruf biasa',sokuon:'Jeda っ (konsonan dobel)',waktu:'Waktu habis (belum sempat dijawab)'};
 const SARAN={
+ partikel:'Ingat: は → wa, を → o, へ → e kalau jadi partikel (penanda topik, objek, arah). Buka lagi materi aturan partikel lewat tombol Kalimat di menu Ujian.',
  tenten:'Latihan lagi pasangan huruf bertanda tenten/maru (か–が, さ–ざ, は–ば–ぱ). Sebelum menjawab, cek dulu ada tanda kecil di pojok kanan atas huruf atau tidak.',
  mirip:'Latihan membedakan huruf yang bentuknya mirip (あ/お, さ/き, は/ほ, た/な). Buka mode Kartu dan perhatikan ciri pembedanya.',
  panjang:'Latihan bunyi panjang: おう, おお, えい, いい, うう dibaca ditahan dua ketukan. Dengarkan lewat tombol 🔊 lalu tirukan.',
@@ -595,6 +623,7 @@ const SARAN={
  waktu:'Perbanyak latihan tanpa batas waktu dulu sampai lancar, baru coba lagi mode Final Exam berwaktu.'
 };
 function fiturKata(c){
+ if(c.sentence)return 'Kalimat · partikel は を へ';
  const ch=[...c.jp];
  if(c.single)return 'Hiragana · huruf tunggal';
  if(/っ/.test(c.jp))return 'Hiragana · っ (jeda)';
@@ -687,13 +716,13 @@ function render(){
  const item=deck[index];
  $('jpFront').textContent=item.jp;
  $('romaji').textContent=item.romaji;
- $('meaning').textContent=item.meaning||item.note||'';
- $('cTag').textContent=GRP[item.g].short+' · '+(item.single?'huruf tunggal':(ulen(item)>=4?'4+':ulen(item))+' huruf');
+ $('meaning').textContent=item.sentence?item.meaning+' · '+item.note:(item.meaning||item.note||'');
+ $('cTag').textContent=GRP[item.g].short+' · '+(item.single?'huruf tunggal':item.sentence?'kalimat':(ulen(item)>=4?'4+':ulen(item))+' huruf');
  $('counter').textContent=`Kartu ${index+1} dari ${deck.length}`;
  $('bar').style.width=`${(index+1)/deck.length*100}%`;
 }
 function flip(){card.classList.toggle('flipped')}
-function move(n){index=(index+n+deck.length)%deck.length;render()}
+function move(n){index=(index+n+deck.length)%deck.length;render();noteStudy()}
 const FGN={all:'Semua hiragana',1:'Rumpun 1 · あ sampai ほ',2:'Rumpun 2 · ま sampai ん',3:'Rumpun 3 · ゃ ゅ ょ dan っ'};
 function refreshCardGroups(){
  const sel=$('fgrp'),cur=sel.value;
@@ -705,6 +734,7 @@ $('fgrp').addEventListener('change',()=>$('filter').dispatchEvent(new Event('cha
 $('filter').addEventListener('change',e=>{
  const v=$('filter').value;
  if(v==='huruf')deck=letterPool($('fgrp').value);
+ else if(v==='kal')deck=SENT.filter(x=>$('fgrp').value==='all'||x.g<=Number($('fgrp').value));
  else deck=allCards.filter(x=>inGrp(x,$('fgrp').value)&&(v==='all'||(v==='4'?ulen(x)>=4:ulen(x)===Number(v))));
  if(!deck.length){deck=[...allCards.filter(x=>inGrp(x,$('fgrp').value))]}
  index=0;render();
@@ -728,7 +758,9 @@ const LV={
  ken:{name:'Ujian Kenaikan'},
  huruf:{name:'Kilat Huruf'},
  penguat:{name:'Latihan Penguat'},
- peta:{name:'Peta Huruf'}
+ peta:{name:'Peta Huruf'},
+ kal:{name:'Kalimat は を へ'},
+ tempat:{name:'Tes Penempatan'}
 };
 const GRP={
  1:{name:'Rumpun 1 · あ sampai ほ',short:'Rumpun 1',desc:'Huruf あ sampai ほ, lengkap dengan tenten dan maru.'},
@@ -740,7 +772,7 @@ const GRP={
 };
 let grpPick='1';
 const inGrp=(c,g)=>g==='all'||c.g===Number(g);
-const poolOf=(l,g)=>allCards.filter(c=>LV[l].f(c)&&inGrp(c,g||grpPick));
+const poolOf=(l,g)=>l==='kal'?SENT.filter(c=>(g||grpPick)==='all'||c.g<=Number(g||grpPick)):allCards.filter(c=>LV[l].f(c)&&inGrp(c,g||grpPick));
 let countPick='10';
 let dirMode='h2m';
 let timePick=0;
@@ -759,6 +791,7 @@ function toks(jp){
  const out=[];let i=0;
  while(i<jp.length){
   const c=jp[i];
+  if(/[\s\u3000。、？！]/.test(c)){i++;continue}
   if(c==='っ'&&i+1<jp.length){
    let u=jp[i+1];if(i+2<jp.length&&SMV[jp[i+2]])u+=jp[i+2];
    out.push('っ'+u);i+=1+u.length;continue;
@@ -816,6 +849,7 @@ const LONGRE=/ou|oo|ei|ii|uu/;
 
 /* bikin pengecoh dari kesalahan baca yang NYATA dialami pemula */
 function makeDistractors(card,n,opt){
+ if(card.sentence)return makeDistractorsS(card,n);
  const U=toks(card.jp),cands=[],ALLOW=allowedFor(card.g);
  const add=(arr,type,why,pair)=>{
   if(!arr.length||arr.some(u=>!RM(u)))return;
@@ -926,6 +960,7 @@ function chipsHTML(card){
 }
 
 function explainHTML(card,o,dir){
+ if(card.sentence)return explainS(card,o);
  let h=`<div class="ans">Cara baca yang benar: <b>${card.jp}</b> = <b>${card.romaji}</b> ${card.meaning?`<span style="color:#64748b">(arti: ${card.meaning})</span>`:''}</div>`;
  h+=`<div class="tipx" style="margin-top:6px">${dir==='h2m'?`Kamu memilih <b>${o.romaji}</b>.`:`Yang kamu pilih, <b>${o.kana}</b>, dibaca <b>${o.romaji}</b>.`} ${o.why}</div>`;
  h+=chipsHTML(card);
@@ -965,7 +1000,7 @@ const letterCard=u=>({jp:u,romaji:RM(u),meaning:'',note:letterNote(u),g:gOfUnit(
 const letterPool=g=>(g==='all'?[...L1,...L2,...YOUON_ALL]:g==='1'?[...L1]:g==='2'?[...L2]:[...YOUON_ALL]).map(letterCard);
 const cardOf=jp=>allCards.find(x=>x.jp===jp)||(RM(jp)?letterCard(jp):null);
 /* huruf yang punya kembaran bunyi (ぢ づ を) hanya diuji dari huruf ke bacaan */
-const dirFor=(c,d)=>(c.single&&'ぢづを'.includes(c.jp))?'h2m':d;
+const dirFor=(c,d)=>((c.single&&'ぢづを'.includes(c.jp))||c.sentence)?'h2m':d;
 
 function renderMenu(){
  if(!unlocked(grpPick))grpPick=currentTarget()||'1';
@@ -990,6 +1025,7 @@ function renderMenu(){
  $('btnHuruf').onclick=()=>startTest('huruf');
  $('btnPen').onclick=()=>{if(hasWeak())startTest('penguat')};
  $('guruBtn').textContent=S.guru?'🔓 Mode guru aktif (ketuk untuk mematikan)':'🔑 Mode guru';
+ paintMenuExtras();
  /* latihan bebas per level */
  const box=$('lvlList');box.innerHTML='';
  [2,3,4,'all'].forEach(l=>{
@@ -1002,6 +1038,14 @@ function renderMenu(){
   btn.onclick=()=>startTest(l);
   box.appendChild(btn);
  });
+ {
+  const kp=poolOf('kal');
+  if(kp.length>=3){
+   const kb=document.createElement('button');kb.className='lvl';
+   kb.innerHTML=`<div class="lico" style="background:#e5736a">📖</div><div class="mid"><div class="t">Kalimat (は を へ)</div><div class="d">${kp.length} kalimat · partikel dibaca wa, o, e</div></div><div class="b">${S.seenPart?'Latihan':'Ada materi<br>dulu'}</div>`;
+   kb.onclick=startKal;box.appendChild(kb);
+  }
+ }
 }
 $('mapBox').addEventListener('click',e=>{
  const b=e.target.closest('button');if(!b)return;
@@ -1041,7 +1085,7 @@ function buildPenguat(){
  const pool=allCards.filter(c=>c.g<=mg&&ulen(c)>=2);
  return shuffleArr([...letters,...pickWeighted(pool,10-letters.length,2.2)]);
 }
-function startTest(level){
+function startTest(level,opt){
  ctx();
  let items,grp=grpPick,dm=dirMode,n;
  const cnt=p=>countPick==='all'?p.length:Math.min(Number(countPick),p.length);
@@ -1054,16 +1098,20 @@ function startTest(level){
   items=buildPeta();n=items.length;grp='peta';dm=HV.mode==='h2m'?'h2m':'m2h';
  }else if(level==='penguat'){
   items=buildPenguat();n=items.length;grp='pen';
+ }else if(level==='tempat'){
+  items=opt.items;n=items.length;grp=opt.grp;dm='mix';
+ }else if(level==='kal'){
+  const pool=poolOf('kal');n=cnt(pool);items=pickWeighted(pool,n,.8);dm='h2m';
  }else{
   const pool=poolOf(level);n=cnt(pool);items=pickWeighted(pool,n,.8);
  }
  Q={level,grp,phase:'main',items,idx:0,results:[],wrongMap:{},queue:[],round:1,roundLeft:0,remedTotal:0,cur:null,locked:false,startWrong:[]};
  Q.dirMode=dm;
- Q.listen=(level==='peta'&&HV.mode==='a2h');Q.look=(level==='peta'&&HV.mode==='mirip');
+ Q.grp=grp;Q.listen=(level==='peta'&&HV.mode==='a2h');Q.look=(level==='peta'&&HV.mode==='mirip');
  Q.dirs=shuffleArr(Q.items.map((_,i)=>i%2===0?'h2m':'m2h'));
  Q.combo=0;$('combo').hidden=true;
  Q.t0=Date.now();Q.errs={};Q.pairs={};Q.timedOut=0;Q.timerId=null;Q.lastTick=0;
- Q.timeLimit=(dm==='mix'&&timePick>0&&level!=='ken')?timePick*n:0;
+ Q.timeLimit=(dm==='mix'&&timePick>0&&level!=='ken'&&level!=='tempat')?timePick*n:0;
  $('qTimer').hidden=true;
  show('viewQuiz');
  nextQuestion();
@@ -1108,7 +1156,7 @@ function drawQuestion(){
   .map(o=>({...o,t:dir==='h2m'?o.romaji:o.kana}));
  const qb=$('qBox');
  if(dir==='h2m'){
-  qb.innerHTML=`<div class="ask">Gimana cara baca ${card.single?'huruf':'kata'} ini?</div><div class="big">${card.jp}</div>`;
+  qb.innerHTML=`<div class="ask">Gimana cara baca ${card.single?'huruf':card.sentence?'kalimat':'kata'} ini?</div><div class="big${card.sentence?' sm':''}">${card.jp}</div>${card.sentence?`<div class="tipx">Arti: ${card.meaning}</div>`:''}`;
  }else if(Q.listen){
   qb.innerHTML=`<div class="ask">Dengar suaranya, lalu pilih hurufnya</div><div><button class="bigspk" id="qSpk" aria-label="Putar suara">🔊</button></div><div class="tipx">Ketuk untuk dengar lagi</div>`;
   $('qSpk').onclick=()=>{ctx();speak(card.jp)};
@@ -1169,6 +1217,7 @@ function answer(i){
    const it=Q.cur.item;
    fb+=it.streak>=2?`<div class="remed">🎉 Kata ini tuntas! Benar 2 kali berturut-turut.</div>`:`<div class="remed">Satu kali lagi benar, dan kata ini tuntas.</div>`;
   }
+  if(card.sentence&&card.note)fb+=`<div class="tipx">💡 ${card.note}</div>`;
   fb+=`<div style="margin-top:8px"><button id="fbSay">🔊 Dengar</button></div></div>`;
  }else{
   fb=`<div class="fb bad"><div class="head">❌ Belum tepat. ${pick(SEMANGAT)}</div>${explainHTML(card,Q.opts[i],dir)}`;
@@ -1197,6 +1246,7 @@ document.addEventListener('keydown',e=>{
 
 /* ===== akhir ujian utama ===== */
 function endMain(){
+ if(Q.level==='tempat'){endTempat();return}
  const total=Q.results.length,benar=Q.results.filter(r=>r.ok).length;
  const pct=Math.round(benar/total*100);
  const bk=bestKey(Q.grp,Q.level,Q.dirMode);
@@ -1210,6 +1260,7 @@ function endMain(){
  const durasi=Math.round((Date.now()-Q.t0)/1000);
  histAdd(durasi,salah.length===0);
  syncMain(durasi);
+ const _sk=touchDay();
  const hero=heroOf(pct);
  let h=`<div class="hero">${hero[0]}</div><h2>Hasil ${Q.listen?'Dengar → Huruf':DIRNAME[Q.dirMode]} · ${GRP[Q.grp].short} · ${LV[Q.level].name}</h2><p class="center praise">${hero[1]}</p>
  <div class="big-result"><div class="sc">${benar} / ${total}</div><div>${pct}%</div>
@@ -1238,6 +1289,7 @@ function endMain(){
   <div class="nav"><button class="primary" id="goRem">Mulai Remedial (${salah.length} kata)</button></div>
   <p class="tipx center">Aturan remedial: tiap kata harus benar <b>2 kali berturut-turut</b>. Kalau salah lagi, hitungannya mulai dari nol.</p>`;
  }
+ if(_sk)h+=`<p class="center tipx">🔥 Streak: ${_sk} hari beruntun!</p>`;
  $('resBox').innerHTML=h;
  show('viewResult');
  if(pct>=PASS)confetti(pct>=90?140:90);
@@ -1387,8 +1439,8 @@ function saranList(D){
 const bar=p=>`<div class="rbar"><span style="width:${Math.max(0,Math.min(100,p||0))}%"></span></div>`;
 const statusRows=()=>GORDER.map(g=>{
  const p=S.prog[g],nm={'1':'Rumpun 1 (あ–ほ)','2':'Rumpun 2 (ま–ん)','3':'Rumpun 3 (ゃゅょ・っ)',all:'Ujian Akhir Hiragana'}[g];
- return [nm,p&&p.lulus?`Lulus ${p.pct}%${p.lancar?' · Lancar ⭐':''}`:unlocked(g)?'Sedang dipelajari':'Terkunci'];
-});
+ return [nm,p&&p.lulus?(p.tempat&&!p.lancar?`Lulus (tes penempatan ${p.pct}%)`:`Lulus ${p.pct}%${p.lancar?' · Lancar ⭐':''}`):unlocked(g)?'Sedang dipelajari':'Terkunci'];
+}).concat([['Streak belajar',`${streakNow()} hari${S.streak.best?' (rekor '+S.streak.best+')':''}`]]);
 const weakTxt=D=>D.weak.map(x=>`${x.u} (${x.romaji})`).join(' · ');
 const wordTxt=([k,v])=>{const c=cardOf(k);return `${k}${c?' ('+c.romaji+')':''} ${v}×`};
 function repHTML(D,nama){
@@ -1942,7 +1994,292 @@ $('hvStart').onclick=()=>{if(![...HV.sel].some(canSel)){toast('Pilih dulu hurufn
 $('tabHuruf').onclick=()=>{ctx();renderHuruf();show('viewHuruf')};
 
 
+/* =====================================================================
+   KALIMAT PARTIKEL は を へ
+   Penanda: [は] = partikel (dibaca terpisah), {は} = di dalam kata (こんにちは).
+   ===================================================================== */
+const PART={'は':['wa','ha','penanda topik'],'を':['o','wo','penanda objek'],'へ':['e','he','penanda arah']};
+const SENT_SRC=[
+ ['あなた[は] すてきです。','Kamu keren.'],
+ ['かさ[は] あそこです。','Payungnya ada di sana.'],
+ ['この かさ[は] たかいです。','Payung ini mahal.'],
+ ['わたし[は] がくせいです。','Saya pelajar.'],
+ ['わたし[は] せんせいです。','Saya guru.'],
+ ['あのひと[は] せんせいです。','Orang itu guru.'],
+ ['これ[は] ほんです。','Ini buku.'],
+ ['それ[は] じしょです。','Itu kamus.'],
+ ['あれ[は] かさです。','Itu payung.'],
+ ['ここ[は] きょうしつです。','Ini ruang kelas.'],
+ ['あなた[は] がくせいですか。','Apakah kamu pelajar?'],
+ ['としょかん[は] どこですか。','Perpustakaan di mana?'],
+ ['これ[は] なんですか。','Ini apa?'],
+ ['きょう[は] げつようびです。','Hari ini hari Senin.'],
+ ['あした[は] やすみです。','Besok libur.'],
+ ['たんじょうび[は] いつですか。','Kapan ulang tahunmu?'],
+ ['ゆうびんきょく[は] あそこです。','Kantor pos ada di sana.'],
+ ['ひるやすみ[は] じゅうにじです。','Istirahat siang jam dua belas.'],
+ ['わたし[は] にほんじん じゃ ありません。','Saya bukan orang Jepang.'],
+ ['こんにち{は}。','Selamat siang.'],
+ ['こんばん{は}。','Selamat malam.'],
+ ['ごはん[を] たべます。','Makan nasi.'],
+ ['みず[を] のみます。','Minum air.'],
+ ['おちゃ[を] のみます。','Minum teh.'],
+ ['ほん[を] よみます。','Membaca buku.'],
+ ['しんぶん[を] よみます。','Membaca koran.'],
+ ['てがみ[を] かきます。','Menulis surat.'],
+ ['しゃしん[を] とります。','Mengambil foto.'],
+ ['おんがく[を] ききます。','Mendengarkan musik.'],
+ ['しゅくだい[を] します。','Mengerjakan PR.'],
+ ['さかな[を] たべます。','Makan ikan.'],
+ ['やさい[を] かいます。','Membeli sayur.'],
+  ['まいあさ ごはん[を] たべます。','Setiap pagi makan nasi.'],
+ ['あなた[は] なに[を] のみますか。','Kamu minum apa?'],
+ ['せんせい[は] ほん[を] よみます。','Guru membaca buku.'],
+ ['かれ[は] まいあさ ごはん[を] たべます。','Dia makan nasi setiap pagi.'],
+ ['わたし[は] みず[を] のみます。','Saya minum air.'],
+ ['ともだち[は] えいが[を] みます。','Teman menonton film.'],
+ ['がっこう[へ] いきます。','Pergi ke sekolah.'],
+ ['えき[へ] いきます。','Pergi ke stasiun.'],
+ ['うち[へ] かえります。','Pulang ke rumah.'],
+ ['にほん[へ] きます。','Datang ke Jepang.'],
+ ['ぎんこう[へ] いきます。','Pergi ke bank.'],
+ ['としょかん[へ] いきます。','Pergi ke perpustakaan.'],
+ ['ゆうびんきょく[へ] いきます。','Pergi ke kantor pos.'],
+ ['どこ[へ] いきますか。','Pergi ke mana?'],
+ ['あなた[は] どこ[へ] いきますか。','Kamu pergi ke mana?'],
+ ['わたし[は] がっこう[へ] いきます。','Saya pergi ke sekolah.'],
+ ['わたし[は] まいにち がっこう[へ] いきます。','Saya pergi ke sekolah setiap hari.'],
+ ['ともだち[は] にほん[へ] いきます。','Teman pergi ke Jepang.'],
+ ['あした[は] うち[へ] かえります。','Besok pulang ke rumah.'],
+  ['かれ[は] まいにち がっこう[へ] いって ほん[を] よみます。','Dia pergi ke sekolah dan membaca buku setiap hari.']
+];
+function parseSent(src){
+ const [text0,meaning]=src;
+ const text=text0.replace(/(?<=[^\s])です/g,' です');
+ const toksP=[];let disp=[];
+ text.split(' ').forEach(ch=>{
+  let m=/^(.*?)\[(.)\]([。？！]*)$/.exec(ch),m2=/^(.*?)\{(.)\}([。？！]*)$/.exec(ch);
+  if(m){
+   if(m[1]){toksP.push({h:m[1],r:toks(m[1]).map(RM).join('')})}
+   toksP.push({h:m[2],r:PART[m[2]][0],lit:PART[m[2]][1],part:true});
+   disp.push(m[1]+m[2]+m[3]);
+  }else if(m2){
+   toksP.push({h:m2[1],r:toks(m2[1]).map(RM).join('')});
+   toksP.push({h:m2[2],r:PART[m2[2]][0],lit:PART[m2[2]][1],part:true,glue:true});
+   disp.push(m2[1]+m2[2]+m2[3]);
+  }else{
+   const w=ch.replace(/[。？！]+$/,'');
+   toksP.push({h:w,r:toks(w).map(RM).join('').replace(/desuka$/,'desu ka')});disp.push(ch);
+  }
+ });
+ const rom=ts=>ts.map((t,i)=>(i&&!t.glue?' ':'')+t.r).join('');
+ const jp=disp.join(' ');
+ const units=toks(jp.replace(/[。？！]/g,''));
+ const g=Math.max(...units.map(u=>gOfUnit(u)));
+ const used=[...new Set(toksP.filter(t=>t.part).map(t=>t.h))];
+ return {jp,romaji:rom(toksP),meaning,g,sentence:true,parts:toksP,rom,
+  note:used.map(p=>`${p} dibaca ${PART[p][0]} (${PART[p][2]})`).join(' · ')};
+}
+const SENT=SENT_SRC.map(parseSent);
+function makeDistractorsS(card,n){
+ const P=card.parts,cands=[],seen=new Set([card.romaji]);
+ const add=(ts,type,why)=>{const r=card.rom(ts);if(seen.has(r))return;seen.add(r);cands.push({kana:card.jp,romaji:r,type,why})};
+ const partIdx=P.map((t,i)=>t.part?i:-1).filter(i=>i>=0);
+ const why1=t=>`「${t.h}」sebagai partikel (${PART[t.h][2]}) dibaca <b>${t.r}</b>, bukan ${t.lit}. Tulisannya ${t.h}, tapi bunyinya berubah kalau jadi partikel.`;
+ partIdx.forEach(i=>add(P.map((t,k)=>k===i?{...t,r:t.lit}:t),'partikel',why1(P[i])));
+ if(partIdx.length>1)add(P.map(t=>t.part?{...t,r:t.lit}:t),'partikel','Dua partikel di kalimat ini dibaca sebagai huruf biasa. Padahal は → wa, を → o, へ → e kalau jadi partikel.');
+ const wordC=[];
+ P.forEach((t,i)=>{
+  if(t.part||!t.r)return;
+  makeDistractors({jp:t.h,romaji:t.r,g:card.g,single:false},2).forEach(d=>{
+   wordC.push([P.map((x,k)=>k===i?{...x,r:d.romaji}:x),d.type,d.why]);
+  });
+ });
+ const first=cands.slice(0,2);
+ shuffleArr(wordC).forEach(([ts,ty,w])=>{if(first.length+cands.slice(2).length>=n)return;add(ts,ty,w)});
+ const rest=cands.filter(c=>!first.includes(c));
+ return [...first,...shuffleArr(rest)].slice(0,n);
+}
+function explainS(card,o){
+ let h=`<div class="ans">Cara baca yang benar: <b>${card.jp}</b> = <b>${card.romaji}</b> <span style="color:#64748b">(arti: ${card.meaning})</span></div>`;
+ h+=`<div class="tipx" style="margin-top:6px">Kamu memilih <b>${o.romaji}</b>. ${o.why}</div>`;
+ h+='<div class="tipx" style="margin-top:8px"><b>Baca per bagian:</b></div><div class="kcs">';
+ card.parts.forEach(t=>{h+=`<div class="kc"${t.part?' style="border-color:#f2b134;background:#fff8e6"':''}><b>${t.h}</b><i>${t.r}</i>${t.part?`<em>partikel</em>`:''}</div>`});
+ h+='</div>';
+ [...new Set(card.parts.filter(t=>t.part).map(t=>t.h))].forEach(p=>h+=`<div class="tipx">💡 Partikel <b>${p}</b> dibaca <b>${PART[p][0]}</b>, bukan ${PART[p][1]}.</div>`);
+ return h;
+}
+/* materi aturan partikel (muncul sebelum latihan pertama) */
+function showMateriPartikel(after){
+ $('matBody').innerHTML=`<p><b>Tujuan:</b> supaya kamu nggak salah baca kalimat sehari-hari. Tiga huruf ini <b>ditulis</b> satu cara tapi <b>dibaca</b> beda kalau jadi partikel.</p>
+ <div class="matrow"><b>は</b><span>Biasanya dibaca <b>ha</b> (はな = hana). Kalau jadi <b>partikel penanda topik</b>, dibaca <b>wa</b>.<br>わたし<b>は</b> がくせいです = watashi <b>wa</b> gakusei desu.<br>Di salam juga: こんにち<b>は</b> = konnichi<b>wa</b>, こんばん<b>は</b> = konban<b>wa</b>.</span></div>
+ <div class="matrow"><b>を</b><span>Selalu dibaca <b>o</b>, sama seperti お. Cuma dipakai sebagai <b>partikel penanda objek</b>.<br>みず<b>を</b> のみます = mizu <b>o</b> nomimasu.</span></div>
+ <div class="matrow"><b>へ</b><span>Biasanya dibaca <b>he</b> (へや = heya). Kalau jadi <b>partikel arah</b>, dibaca <b>e</b>.<br>がっこう<b>へ</b> いきます = gakkou <b>e</b> ikimasu.</span></div>
+ <p class="tipx">Tips: partikel menempel di belakang kata. Di tulisan romaji, partikel dipisah spasi: watashi <b>wa</b>.</p>`;
+ $('matov').hidden=false;document.body.style.overflow='hidden';
+ $('matSay').onclick=()=>{ctx();speak('わたしは がくせいです')};
+ $('matGo').onclick=()=>{$('matov').hidden=true;document.body.style.overflow='';S.seenPart=true;saveS();if(after)after()};
+ $('matX').onclick=()=>{$('matov').hidden=true;document.body.style.overflow=''};
+}
+function startKal(){if(!S.seenPart)showMateriPartikel(()=>startTest('kal'));else startTest('kal')}
+
+/* =====================================================================
+   STREAK HARIAN
+   ===================================================================== */
+S.streak=S.streak&&typeof S.streak==='object'?S.streak:{n:0,best:0,last:'',days:[]};
+const ymdAdd=(s,k)=>{const [y,m,d]=s.split('-').map(Number);return ymd(new Date(y,m-1,d+k))};
+function streakNow(){
+ const st=S.streak,t=ymd();
+ if(!st.last)return 0;
+ return (st.last===t||st.last===ymdAdd(t,-1))?st.n:0;
+}
+function touchDay(){
+ const t=ymd(),st=S.streak;
+ if(st.last===t)return 0;
+ st.n=(st.last===ymdAdd(t,-1))?(st.n||0)+1:1;
+ st.best=Math.max(st.best||0,st.n);st.last=t;
+ st.days=[...(st.days||[]).filter(x=>x!==t),t].slice(-60);
+ saveS();paintStreak();
+ return st.n;
+}
+const HARI=['Min','Sen','Sel','Rab','Kam','Jum','Sab'];
+function weekDots(){
+ const t=ymd(),set=new Set(S.streak.days||[]);
+ return [6,5,4,3,2,1,0].map(i=>{
+  const d=ymdAdd(t,-i),[y,m,dd]=d.split('-').map(Number);
+  return {d,on:set.has(d),today:i===0,lbl:HARI[new Date(y,m-1,dd).getDay()]};
+ });
+}
+function streakHTML(){
+ const n=streakNow(),st=S.streak,t=ymd(),done=st.last===t;
+ const msg=done?`Hari ini sudah belajar ✅ ${n>=2?'Streak aman, sampai ketemu besok!':'Besok lanjut ya biar jadi streak.'}`
+  :n>0?`Streak <b>${n} hari</b> nunggu latihan hari ini. Satu sesi aja cukup biar nggak putus!`
+  :'Mulai hari ini: satu sesi latihan = hari pertama streak kamu.';
+ return `<div class="streakbox"><div class="sbig">🔥 <b>${n}</b> hari beruntun</div><div class="dots">${weekDots().map(x=>`<span class="${x.on?'on':''}${x.today?' td':''}"><i></i>${x.lbl}</span>`).join('')}</div><div class="tipx center">${msg}${st.best>n?` · Rekor: ${st.best} hari`:''}</div></div>`;
+}
+function paintStreak(){
+ const n=streakNow();
+ $('optStreak').textContent=n>0?`🔥 ${n} hari`:'🔥 Mulai streak';
+ $('optStreak').classList.toggle('on',n>0);
+ if($('streakMenu'))$('streakMenu').innerHTML=streakHTML();
+}
+$('optStreak').onclick=()=>{
+ const n=streakNow();
+ toast(n>0?`Streak ${n} hari beruntun 🔥 (rekor ${S.streak.best}). Latihan hari ini biar tetap jalan!`:'Selesaikan satu sesi latihan hari ini buat mulai streak 🔥');
+};
+/* membuka 12 kartu atau huruf juga dihitung belajar */
+let studyN=0;
+function noteStudy(){
+ const t=ymd();
+ if(!S.studyDay||S.studyDay.d!==t)S.studyDay={d:t,n:0};
+ S.studyDay.n++;
+ if(S.studyDay.n===12){const k=touchDay();if(k)toast(`Belajar hari ini tercatat 🔥 Streak ${k} hari!`)}
+}
+
+/* =====================================================================
+   TES PENEMPATAN
+   Tiga tahap (rumpun 1, 2, 3), campur dua arah. Rumpun yang dikuasai
+   (>= 90% dan tidak lambat) dibuka otomatis, huruf yang lemah dicatat.
+   ===================================================================== */
+const PT_N={'1':12,'2':10,'3':8};
+const PT_G=['1','2','3'];
+let PT=null;
+const PT_SLOW_MS=9000;
+function rowName(u){
+ for(const set of Object.keys(ROWS))for(const r of ROWS[set])if(r.cells.includes(u))return r.name;
+ return '';
+}
+function ptSample(g){
+ const pool=letterPool(g).filter(c=>!'ぢづ'.includes(c.jp));
+ const by={};pool.forEach(c=>{const r=rowName(c.jp)||c.jp;(by[r]=by[r]||[]).push(c)});
+ const rows=shuffleArr(Object.keys(by)).map(r=>shuffleArr(by[r]));
+ const out=[],n=Math.min(PT_N[g],pool.length);
+ while(out.length<n&&rows.some(r=>r.length))rows.forEach(r=>{if(out.length<n&&r.length)out.push(r.shift())});
+ return shuffleArr(out);
+}
+function startPlacement(){PT={stage:0,res:[]};ptStage()}
+function ptStage(){
+ const g=PT_G[PT.stage];
+ if(!g){ptFinish();return}
+ startTest('tempat',{items:ptSample(g),grp:g});
+}
+function endTempat(){
+ stopTimer();
+ const g=Q.grp,R=Q.results,total=R.length,benar=R.filter(r=>r.ok).length,pct=Math.round(benar/total*100);
+ const ms=R.map(r=>r.ms).filter(x=>x!=null),avg=ms.length?Math.round(ms.reduce((a,b)=>a+b,0)/ms.length/100)/10:null;
+ const wrong=[...new Set(R.filter(r=>!r.ok).map(r=>r.card.jp))];
+ const slow=[...new Set(R.filter(r=>r.ok&&r.ms>PT_SLOW_MS).map(r=>r.card.jp))];
+ const lvl=pct>=90&&(avg==null||avg<=10)?'hafal':pct>=60?'sebagian':'awal';
+ PT.res.push({g,pct,benar,total,avg,wrong,slow,lvl});
+ const last=PT.stage>=PT_G.length-1;
+ if(lvl==='awal'||last){ptFinish();return}
+ const nxt=PT_G[PT.stage+1];
+ const icon={hafal:'✅',sebagian:'🟡'}[lvl];
+ $('resBox').innerHTML=`<div class="hero">${icon}</div><h2>Tahap ${PT.stage+1} selesai · ${GRP[g].short}</h2>
+ <div class="big-result"><div class="sc">${benar} / ${total}</div><div>${pct}%</div></div>
+ <p class="center tipx">${lvl==='hafal'?'Bacaanmu di rumpun ini sudah kuat, mantap!':'Lumayan! Nanti kuperlihatkan bagian yang perlu diperkuat.'}</p>
+ <div class="nav"><button class="primary" id="ptNext">Lanjut ke ${GRP[nxt].short}</button><button id="ptEnd">Cukup, lihat hasil</button></div>`;
+ show('viewResult');
+ $('ptNext').onclick=()=>{PT.stage++;ptStage()};
+ $('ptEnd').onclick=()=>ptFinish();
+}
+function ptFinish(){
+ const res=PT.res;
+ /* rumpun dibuka hanya kalau semua rumpun sebelumnya juga dikuasai */
+ const opened=[];
+ for(const r of res){
+  if(r.lvl!=='hafal')break;
+  const p=S.prog[r.g]||(S.prog[r.g]={});
+  if(!p.lulus){p.lulus=true;p.tempat=true;p.tgl=ymd();p.pct=r.pct;if(r.avg!=null)p.avg=r.avg;opened.push(r.g);syncStatus('hira:rumpun-'+r.g,'hafal')}
+ }
+ const weakU=[...new Set(res.flatMap(r=>[...r.wrong,...r.slow]))];
+ S.placement={d:ymd(),res:res.map(r=>({g:r.g,pct:r.pct,benar:r.benar,total:r.total,avg:r.avg,lvl:r.lvl})),weak:weakU.slice(0,30)};
+ saveS();
+ const sn=touchDay();
+ const byRow=u=>{const o={};u.forEach(x=>{const k=rowName(x)||x;(o[k]=o[k]||[]).push(x)});return Object.entries(o).map(([k,v])=>`${k}: ${v.map(x=>`${x} (${RM(x)})`).join(', ')}`).join(' · ')};
+ let h=`<div class="hero">🎯</div><h2>Hasil Tes Penempatan</h2><p class="center tipx">Ini peta penguasaanmu sekarang. Kamu cukup fokus ke bagian yang perlu diperkuat.</p>`;
+ res.forEach(r=>{
+  const st=r.lvl==='hafal'?'✅ Sudah menguasai':r.lvl==='sebagian'?'🟡 Perlu diperkuat':'🔴 Mulai dari sini';
+  h+=`<div class="ptcard ${r.lvl}"><div class="pth"><b>${GRP[r.g].short}</b><span>${st}</span></div><div class="tipx">${r.benar} dari ${r.total} benar (${r.pct}%)${r.avg!=null?` · rata-rata ${r.avg} detik`:''}</div>`;
+  if(r.wrong.length)h+=`<div class="tipx">Salah: ${byRow(r.wrong)}</div>`;
+  if(r.slow.length)h+=`<div class="tipx">Benar tapi ragu-ragu (lambat): ${byRow(r.slow)}</div>`;
+  if(r.lvl==='hafal'&&opened.includes(r.g))h+=`<div class="tipx">🔓 Rumpun ini kulewati, nggak perlu Ujian Kenaikan.</div>`;
+  h+='</div>';
+ });
+ const done=new Set(res.map(r=>r.g)),skipped=PT_G.filter(g=>!done.has(g));
+ if(skipped.length)h+=`<div class="tipx center">Tahap ${skipped.map(g=>GRP[g].short).join(', ')} belum diuji. Selesaikan dulu bagian di atas.</div>`;
+ const tg=currentTarget();
+ h+=`<h3>Langkah yang kusarankan</h3>`;
+ const steps=[];
+ if(weakU.length)steps.push(`Perkuat dulu huruf yang lemah lewat <b>Peta Huruf</b> (sudah kupilihkan).`);
+ if(tg&&!S.guru)steps.push(`Setelah itu kerjakan <b>${kenName(tg)}</b>.`);
+ else if(tg===null)steps.push('Semua rumpun hiragana sudah terbuka. Kerjakan Ujian Akhir kalau sudah siap.');
+ steps.forEach(x=>h+=`<div class="tipx">• ${x}</div>`);
+ if(sn)h+=`<div class="tipx center">🔥 Streak: ${sn} hari beruntun!</div>`;
+ h+=`<div class="nav">${weakU.length?'<button class="primary" id="ptWeak">💪 Latih huruf yang lemah</button>':''}<button id="ptMenu">📝 Ke menu ujian</button><button id="ptRep">📊 Progres</button></div>`;
+ $('resBox').innerHTML=h;show('viewResult');
+ if(res.every(r=>r.lvl==='hafal'))confetti(120);
+ if($('ptWeak'))$('ptWeak').onclick=()=>openHurufWith(weakU);
+ $('ptMenu').onclick=()=>{renderMenu();show('viewMenu')};
+ $('ptRep').onclick=()=>openReport();
+ PT=null;
+}
+function openHurufWith(units){
+ HV.sc='h';HV.sel=new Set(units.filter(canSel));
+ const u0=[...HV.sel][0];if(u0)HV.set=findLoc(u0)||'dasar';
+ HV.open=null;HV.mode='h2m';renderHuruf();show('viewHuruf');
+ toast('Huruf yang lemah sudah kupilih. Tinggal tekan Mulai Latihan.');
+}
+function paintMenuExtras(){
+ const p=S.placement;
+ let h=`<div class="ptpromo"><div class="pti">🎯</div><div class="mid"><div class="t">Tes Penempatan</div><div class="d">Sudah pernah belajar hiragana? Tes singkat (sekitar 30 soal) buat tahu bagian mana yang sudah hafal dan mana yang perlu diperkuat. Rumpun yang sudah hafal bisa dilewati.</div>${p?`<div class="d">Terakhir: ${fmtD(p.d)} · ${p.res.map(r=>`${GRP[r.g].short} ${r.pct}%`).join(' · ')}</div>`:''}</div><button class="primary" id="btnPT">${p?'Ulangi tes':'Mulai tes'}</button></div>`;
+ $('ptBox').innerHTML=h;
+ $('btnPT').onclick=()=>startPlacement();
+ paintStreak();
+}
+
 refreshCardGroups();
+paintStreak();
 </script>
 </body>
 </html>
