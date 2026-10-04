@@ -726,9 +726,24 @@ function render(){
  $('romaji').textContent=item.romaji;
  $('meaning').textContent=item.sentence?item.meaning+' · '+item.note:(item.meaning||item.note||'');
  $('cTag').textContent=GRP[(item.k?'k':'')+item.g].short+' · '+(item.single?'huruf tunggal':item.sentence?'kalimat':(ulen(item)>=4?'4+':ulen(item))+' huruf');
+ fitCard();
  $('counter').textContent=`Kartu ${index+1} dari ${deck.length}`;
  $('bar').style.width=`${(index+1)/deck.length*100}%`;
 }
+/* kecilkan tulisan kalau kepanjangan supaya muat di kotak */
+function fitText(el,txt,wide,boxW){
+ el.style.fontSize='';
+ const base=parseFloat(getComputedStyle(el).fontSize)||48;
+ const n=[...String(txt)].length||1;
+ const sz=Math.max(18,Math.min(base,(boxW||260)/(n*(wide?1.08:0.6))));
+ el.style.fontSize=sz+'px';
+}
+function fitCard(){
+ const it=deck[index];if(!it)return;
+ const w=Math.max(180,card.clientWidth-56);
+ fitText($('jpFront'),it.jp,true,w);fitText($('romaji'),it.romaji,false,w);
+}
+addEventListener('resize',()=>{if(!$('viewCards').hidden)fitCard()});
 function flip(){card.classList.toggle('flipped')}
 function move(n){index=(index+n+deck.length)%deck.length;render();noteStudy()}
 const FGN={all:'Semua hiragana',1:'Rumpun 1 · あ sampai ほ',2:'Rumpun 2 · ま sampai ん',3:'Rumpun 3 · ゃ ゅ ょ dan っ',kall:'Semua katakana',k1:'Katakana 1 · ア sampai ホ',k2:'Katakana 2 · マ sampai ン',k3:'Katakana 3 · ャ ュ ョ dan ッ',k4:'Katakana 4 · ー dan serapan'};
@@ -1243,6 +1258,8 @@ function drawQuestion(){
  }else{
   qb.innerHTML=`<div class="ask">Mana ${isK(card.jp)?'katakana':'hiragana'} yang dibaca:</div><div class="bigm">${card.romaji}</div>`;
  }
+ {const bw=qb.clientWidth-40,bg=qb.querySelector('.big:not(.sm)'),bm=qb.querySelector('.bigm');
+  if(bg)fitText(bg,card.jp,true,bw);if(bm)fitText(bm,card.romaji,false,bw);}
  const ch=$('choices');ch.innerHTML='';
  ch.className='choices'+(dir==='m2h'?' two':'')+(card.sentence?' sent':'');
  Q.opts.forEach((o,i)=>{
