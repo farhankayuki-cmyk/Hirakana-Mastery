@@ -66,3 +66,9 @@ Tanpa mengganti angka itu, perangkat tetap mengambil versi baru diam-diam dan ta
 - Empat cara latihan: Lihat huruf, Lihat bacaan, Dengar suara, Huruf mirip.
 - Katakana: bentuk, cara ingat, suara, dan urutan tulis sudah bisa dilihat. Latihan dan ujian katakana menyusul.
 - Data urutan goresan: KanjiVG, hak cipta (C) Ulrich Apel, lisensi CC BY-SA 3.0 (https://kanjivg.tagaini.net). Data goresan di dalam `index.html` tunduk pada lisensi ini.
+
+## Gaya huruf (font)
+
+- Tombol **🔠 Gaya huruf** di bagian atas mengganti tampilan huruf di seluruh aplikasi: Gothic, Mincho, Buku pelajaran, Tulis tangan, Kuas, atau **Acak** (tiap kartu dan tiap soal pakai gaya berbeda, supaya siswa terbiasa dengan semua versi).
+- Di kartu detail huruf ada strip perbandingan: satu huruf dalam kelima gaya, ketuk untuk memilih.
+- Font ada di folder `fonts/` (hanya huruf kana, total sekitar 150 KB, ikut tersimpan untuk mode offline). Lisensi: SIL OFL 1.1, lihat `fonts/LISENSI-FONT.md`.

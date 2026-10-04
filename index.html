@@ -271,6 +271,23 @@ button.primary{background:linear-gradient(135deg,#2f80ff,#1448b8);border-color:#
 .wp-nav{display:flex;gap:6px;justify-content:center;flex-wrap:wrap;margin-bottom:6px}
 .wp-nav button{font-size:.8rem;padding:7px 10px;min-height:38px}
 .wp-note{font-size:.74rem;color:#73849a;text-align:center;margin:4px 0 0;line-height:1.5}
+
+/* ===== Gaya tulisan (font kana, hanya huruf kana yang dipotong, lisensi OFL) ===== */
+@font-face{font-family:"KF Gothic";src:url(fonts/gothic.woff2) format("woff2");font-display:swap;unicode-range:U+3040-30FF,U+3099-309C,U+30FC}
+@font-face{font-family:"KF Mincho";src:url(fonts/mincho.woff2) format("woff2");font-display:swap;unicode-range:U+3040-30FF,U+3099-309C,U+30FC}
+@font-face{font-family:"KF Kyokasho";src:url(fonts/kyokasho.woff2) format("woff2");font-display:swap;unicode-range:U+3040-30FF,U+3099-309C,U+30FC}
+@font-face{font-family:"KF Tangan";src:url(fonts/tangan.woff2) format("woff2");font-display:swap;unicode-range:U+3040-30FF,U+3099-309C,U+30FC}
+@font-face{font-family:"KF Kuas";src:url(fonts/kuas.woff2) format("woff2");font-display:swap;unicode-range:U+3040-30FF,U+3099-309C,U+30FC}
+:root{--kf:"KF Gothic","Noto Sans JP","Hiragino Sans","Yu Gothic",sans-serif}
+.jp,.qbox .big,.choice.kj,.hcell b,.hd-big,.kc b,.hd-sim button,.hd-fs b{font-family:var(--kf)}
+.hd-fonts{margin:10px 0 4px}
+.hd-fonts p{font-size:.84rem;color:#4a5b70;margin:0 0 6px}
+.hd-fgrid{display:grid;grid-template-columns:repeat(5,1fr);gap:6px}
+.hd-fs{min-height:0;padding:6px 2px 4px;border-radius:12px;border:2px solid #cbd7e5;background:#fff;display:flex;flex-direction:column;align-items:center;gap:2px;line-height:1.1}
+.hd-fs b{font-size:1.9rem;font-weight:400;color:var(--navy)}
+.hd-fs small{font-size:.58rem;color:#6a7b90;font-weight:700}
+.hd-fs.on{border-color:var(--blue);background:#e8f1fb}
+.hd-fnote{font-size:.78rem;color:#6b4a00;background:#fff8e6;border-radius:10px;padding:6px 10px;margin:8px 0 0;line-height:1.5}
 </style>
 </head>
 <body>
@@ -292,6 +309,7 @@ button.primary{background:linear-gradient(135deg,#2f80ff,#1448b8);border-color:#
 <button class="chip" id="optInstall" hidden>📲 Pasang aplikasi</button>
 <button class="chip" id="netChip" hidden disabled>📴 Mode offline</button>
 <button class="chip on" id="optAuto">🗣️ Baca otomatis: nyala</button>
+<button class="chip" id="optFont">🔠 Gaya huruf: Gothic</button>
 </div>
 
 <!-- ================= MODE KARTU ================= -->
@@ -664,6 +682,7 @@ let deck=allCards.filter(c=>c.g===1), index=0;
 const card=$('card');
 function render(){
  if(!deck.length)return;
+ perItemFont($('viewCards'));
  card.classList.remove('flipped');
  const item=deck[index];
  $('jpFront').textContent=item.jp;
@@ -1083,6 +1102,7 @@ function nextQuestion(){
 function drawQuestion(){
  const {card,dir}=Q.cur;
  Q.qStart=Date.now();
+ perItemFont($('viewQuiz'));
  const ds=makeDistractors(card,3,{look:!!Q.look});
  Q.opts=shuffleArr([{ok:true,kana:card.jp,romaji:card.romaji,why:''},...ds.map(d=>({...d,ok:false}))])
   .map(o=>({...o,t:dir==='h2m'?o.romaji:o.kana}));
@@ -1603,6 +1623,36 @@ setTimeout(syncFlush,2500);
 try{if(window.KayukiSync&&KayukiSync.init)KayukiSync.init({app:'latihan'})}catch(e){}
 
 
+/* ===== gaya tulisan (point 7): satu huruf, banyak versi ===== */
+const FONTS=[['gothic','Gothic'],['mincho','Mincho'],['kyokasho','Buku pelajaran'],['tangan','Tulis tangan'],['kuas','Kuas']];
+const FSTACK={
+ gothic:'"KF Gothic","Noto Sans JP","Hiragino Sans","Yu Gothic",sans-serif',
+ mincho:'"KF Mincho","Noto Serif JP","Hiragino Mincho ProN","Yu Mincho",serif',
+ kyokasho:'"KF Kyokasho","UD Digi Kyokasho N-R","Noto Sans JP",sans-serif',
+ tangan:'"KF Tangan","Noto Sans JP",cursive',
+ kuas:'"KF Kuas","Noto Serif JP",serif'
+};
+const FORDER=['gothic','mincho','kyokasho','tangan','kuas','acak'];
+const fKey=()=>FSTACK[S.font]?S.font:(S.font==='acak'?'acak':'gothic');
+const fName=k=>k==='acak'?'Acak':(FONTS.find(f=>f[0]===k)||FONTS[0])[1];
+function randFont(){return FONTS[Math.floor(Math.random()*FONTS.length)][0]}
+function applyFont(){
+ const k=fKey();
+ document.documentElement.style.setProperty('--kf',FSTACK[k==='acak'?'gothic':k]);
+ $('optFont').textContent='🔠 Gaya huruf: '+fName(k);
+ $('optFont').classList.toggle('on',k!=='gothic');
+}
+/* mode Acak: tiap kartu dan tiap soal pakai gaya yang berbeda */
+function perItemFont(el){
+ if(fKey()==='acak')el.style.setProperty('--kf',FSTACK[randFont()]);else el.style.removeProperty('--kf');
+}
+$('optFont').onclick=()=>{
+ const i=FORDER.indexOf(fKey());S.font=FORDER[(i+1)%FORDER.length];saveS();applyFont();
+ perItemFont($('viewCards'));if(!$('viewHuruf').hidden)renderHuruf();
+ toast(S.font==='acak'?'Gaya huruf diacak tiap kartu dan soal, biar terbiasa sama semua versi.':'Gaya huruf: '+fName(S.font));
+};
+applyFont();
+
 /* =====================================================================
    TAB HURUF: peta huruf, kartu detail, urutan tulis, latihan
    Data urutan goresan: KanjiVG (https://kanjivg.tagaini.net),
@@ -1697,7 +1747,8 @@ function renderHuruf(){
    if(!u){h+='<span class="hgap"></span>';return}
    const F=formOf(u),st=hira&&practicable(u)?hStat(u):-1;
    const lock=hira&&practicable(u)&&!unl(u);
-   h+=`<button class="hcell${st>0?' st'+st:''}${lock?' lock':''}${HV.sel.has(u)?' sel':''}${HV.open===u?' open':''}" data-u="${u}" aria-label="${F}"><b>${F}</b><i>${HV.hide?'':romOf(F)}</i>${lock?'<em>🔒</em>':''}</button>`;
+   const cf=fKey()==='acak'?` style="--kf:${FSTACK[FONTS[(u.charCodeAt(0)+(u.length>1?u.charCodeAt(1):0))%FONTS.length][0]]}"`:'';
+   h+=`<button class="hcell${st>0?' st'+st:''}${lock?' lock':''}${HV.sel.has(u)?' sel':''}${HV.open===u?' open':''}" data-u="${u}" aria-label="${F}"${cf}><b>${F}</b><i>${HV.hide?'':romOf(F)}</i>${lock?'<em>🔒</em>':''}</button>`;
   });
  });
  $('hvGrid').innerHTML=h+'</div>';
@@ -1790,6 +1841,11 @@ function paintDetail(play){
  if(mn)h+=`<p class="hd-mn">${mn}</p>`;
  const nt=noteOf(u);if(nt)h+=`<div class="hd-note">💡 ${nt}</div>`;
  if(simBtns)h+=`<div class="hd-sim">Sering tertukar dengan: ${simBtns}</div>`;
+ if(ok&&!/[っ]/.test(F)){
+  h+=`<div class="hd-fonts"><p><b>Satu huruf, banyak gaya.</b> Ketuk salah satu untuk dipakai di seluruh aplikasi.</p><div class="hd-fgrid">${FONTS.map(f=>`<button class="hd-fs${fKey()===f[0]?' on':''}" data-f="${f[0]}"><b style="font-family:${FSTACK[f[0]].replace(/"/g,"'")}">${F}</b><small>${f[1]}</small></button>`).join('')}</div>`;
+  if(/[さきふらり]|[サキフラリ]/.test(F))h+=`<div class="hd-fnote">Perhatikan: di gaya tulisan tangan atau buku pelajaran, huruf seperti さ き ふ ら り bisa kelihatan menyambung atau sedikit beda dari huruf cetak. Itu normal, hurufnya tetap sama.</div>`;
+  h+=`</div>`;
+ }
  if(gl.length){
   h+=`<div class="hd-str" id="hdStr">${gl.map((c,i)=>`<div class="hd-gl" data-play="1">${glyphSVG(c)}<small>${gl.length>1?(i===0?c:c+' (kecil)')+' · ':''}${KVG[c].length} goresan</small></div>`).join('')}</div>`;
   h+=`<p class="hd-strn">${total} goresan · ketuk gambar untuk lihat animasinya</p>`;
@@ -1807,6 +1863,7 @@ function paintDetail(play){
   HV.sel.has(u)?HV.sel.delete(u):HV.sel.add(u);renderHuruf();
  };
  d.querySelectorAll('[data-go]').forEach(b=>b.onclick=()=>{const hu=b.dataset.go;const s=findLoc(hu);if(s)HV.set=s;HV.open=hu;renderHuruf();speak(formOf(hu));$('hvDetail').scrollIntoView({block:'nearest',behavior:'smooth'})});
+ d.querySelectorAll('.hd-fs').forEach(b=>b.onclick=()=>{S.font=b.dataset.f;saveS();applyFont();perItemFont($('viewCards'));renderHuruf();paintDetail(false)});
  d.querySelectorAll('.hd-gl').forEach(g=>g.onclick=()=>{animTok++;animSVG(g.querySelector('.kvg'))});
  if(play)animDetail();
 }
