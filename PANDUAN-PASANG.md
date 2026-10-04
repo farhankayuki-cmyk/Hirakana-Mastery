@@ -72,3 +72,11 @@ Tanpa mengganti angka itu, perangkat tetap mengambil versi baru diam-diam dan ta
 - Tombol **🔠 Gaya huruf** di bagian atas mengganti tampilan huruf di seluruh aplikasi: Gothic, Mincho, Buku pelajaran, Tulis tangan, Kuas, atau **Acak** (tiap kartu dan tiap soal pakai gaya berbeda, supaya siswa terbiasa dengan semua versi).
 - Di kartu detail huruf ada strip perbandingan: satu huruf dalam kelima gaya, ketuk untuk memilih.
 - Font ada di folder `fonts/` (hanya huruf kana, total sekitar 150 KB, ikut tersimpan untuk mode offline). Lisensi: SIL OFL 1.1, lihat `fonts/LISENSI-FONT.md`.
+
+## Fitur baru: kalimat, streak, tes penempatan, katakana
+
+- **Kalimat は を へ**: menu Ujian, tombol "Kalimat" (ada materi aturan sebelum latihan pertama). Juga ada di Kartu (filter "Kalimat").
+- **Streak harian**: chip 🔥 di atas dan kotak 7 hari di menu Ujian. Satu sesi latihan atau 12 kartu dibuka dihitung belajar hari itu.
+- **Tes Penempatan** (hiragana): huruf satuan plus baca kata 2–4 huruf, per rumpun. Rumpun yang dikuasai terbuka otomatis, huruf lemah dikirim ke tab Huruf.
+- **Katakana**: tombol あ Hiragana / ア Katakana di bawah tab. Rumpun Katakana 1–4 lalu Ujian Akhir Katakana, dengan Kartu, Ujian Kenaikan, Kilat Huruf, Latihan Penguat, Peta Huruf (plus set "ー & serapan"), dan materi Katakana. Pengecoh khas katakana: シ/ツ, ソ/ン, ー (panjang vs pendek), ッ, bunyi serapan.
+- Kosakata katakana ada di array `KATA_SRC` (bagian bawah index.html). Kata dari buku Bab 1–15 plus tambahan Kayuki; tinggal tambah baris `['カタカナ','arti']` untuk menambah kata.

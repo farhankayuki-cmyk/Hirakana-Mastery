@@ -255,6 +255,7 @@ button.primary{background:linear-gradient(135deg,#2f80ff,#1448b8);border-color:#
 /* papan latihan menulis */
 .wpov{position:fixed;inset:0;background:#0a1626cc;z-index:60;display:flex;align-items:center;justify-content:center;padding:12px;overflow:auto}
 .wpov[hidden]{display:none}
+.scseg{max-width:420px;margin:8px auto 2px}
 .matbox{max-width:520px;width:100%;background:#fff;border-radius:20px;padding:14px 16px;max-height:92vh;overflow:auto}
 .matrow{display:flex;gap:12px;align-items:flex-start;background:#f4f8fd;border-radius:14px;padding:10px 12px;margin:8px 0;font-size:.92rem}
 .matrow>b{font-size:1.5rem;color:var(--navy);line-height:1.1;min-width:2.2rem;text-align:center}
@@ -313,7 +314,7 @@ button.primary{background:linear-gradient(135deg,#2f80ff,#1448b8);border-color:#
 <header class="hero-head">
 <img id="logoImg" class="logo" alt="Kayuki Nihongo Gakkou" width="210" height="130">
 <h1>HiraKana Mastery Kayuki</h1>
-<p class="sub">Lancar baca hiragana dulu, katakana menyusul. Belajar pakai kartu, lalu uji cara bacamu. Semangat! 🌸</p>
+<p class="sub">Lancar baca hiragana dan katakana. Belajar pakai kartu, lalu uji cara bacamu. Semangat! 🌸</p>
 </header>
 
 <div class="tabs" id="tabs">
@@ -322,6 +323,7 @@ button.primary{background:linear-gradient(135deg,#2f80ff,#1448b8);border-color:#
 <button class="tab" id="tabTest">📝 Ujian</button>
 <button class="tab" id="tabRep">📊 Progres</button>
 </div>
+<div class="seg scseg" id="scSeg"><button data-s="h" class="on">あ Hiragana</button><button data-s="k">ア Katakana</button></div>
 <div class="opts">
 <button class="chip on" id="optSfx">🔔 Efek suara: nyala</button>
 <button class="chip" id="optInstall" hidden>📲 Pasang aplikasi</button>
@@ -334,12 +336,7 @@ button.primary{background:linear-gradient(135deg,#2f80ff,#1448b8);border-color:#
 <!-- ================= MODE KARTU ================= -->
 <section id="viewCards">
 <div class="toolbar">
-<select id="fgrp" aria-label="Pilih rumpun huruf">
-<option value="all">Semua hiragana</option>
-<option value="1">Rumpun 1 · あ sampai ほ</option>
-<option value="2">Rumpun 2 · ま sampai ん</option>
-<option value="3">Rumpun 3 · ゃ ゅ ょ dan っ</option>
-</select>
+<select id="fgrp" aria-label="Pilih rumpun huruf"></select>
 <select id="filter" aria-label="Pilih jumlah huruf">
 <option value="huruf">Huruf tunggal</option>
 <option value="all">Semua kosakata</option>
@@ -383,7 +380,7 @@ button.primary{background:linear-gradient(135deg,#2f80ff,#1448b8);border-color:#
 <h2>Peta huruf</h2>
 <p class="tipx center">Ketuk huruf buat lihat cara ingat, suara, dan urutan menulisnya. Ketuk nama baris (あ行, か行, dst) buat milih huruf yang mau dilatih.</p>
 <div class="seg" id="hvSc"><button data-v="h" class="on">Hiragana</button><button data-v="k">Katakana</button></div>
-<div class="seg" id="hvSet"><button data-v="dasar" class="on">Huruf dasar</button><button data-v="dakuten">Dakuten ゛゜</button><button data-v="yoon">Yōon (きゃ…)</button></div>
+<div class="seg" id="hvSet"><button data-v="dasar" class="on">Huruf dasar</button><button data-v="dakuten">Dakuten ゛゜</button><button data-v="yoon">Yōon (きゃ…)</button><button data-v="khusus" id="hvKh" hidden>ー & serapan</button></div>
 <div id="hvLegend" class="hlegend"><span><i style="background:#fff"></i>belum</span><span><i style="background:#fff6cf;border-color:#f0d36a"></i>baru kenal</span><span><i style="background:#ffe3c2;border-color:#f2a04b"></i>hampir</span><span><i style="background:#d8f3e5;border-color:#53b88c"></i>hafal</span></div>
 <div class="hprog" id="hvProg"><span id="hvProgTxt"></span><div class="progress"><div id="hvBar"></div></div></div>
 <div id="hvGrid"></div>
@@ -411,13 +408,13 @@ button.primary{background:linear-gradient(135deg,#2f80ff,#1448b8);border-color:#
 <div class="panel">
 <div id="streakMenu"></div>
 <div id="ptBox"></div>
-<h2>Peta belajar hiragana</h2>
+<h2 id="mapTitle">Peta belajar hiragana</h2>
 <div class="map" id="mapBox"></div>
 <p class="tipx center" id="grpDesc"></p>
 <div id="menuBody">
 <div id="gateBox"></div>
 <div class="center tipx" style="margin-top:6px"><b>Latihan bebas</b> · atur jumlah soal dan arah dulu</div>
-<p class="tipx center">Kamu lihat kata hiragana, lalu pilih cara bacanya yang benar. Kalau salah, ada penjelasan kenapa bacaanmu keliru, lalu soal yang salah diulang sampai benar.</p>
+<p class="tipx center">Kamu lihat kata (hiragana atau katakana), lalu pilih cara bacanya yang benar. Kalau salah, ada penjelasan kenapa bacaanmu keliru, lalu soal yang salah diulang sampai benar.</p>
 <div class="center tipx"><b>Jumlah soal</b></div>
 <div class="seg" id="cntSeg">
 <button data-n="10" class="on">10 soal</button>
@@ -492,7 +489,7 @@ button.primary{background:linear-gradient(135deg,#2f80ff,#1448b8);border-color:#
 
 <div id="matov" class="wpov" hidden>
 <div class="wpbox matbox">
-<div class="wp-head"><span class="wp-title">📖 Aturan Partikel は を へ</span><button class="wp-x" id="matX" aria-label="Tutup">×</button></div>
+<div class="wp-head"><span class="wp-title" id="matTitle">📖 Aturan Partikel は を へ</span><button class="wp-x" id="matX" aria-label="Tutup">×</button></div>
 <div id="matBody"></div>
 <div class="wp-nav"><button id="matSay">🔊 Dengar contoh</button><button class="primary" id="matGo">Mengerti, mulai latihan</button></div>
 </div></div>
@@ -561,11 +558,11 @@ function memUpdate(card,ok,o){
  else{W.w++;W.t=now;diffUnits(card.jp,o&&o.kana).forEach(u=>{const x=MEM.u[u]||(MEM.u[u]={w:0,c:0,t:0});x.w++;x.t=now})}
  memSave();
 }
-function weakList(k){
- return Object.keys(MEM.u).map(u=>({u,romaji:RM(u),score:unitScore(u)})).filter(x=>x.score>=0.75&&x.romaji&&unitGrp(x.u)<=maxG())
+function weakList(k,sc){
+ return Object.keys(MEM.u).map(u=>({u,romaji:RM(u),score:unitScore(u)})).filter(x=>x.score>=0.75&&x.romaji&&unlocked(gKey(x.u))&&(!sc||isK(x.u)===(sc==='k')))
   .sort((a,b)=>b.score-a.score).slice(0,k||6);
 }
-const hasWeak=()=>weakList(1).length>0;
+const hasWeak=sc=>weakList(1,sc||SC).length>0;
 function pickWeighted(pool,n,k){
  k=k==null?.8:k;const arr=[...pool],out=[];
  while(out.length<n&&arr.length){
@@ -626,6 +623,15 @@ const SARAN={
 };
 function fiturKata(c){
  if(c.sentence)return 'Kalimat · partikel は を へ';
+ if(c.k){
+  if(c.single)return 'Katakana · huruf tunggal';
+  if(/[ァィゥェォ]/.test(c.jp))return 'Katakana · bunyi serapan';
+  if(/ー/.test(c.jp))return 'Katakana · ー (panjang)';
+  if(/ッ/.test(c.jp))return 'Katakana · ッ (jeda)';
+  if(/[ャュョ]/.test(c.jp))return 'Katakana · ャュョ (huruf kecil)';
+  if(/[シツソン]/.test(c.jp))return 'Katakana · シ ツ ソ ン';
+  return 'Katakana · bunyi dasar';
+ }
  const ch=[...c.jp];
  if(c.single)return 'Hiragana · huruf tunggal';
  if(/っ/.test(c.jp))return 'Hiragana · っ (jeda)';
@@ -719,26 +725,31 @@ function render(){
  $('jpFront').textContent=item.jp;
  $('romaji').textContent=item.romaji;
  $('meaning').textContent=item.sentence?item.meaning+' · '+item.note:(item.meaning||item.note||'');
- $('cTag').textContent=GRP[item.g].short+' · '+(item.single?'huruf tunggal':item.sentence?'kalimat':(ulen(item)>=4?'4+':ulen(item))+' huruf');
+ $('cTag').textContent=GRP[(item.k?'k':'')+item.g].short+' · '+(item.single?'huruf tunggal':item.sentence?'kalimat':(ulen(item)>=4?'4+':ulen(item))+' huruf');
  $('counter').textContent=`Kartu ${index+1} dari ${deck.length}`;
  $('bar').style.width=`${(index+1)/deck.length*100}%`;
 }
 function flip(){card.classList.toggle('flipped')}
 function move(n){index=(index+n+deck.length)%deck.length;render();noteStudy()}
-const FGN={all:'Semua hiragana',1:'Rumpun 1 · あ sampai ほ',2:'Rumpun 2 · ま sampai ん',3:'Rumpun 3 · ゃ ゅ ょ dan っ'};
+const FGN={all:'Semua hiragana',1:'Rumpun 1 · あ sampai ほ',2:'Rumpun 2 · ま sampai ん',3:'Rumpun 3 · ゃ ゅ ょ dan っ',kall:'Semua katakana',k1:'Katakana 1 · ア sampai ホ',k2:'Katakana 2 · マ sampai ン',k3:'Katakana 3 · ャ ュ ョ dan ッ',k4:'Katakana 4 · ー dan serapan'};
 function refreshCardGroups(){
- const sel=$('fgrp'),cur=sel.value;
- [...sel.options].forEach(o=>{const u=unlocked(o.value);o.disabled=!u;o.textContent=(u?'':'🔒 ')+FGN[o.value]});
- sel.value=unlocked(cur)?cur:'1';
+ const sel=$('fgrp');
+ const list=SC==='k'?['kall','k1','k2','k3','k4']:['all','1','2','3'];
+ const cur=list.includes(sel.value)?sel.value:list[0];
+ sel.innerHTML=list.map(v=>{const u=unlocked(v)||v==='all'||v==='kall';return `<option value="${v}"${u?'':' disabled'}>${u?'':'🔒 '}${FGN[v]}</option>`}).join('');
+ sel.value=unlocked(cur)||cur==='all'||cur==='kall'?cur:list[1];
+ [...$('filter').options].forEach(o=>{if(o.value==='kal'){o.hidden=SC==='k';o.disabled=SC==='k'}});
+ if(SC==='k'&&$('filter').value==='kal')$('filter').value='all';
  $('filter').dispatchEvent(new Event('change'));
 }
 $('fgrp').addEventListener('change',()=>$('filter').dispatchEvent(new Event('change')));
 $('filter').addEventListener('change',e=>{
  const v=$('filter').value;
- if(v==='huruf')deck=letterPool($('fgrp').value);
- else if(v==='kal')deck=SENT.filter(x=>$('fgrp').value==='all'||x.g<=Number($('fgrp').value));
- else deck=allCards.filter(x=>inGrp(x,$('fgrp').value)&&(v==='all'||(v==='4'?ulen(x)>=4:ulen(x)===Number(v))));
- if(!deck.length){deck=[...allCards.filter(x=>inGrp(x,$('fgrp').value))]}
+ const gp=$('fgrp').value;
+ if(v==='huruf')deck=letterPool(gp);
+ else if(v==='kal'&&SC==='h')deck=SENT.filter(x=>gp==='all'||x.g<=Number(gp));
+ else deck=srcOf(gp).filter(x=>inGrp(x,gp)&&(v==='all'||v==='kal'||(v==='4'?ulen(x)>=4:ulen(x)===Number(v))));
+ if(!deck.length){deck=[...srcOf(gp).filter(x=>inGrp(x,gp))]}
  index=0;render();
 });
 $('shuffle').addEventListener('click',()=>{deck=shuffleArr(deck);index=0;render()});
@@ -769,16 +780,23 @@ const GRP={
  2:{name:'Rumpun 2 · ま sampai ん',short:'Rumpun 2',desc:'Huruf ま み む め も, や ゆ よ, ら り る れ ろ, わ を ん (sambil tetap memakai huruf rumpun 1).'},
  3:{name:'Rumpun 3 · ゃ ゅ ょ dan っ',short:'Rumpun 3',desc:'Huruf kecil ゃ ゅ ょ (きゃ, しゅ, ちょ) dan っ (jeda: きって).'},
  all:{name:'Semua hiragana',short:'Semua hiragana',desc:'Gabungan semua rumpun. Di sini ada Ujian Akhir Hiragana.'},
+ k1:{name:'Katakana 1 · ア sampai ホ',short:'Katakana 1',desc:'Katakana ア sampai ホ, lengkap dengan tenten dan maru. Awas, シ dan ツ mirip banget!'},
+ k2:{name:'Katakana 2 · マ sampai ン',short:'Katakana 2',desc:'Katakana マ ミ ム メ モ, ヤ ユ ヨ, ラ リ ル レ ロ, ワ ヲ ン. Awas ソ dan ン!'},
+ k3:{name:'Katakana 3 · ャ ュ ョ dan ッ',short:'Katakana 3',desc:'Huruf kecil ャ ュ ョ (シャ, ジュ, チョ) dan ッ (jeda: サッカー).'},
+ k4:{name:'Katakana 4 · ー dan bunyi serapan',short:'Katakana 4',desc:'Tanda tahan ー (コーヒー = koohii) dan bunyi serapan seperti ティ, ファ, ウィ, ジェ.'},
+ kall:{name:'Semua katakana',short:'Semua katakana',desc:'Gabungan semua rumpun katakana. Di sini ada Ujian Akhir Katakana.'},
  pen:{name:'Rumpun yang sudah terbuka',short:'Rumpun terbuka',desc:''},
  peta:{name:'Pilihan dari Peta Huruf',short:'Huruf pilihan',desc:''}
 };
 let grpPick='1';
-const inGrp=(c,g)=>g==='all'||c.g===Number(g);
-const poolOf=(l,g)=>l==='kal'?SENT.filter(c=>(g||grpPick)==='all'||c.g<=Number(g||grpPick)):allCards.filter(c=>LV[l].f(c)&&inGrp(c,g||grpPick));
+const inGrp=(c,g)=>g==='all'||g==='kall'||String(g)===(c.k?'k':'')+c.g;
+const srcOf=g=>/^k/.test(String(g))?KCARDS:allCards;
+const poolOf=(l,g)=>l==='kal'?SENT.filter(c=>(g||grpPick)==='all'||c.g<=Number(g||grpPick)):srcOf(g||grpPick).filter(c=>LV[l].f(c)&&inGrp(c,g||grpPick));
 let countPick='10';
 let dirMode='h2m';
 let timePick=0;
-const DIRNAME={h2m:'Hiragana → Romaji',m2h:'Romaji → Hiragana',mix:'Final Exam (campur)'};
+const scName=()=>{const inQ=Q&&!($('viewQuiz').hidden&&$('viewResult').hidden);return (inQ?Q.sc:SC)==='k'?'Katakana':'Hiragana'};
+const DIRNAME={get h2m(){return scName()+' → Romaji'},get m2h(){return 'Romaji → '+scName()},mix:'Final Exam (campur)'};
 const otherDir=d=>d==='h2m'?'m2h':'h2m';
 const PASS=70;
 
@@ -789,22 +807,33 @@ const YPRE={'き':'ky','し':'sh','ち':'ch','に':'ny','ひ':'hy','み':'my','�
 const SMV={'ゃ':'a','ゅ':'u','ょ':'o'};
 const SMN={'ゃ':'や','ゅ':'ゆ','ょ':'よ'};
 const YOUON_ALL=Object.keys(YPRE).flatMap(c=>Object.keys(SMV).map(x=>c+x));
+const isK=s=>/[゠-ヿ]/.test(s);
+const k2h=s=>s.replace(/[ァ-ヶ]/g,c=>String.fromCharCode(c.charCodeAt(0)-0x60));
 function toks(jp){
  const out=[];let i=0;
  while(i<jp.length){
   const c=jp[i];
-  if(/[\s\u3000。、？！]/.test(c)){i++;continue}
-  if(c==='っ'&&i+1<jp.length){
-   let u=jp[i+1];if(i+2<jp.length&&SMV[jp[i+2]])u+=jp[i+2];
-   out.push('っ'+u);i+=1+u.length;continue;
-  }
-  if(i+1<jp.length&&SMV[jp[i+1]]){out.push(c+jp[i+1]);i+=2;continue}
-  out.push(c);i++;
+  if(/[\s　。、？！]/.test(c)){i++;continue}
+  let pre='';
+  if((c==='っ'||c==='ッ')&&i+1<jp.length&&jp[i+1]!=='ー'){pre=c;i++}
+  let u=jp[i];i++;
+  if(i<jp.length&&/[ゃゅょャュョぁぃぅぇぉァィゥェォ]/.test(jp[i])){u+=jp[i];i++}
+  if(i<jp.length&&jp[i]==='ー'){u+='ー';i++}
+  out.push(pre+u);
  }
  return out;
 }
 const ulen=c=>toks(c.jp).length;
+const SER={'てぃ':'ti','でぃ':'di','ふぁ':'fa','ふぃ':'fi','ふぇ':'fe','ふぉ':'fo','うぃ':'wi','うぇ':'we','うぉ':'wo','じぇ':'je','ちぇ':'che','しぇ':'she','とぅ':'tu','どぅ':'du'};
 function RM(u){
+ if(!u)return '';
+ if(isK(u)){
+  let long=false;
+  if(u.endsWith('ー')){long=true;u=u.slice(0,-1)}
+  const r=RM(k2h(u));
+  return r&&long?r+r.slice(-1):r;
+ }
+ if(u.length===2&&SER[u])return SER[u];
  if(u[0]==='っ'){const r=RM(u.slice(1));if(!r)return '';return r.startsWith('ch')?'t'+r:r[0]+r}
  if(u.length===2&&SMV[u[1]]&&YPRE[u[0]])return YPRE[u[0]]+SMV[u[1]];
  return ROMA[u]||'';
@@ -852,6 +881,7 @@ const LONGRE=/ou|oo|ei|ii|uu/;
 /* bikin pengecoh dari kesalahan baca yang NYATA dialami pemula */
 function makeDistractors(card,n,opt){
  if(card.sentence)return makeDistractorsS(card,n);
+ if(card.k)return makeDistractorsK(card,n,opt);
  const U=toks(card.jp),cands=[],ALLOW=allowedFor(card.g);
  const add=(arr,type,why,pair)=>{
   if(!arr.length||arr.some(u=>!RM(u)))return;
@@ -948,14 +978,19 @@ function makeDistractors(card,n,opt){
 function chipsHTML(card){
  let h='<div class="tipx" style="margin-top:8px"><b>Baca satu-satu dari kiri ke kanan:</b></div><div class="kcs">';
  for(const u of toks(card.jp)){
-  let tag='';
-  if(u[0]==='っ')tag=`っ = jeda, ${u.slice(1)} dobel`;
-  else if(u.length===2)tag=`${u[0]} + ${u[1]} kecil`;
+  let tag='',core=u;
+  const lg=core.endsWith('ー');if(lg)core=core.slice(0,-1);
+  const sk=/^[っッ]/.test(core)&&core.length>1;if(sk)core=core.slice(1);
+  const K=isK(core),cv=x=>K?toKata(x):x;
+  if(sk)tag=`${u[0]} = jeda, ${core} dobel`;
+  else if(core.length===2&&/[ゃゅょャュョ]/.test(core[1]))tag=`${core[0]} + ${core[1]} kecil`;
+  else if(core.length===2&&/[ぁぃぅぇぉァィゥェォ]/.test(core[1]))tag=`${core[0]} + ${core[1]} kecil (serapan)`;
   else{
-   const di=DAK.indexOf(u),hi=HAN.indexOf(u);
-   if(di>=0)tag=`${DAKB[di]} + tenten`;
-   else if(hi>=0)tag=`${HANB[hi]} + maru`;
+   const t=k2h(core),di=DAK.indexOf(t),hi=HAN.indexOf(t);
+   if(di>=0)tag=`${cv(DAKB[di])} + tenten`;
+   else if(hi>=0)tag=`${cv(HANB[hi])} + maru`;
   }
+  if(lg)tag=(tag?tag+' · ':'')+'ー = tahan 2 ketukan';
   h+=`<div class="kc"><b>${u}</b><i>${RM(u)||'?'}</i>${tag?`<em>${tag}</em>`:''}</div>`;
  }
  return h+'</div>';
@@ -963,14 +998,19 @@ function chipsHTML(card){
 
 function explainHTML(card,o,dir){
  if(card.sentence)return explainS(card,o);
+ const K=!!card.k;
  let h=`<div class="ans">Cara baca yang benar: <b>${card.jp}</b> = <b>${card.romaji}</b> ${card.meaning?`<span style="color:#64748b">(arti: ${card.meaning})</span>`:''}</div>`;
  h+=`<div class="tipx" style="margin-top:6px">${dir==='h2m'?`Kamu memilih <b>${o.romaji}</b>.`:`Yang kamu pilih, <b>${o.kana}</b>, dibaca <b>${o.romaji}</b>.`} ${o.why}</div>`;
  h+=chipsHTML(card);
  const notes=[];
- if(LONGRE.test(card.romaji))notes.push('Ada <b>bunyi panjang</b> di kata ini. Tahan bunyinya sekitar dua ketukan.');
- if(/[ゃゅょ]/.test(card.jp))notes.push('Huruf <b>ゃ ゅ ょ</b> yang kecil menempel ke huruf di depannya dan jadi <b>satu bunyi</b> (きゃ = kya).');
- if(/っ/.test(card.jp))notes.push('<b>っ</b> kecil itu jeda singkat: konsonan setelahnya dibaca dobel (きって = kitte). Dia nggak punya bunyi sendiri.');
- for(const ch of new Set(card.jp))if(TRICKY[ch])notes.push(TRICKY[ch]+'.');
+ if(K){
+  if(/ー/.test(card.jp))notes.push('Tanda <b>ー</b> artinya bunyi huruf sebelumnya <b>ditahan dua ketukan</b> (コー = koo, ビール = biiru).');
+ }else if(LONGRE.test(card.romaji))notes.push('Ada <b>bunyi panjang</b> di kata ini. Tahan bunyinya sekitar dua ketukan.');
+ if(/[ゃゅょャュョ]/.test(card.jp))notes.push(`Huruf <b>${K?'ャ ュ ョ':'ゃ ゅ ょ'}</b> yang kecil menempel ke huruf di depannya dan jadi <b>satu bunyi</b> (${K?'シャ = sha':'きゃ = kya'}).`);
+ if(/[ぁぃぅぇぉァィゥェォ]/.test(card.jp))notes.push('Huruf kecil <b>ァ ィ ゥ ェ ォ</b> menempel ke huruf di depannya dan jadi <b>bunyi serapan</b> (ティ = ti, ファ = fa, ウィ = wi).');
+ if(/[っッ]/.test(card.jp))notes.push(K?'<b>ッ</b> kecil itu jeda singkat: konsonan setelahnya dibaca dobel (サッカー = sakkaa). Dia nggak punya bunyi sendiri.':'<b>っ</b> kecil itu jeda singkat: konsonan setelahnya dibaca dobel (きって = kitte). Dia nggak punya bunyi sendiri.');
+ if(K&&/[シツソン]/.test(card.jp))notes.push('Awas mirip! <b>シ</b> dan <b>ン</b> goresan panjangnya naik ↗, sedangkan <b>ツ</b> dan <b>ソ</b> goresan panjangnya turun ↙.');
+ for(const ch of new Set(card.jp)){const t=TRICKY[k2h(ch)];if(t)notes.push((isK(ch)?toKata(t):t)+'.')}
  notes.forEach(x=>h+=`<div class="tipx">💡 ${x}</div>`);
  return h;
 }
@@ -979,18 +1019,22 @@ function explainHTML(card,o,dir){
 let Q=null;
 
 const bestKey=(g,l,d)=>g+':'+l+'|'+d;
-const GORDER=['1','2','3','all'];
-const GNODE={'1':['🌱','Rumpun 1'],'2':['🌸','Rumpun 2'],'3':['🌺','Rumpun 3'],all:['🏆','Ujian Akhir']};
-const unlocked=g=>{g=String(g);if(g==='1'||S.guru)return true;const p=S.prog[GORDER[GORDER.indexOf(g)-1]];return !!(p&&p.lulus)};
-const maxG=()=>unlocked('3')?3:unlocked('2')?2:1;
-const currentTarget=()=>GORDER.find(g=>!(S.prog[g]&&S.prog[g].lulus))||null;
-const kenName=g=>g==='all'?'Ujian Akhir Hiragana':'Ujian Kenaikan '+GRP[g].short;
+const HORDER=['1','2','3','all'],KORDER=['k1','k2','k3','k4','kall'];
+let SC=S.sc==='k'?'k':'h';
+const ordOf=g=>/^k/.test(String(g))?KORDER:HORDER;
+const GO=()=>SC==='k'?KORDER:HORDER;
+const nextOf=g=>{const o=ordOf(g);return o[o.indexOf(String(g))+1]};
+const GNODE={'1':['🌱','Rumpun 1'],'2':['🌸','Rumpun 2'],'3':['🌺','Rumpun 3'],all:['🏆','Ujian Akhir'],k1:['🌱','Katakana 1'],k2:['🌸','Katakana 2'],k3:['🌺','Katakana 3'],k4:['🎌','Katakana 4'],kall:['🏆','Ujian Akhir']};
+const unlocked=g=>{g=String(g);if(g==='1'||g==='k1'||S.guru)return true;const o=ordOf(g),p=S.prog[o[o.indexOf(g)-1]];return !!(p&&p.lulus)};
+const currentTarget=sc=>((sc||SC)==='k'?KORDER:HORDER).find(g=>!(S.prog[g]&&S.prog[g].lulus))||null;
+const kenName=g=>g==='all'?'Ujian Akhir Hiragana':g==='kall'?'Ujian Akhir Katakana':'Ujian Kenaikan '+GRP[g].short;
 const L1='あいうえおかきくけこがぎぐげごさしすせそざじずぜぞたちつてとだぢづでどなにぬねのはひふへほばびぶべぼぱぴぷぺぽ';
 const L2='まみむめもやゆよらりるれろわをん';
-const gOfUnit=u=>(u.length===2||u[0]==='っ')?3:L2.includes(u)?2:1;
-const unitGrp=gOfUnit;
+const gOfUnit=u=>{if(/[ーぁぃぅぇぉァィゥェォ]/.test(u))return 4;u=k2h(u);return (u.length===2||u[0]==='っ')?3:L2.includes(u)?2:1};
+const gKey=u=>isK(u)?'k'+gOfUnit(u):String(gOfUnit(u));
 const NOTE_KHUSUS={'ぢ':'bunyinya sama dengan じ (ji)','づ':'bunyinya sama dengan ず (zu)','を':'partikel objek, dibaca o','ん':'dibaca n, nggak pernah di awal kata'};
 function letterNote(u){
+ if(isK(u))return letterNoteK(u);
  if(NOTE_KHUSUS[u])return NOTE_KHUSUS[u];
  if(u.length===2)return `${u[0]} + ${u[1]} kecil, satu bunyi`;
  const di=DAK.indexOf(u),hi=HAN.indexOf(u);
@@ -998,30 +1042,35 @@ function letterNote(u){
  if(hi>=0)return `${HANB[hi]} + maru (゜)`;
  return '';
 }
-const letterCard=u=>({jp:u,romaji:RM(u),meaning:'',note:letterNote(u),g:gOfUnit(u),single:true});
-const letterPool=g=>(g==='all'?[...L1,...L2,...YOUON_ALL]:g==='1'?[...L1]:g==='2'?[...L2]:[...YOUON_ALL]).map(letterCard);
-const cardOf=jp=>allCards.find(x=>x.jp===jp)||(RM(jp)?letterCard(jp):null);
+const letterCard=u=>({jp:u,romaji:RM(u),meaning:'',note:letterNote(u),g:gOfUnit(u),single:true,k:isK(u)});
+const letterPool=g=>{
+ g=String(g);
+ const m={all:[...L1,...L2,...YOUON_ALL],'1':[...L1],'2':[...L2],'3':[...YOUON_ALL],kall:[...KL1,...KL2,...KYOON,...KSERAPAN,...KLONG],k1:[...KL1],k2:[...KL2],k3:[...KYOON],k4:[...KSERAPAN,...KLONG]};
+ return m[g].map(letterCard);
+};
+const cardOf=jp=>allCards.find(x=>x.jp===jp)||KCARDS.find(x=>x.jp===jp)||(RM(jp)?letterCard(jp):null);
 /* huruf yang punya kembaran bunyi (ぢ づ を) hanya diuji dari huruf ke bacaan */
-const dirFor=(c,d)=>((c.single&&'ぢづを'.includes(c.jp))||c.sentence)?'h2m':d;
+const dirFor=(c,d)=>((c.single&&'ぢづをヂヅヲ'.includes(c.jp))||c.sentence)?'h2m':d;
 
 function renderMenu(){
- if(!unlocked(grpPick))grpPick=currentTarget()||'1';
+ if((/^k/.test(grpPick))!==(SC==='k')||!unlocked(grpPick))grpPick=currentTarget()||(SC==='k'?'k1':'1');
+ paintSc();
  $('timerWrap').hidden=(dirMode!=='mix');
  /* peta belajar */
- $('mapBox').innerHTML=GORDER.map(g=>{
+ $('mapBox').innerHTML=GO().map(g=>{
   const u=unlocked(g),p=S.prog[g],done=!!(p&&p.lulus);
   const st=!u?'🔒 Terkunci':done?(p.lancar?'⭐ Lancar':'✅ Lulus'):'🟢 Terbuka';
   return `<button class="node${g===grpPick?' on':''}${done?' done':''}${u?'':' locked'}" data-g="${g}"><i>${u?GNODE[g][0]:'🔒'}</i><b>${GNODE[g][1]}</b><span>${st}</span></button>`;
  }).join('');
  const tg=currentTarget();
- $('grpDesc').innerHTML=`${GRP[grpPick].desc}`+(tg&&!S.guru?`<br>Langkah kamu sekarang: <b>${kenName(tg)}</b>.`:tg===null?'<br>🏆 Semua rumpun hiragana sudah lulus!':'');
+ $('grpDesc').innerHTML=`${GRP[grpPick].desc}`+(tg&&!S.guru?`<br>Langkah kamu sekarang: <b>${kenName(tg)}</b>.`:tg===null?`<br>🏆 Semua rumpun ${SC==='k'?'katakana':'hiragana'} sudah lulus!`:'')+(SC==='k'&&!(S.prog.all&&S.prog.all.lulus)&&!S.guru?'<br>💡 Disarankan lulus Ujian Akhir Hiragana dulu, tapi kamu boleh mulai katakana kapan saja.':'');
  /* gerbang + alat */
- const g=grpPick,p=S.prog[g]||{},nx=GORDER[GORDER.indexOf(g)+1];
- const kpool=allCards.filter(c=>ulen(c)>=2&&inGrp(c,g)).length,kn=Math.min(g==='all'?KEN_ALL_N:KEN_N,kpool);
- let h=`<button class="gate" id="btnKen"><div class="lico" style="background:#f2b134">${g==='all'?'🏆':'🎯'}</div><div class="mid"><div class="t">${kenName(g)}</div><div class="d">${kn} soal campur · lulus ${PASS}% · remedial tuntas${nx?` · membuka ${GNODE[nx][1]}`:''}</div></div><div class="b">${p.lulus?`✅ Lulus ${p.pct}%${p.lancar?'<br>⭐ Lancar':''}`:'Belum lulus'}</div></button>
+ const g=grpPick,p=S.prog[g]||{},nx=nextOf(g);
+ const kpool=srcOf(g).filter(c=>ulen(c)>=2&&inGrp(c,g)).length,kn=Math.min(g==='all'||g==='kall'?KEN_ALL_N:KEN_N,kpool);
+ let h=`<button class="gate" id="btnKen"><div class="lico" style="background:#f2b134">${g==='all'||g==='kall'?'🏆':'🎯'}</div><div class="mid"><div class="t">${kenName(g)}</div><div class="d">${kn} soal campur · lulus ${PASS}% · remedial tuntas${nx?` · membuka ${GNODE[nx][1]}`:''}</div></div><div class="b">${p.lulus?`✅ Lulus ${p.pct}%${p.lancar?'<br>⭐ Lancar':''}`:'Belum lulus'}</div></button>
  <div class="center tipx">⭐ Lancar = benar ${LANCAR_PCT}% ke atas dan rata-rata ${LANCAR_DTK} detik per soal atau kurang.</div>
  <div class="tools"><button id="btnHuruf">🔤 Kilat Huruf<small>per huruf · ${letterPool(g).length} huruf</small></button>
- <button id="btnPen"${hasWeak()?'':' disabled'}>💪 Latihan Penguat<small>${hasWeak()?'fokus: '+weakList(3).map(x=>x.u).join(' '):'muncul setelah ada huruf yang salah'}</small></button></div>`;
+ <button id="btnPen"${hasWeak()?'':' disabled'}>💪 Latihan Penguat<small>${hasWeak()?'fokus: '+weakList(3,SC).map(x=>x.u).join(' '):'muncul setelah ada huruf yang salah'}</small></button></div>`;
  $('gateBox').innerHTML=h;
  $('btnKen').onclick=()=>startTest('ken');
  $('btnHuruf').onclick=()=>startTest('huruf');
@@ -1040,7 +1089,7 @@ function renderMenu(){
   btn.onclick=()=>startTest(l);
   box.appendChild(btn);
  });
- {
+ if(SC==='h'){
   const kp=poolOf('kal');
   if(kp.length>=3){
    const kb=document.createElement('button');kb.className='lvl';
@@ -1053,7 +1102,7 @@ $('mapBox').addEventListener('click',e=>{
  const b=e.target.closest('button');if(!b)return;
  const g=b.dataset.g;
  if(!unlocked(g)){
-  const pv=GORDER[GORDER.indexOf(g)-1];
+  const pv=ordOf(g)[ordOf(g).indexOf(g)-1];
   toast(`🔒 Selesaikan dulu ${kenName(pv)} untuk membuka ${GNODE[g][1]}.`);return;
  }
  grpPick=g;renderMenu();
@@ -1082,9 +1131,8 @@ $('cntSeg').addEventListener('click',e=>{
 });
 
 function buildPenguat(){
- const mg=maxG();
- const letters=weakList(3).filter(x=>x.u.length<=2&&x.u[0]!=='っ').map(x=>letterCard(x.u));
- const pool=allCards.filter(c=>c.g<=mg&&ulen(c)>=2);
+ const letters=weakList(3,SC).filter(x=>x.u.length<=2&&!/^[っッ]/.test(x.u)).map(x=>letterCard(x.u));
+ const pool=srcOf(SC==='k'?'k1':'1').filter(c=>unlocked((SC==='k'?'k':'')+c.g)&&ulen(c)>=2);
  return shuffleArr([...letters,...pickWeighted(pool,10-letters.length,2.2)]);
 }
 function startTest(level,opt){
@@ -1092,8 +1140,8 @@ function startTest(level,opt){
  let items,grp=grpPick,dm=dirMode,n;
  const cnt=p=>countPick==='all'?p.length:Math.min(Number(countPick),p.length);
  if(level==='ken'){
-  const pool=allCards.filter(c=>ulen(c)>=2&&inGrp(c,grpPick));
-  n=Math.min(grpPick==='all'?KEN_ALL_N:KEN_N,pool.length);items=shuffleArr(pool).slice(0,n);dm='mix';
+  const pool=srcOf(grpPick).filter(c=>ulen(c)>=2&&inGrp(c,grpPick));
+  n=Math.min(grpPick==='all'||grpPick==='kall'?KEN_ALL_N:KEN_N,pool.length);items=shuffleArr(pool).slice(0,n);dm='mix';
  }else if(level==='huruf'){
   const pool=letterPool(grpPick);n=cnt(pool);items=pickWeighted(pool,n,1.2);
  }else if(level==='peta'){
@@ -1109,7 +1157,7 @@ function startTest(level,opt){
  }
  Q={level,grp,phase:'main',items,idx:0,results:[],wrongMap:{},queue:[],round:1,roundLeft:0,remedTotal:0,cur:null,locked:false,startWrong:[]};
  Q.dirMode=dm;
- Q.grp=grp;Q.listen=(level==='peta'&&HV.mode==='a2h');Q.look=(level==='peta'&&HV.mode==='mirip');
+ Q.grp=grp;Q.sc=SC;Q.listen=(level==='peta'&&HV.mode==='a2h');Q.look=(level==='peta'&&HV.mode==='mirip');
  Q.dirs=shuffleArr(Q.items.map((_,i)=>i%2===0?'h2m':'m2h'));
  Q.combo=0;$('combo').hidden=true;
  Q.t0=Date.now();Q.errs={};Q.pairs={};Q.timedOut=0;Q.timerId=null;Q.lastTick=0;
@@ -1164,7 +1212,7 @@ function drawQuestion(){
   $('qSpk').onclick=()=>{ctx();speak(card.jp)};
   setTimeout(()=>{if(Q&&Q.cur&&Q.cur.card===card&&!Q.locked)speak(card.jp)},300);
  }else{
-  qb.innerHTML=`<div class="ask">Mana hiragana yang dibaca:</div><div class="bigm">${card.romaji}</div>`;
+  qb.innerHTML=`<div class="ask">Mana ${isK(card.jp)?'katakana':'hiragana'} yang dibaca:</div><div class="bigm">${card.romaji}</div>`;
  }
  const ch=$('choices');ch.innerHTML='';
  ch.className='choices'+(dir==='m2h'?' two':'')+(card.sentence?' sent':'');
@@ -1206,7 +1254,7 @@ function answer(i){
   Q.queue.shift();Q.roundLeft--;
   if(ok){
    it.streak++;
-   if(it.streak>=2){setTimeout(()=>sfx.tuntas(),380);confetti(28);syncStatus('hira:'+card.jp,'hafal')}
+   if(it.streak>=2){setTimeout(()=>sfx.tuntas(),380);confetti(28);syncStatus((isK(card.jp)?'kata:':'hira:')+card.jp,'hafal')}
    else Q.queue.push(it);
   }else{
    it.streak=0;it.wrong++;Q.wrongMap[card.jp]=(Q.wrongMap[card.jp]||0)+1;
@@ -1309,11 +1357,12 @@ function kenDone(){
  let newL=false;
  if(!p.lancar&&Q.mainPct>=LANCAR_PCT&&Q.avgDtk!=null&&Q.avgDtk<=LANCAR_DTK){p.lancar=true;p.lancarTgl=ymd();newL=true}
  saveS();
- syncStatus('hira:rumpun-'+g,'hafal');
- const nx=GORDER[GORDER.indexOf(g)+1];
+ syncStatus((g[0]==='k'?'kata:':'hira:')+'rumpun-'+g,'hafal');
+ const nx=nextOf(g);
  let h=`<div class="gatebox">🎓 <b>${kenName(g)}: LULUS!</b>`;
  if(first&&nx)h+=`<br>🔓 <b>${GNODE[nx][1]}</b> sekarang terbuka. Lanjut ya!`;
- if(g==='all'&&first)h+=`<br>🏆 <b>Hiragana Mastery tuntas!</b> Katakana menyusul berikutnya.`;
+ if(g==='all'&&first)h+=`<br>🏆 <b>Hiragana Mastery tuntas!</b> Lanjut ke Katakana yuk (ketuk tombol ア Katakana di atas).`;
+ if(g==='kall'&&first)h+=`<br>🏆 <b>Katakana Mastery tuntas!</b> Hiragana dan katakana sudah kamu kuasai.`;
  if(newL)h+=`<br>⭐ Lencana <b>Lancar</b> kamu dapat! Baca cepat dan tepat.`;
  else if(!p.lancar)h+=`<br>Mau lencana ⭐ Lancar? Ulangi dengan benar ${LANCAR_PCT}% ke atas dan rata-rata ${LANCAR_DTK} detik per soal atau kurang.`;
  return h+'</div>';
@@ -1401,7 +1450,7 @@ function histUpdate(){
 
 /* ===== kirim hasil ke portal (KayukiSync) ===== */
 function syncMain(durasi){
- const detail=Q.results.map(r=>({id:`hira:${r.dir}:${r.card.jp}`,k:fiturKata(r.card),benar:r.ok,jawab:r.jawab||null}));
+ const detail=Q.results.map(r=>({id:`${isK(r.card.jp)?'kata':'hira'}:${r.dir}:${r.card.jp}`,k:fiturKata(r.card),benar:r.ok,jawab:r.jawab||null}));
  syncHasil({mode:'tes',bab:SYNC_BAB,level:null,kategori:'moji',skor:Q.mainBenar,total:Q.mainTotal,durasi,detail});
  Q.results.forEach(r=>syncStatus('hira:'+r.card.jp,r.ok?'hafal':'belum'));
 }
@@ -1439,8 +1488,8 @@ function saranList(D){
  return out;
 }
 const bar=p=>`<div class="rbar"><span style="width:${Math.max(0,Math.min(100,p||0))}%"></span></div>`;
-const statusRows=()=>GORDER.map(g=>{
- const p=S.prog[g],nm={'1':'Rumpun 1 (あ–ほ)','2':'Rumpun 2 (ま–ん)','3':'Rumpun 3 (ゃゅょ・っ)',all:'Ujian Akhir Hiragana'}[g];
+const statusRows=()=>[...HORDER,...KORDER].map(g=>{
+ const p=S.prog[g],nm={'1':'Rumpun 1 (あ–ほ)','2':'Rumpun 2 (ま–ん)','3':'Rumpun 3 (ゃゅょ・っ)',all:'Ujian Akhir Hiragana',k1:'Katakana 1 (ア–ホ)',k2:'Katakana 2 (マ–ン)',k3:'Katakana 3 (ャュョ・ッ)',k4:'Katakana 4 (ー・serapan)',kall:'Ujian Akhir Katakana'}[g];
  return [nm,p&&p.lulus?(p.tempat&&!p.lancar?`Lulus (tes penempatan ${p.pct}%)`:`Lulus ${p.pct}%${p.lancar?' · Lancar ⭐':''}`):unlocked(g)?'Sedang dipelajari':'Terkunci'];
 }).concat([['Streak belajar',`${streakNow()} hari${S.streak.best?' (rekor '+S.streak.best+')':''}`]]);
 const weakTxt=D=>D.weak.map(x=>`${x.u} (${x.romaji})`).join(' · ');
@@ -1718,7 +1767,7 @@ const KANA_MN={"あ":"Ada tanda silang di atas, lalu badan melengkung — sepert
 const KANA_SIM=[["さ","ち","き"],["ぬ","め"],["ね","れ","わ"],["る","ろ"],["は","ほ","け"],["い","り"],["こ","に"],["あ","お"],["う","ら"],["た","な"],["ま","も"],["し","つ"],["く","へ"],["ゆ","よ"],["す","む"],["シ","ツ","ン","ソ"],["ク","ケ","タ"],["ウ","ワ","フ"],["コ","ユ","ロ"],["ア","マ","ヤ"],["チ","テ"],["ノ","メ","ナ"],["ス","ヌ"],["ル","レ"],["サ","セ"],["エ","ユ"],["キ","チ"],["オ","ホ"],["ヨ","ヲ"]];
 const KANA_NOTE={"を":"Dipakai sebagai partikel dan dibaca **o** (sama seperti お).","ヲ":"Sangat jarang dipakai. Dibaca **o**.","ぢ":"Bunyinya sama dengan じ (ji). Jarang dipakai.","づ":"Bunyinya sama dengan ず (zu). Jarang dipakai.","ヂ":"Bunyinya sama dengan ジ (ji). Sangat jarang dipakai.","ヅ":"Bunyinya sama dengan ズ (zu). Sangat jarang dipakai.","し":"Dibaca **shi**, bukan si.","ち":"Dibaca **chi**, bukan ti.","つ":"Dibaca **tsu**, bukan tu.","ふ":"Dibaca **fu**, bukan hu.","シ":"Dibaca **shi**, bukan si.","チ":"Dibaca **chi**, bukan ti.","ツ":"Dibaca **tsu**, bukan tu.","フ":"Dibaca **fu**, bukan hu."};
 const h2k=c=>String.fromCharCode(c.charCodeAt(0)+0x60);
-const toKata=s=>[...s].map(h2k).join('');
+const toKata=s=>[...s].map(c=>/[ぁ-ゖ]/.test(c)?h2k(c):c).join('');
 const toHira=s=>[...s].map(c=>/[ァ-ヶ]/.test(c)?String.fromCharCode(c.charCodeAt(0)-0x60):c).join('');
 const mdb=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/\*\*(.+?)\*\*/g,'<b>$1</b>');
 const cellsOf=s=>[...s].map(c=>c==='*'?null:c);
@@ -1731,13 +1780,13 @@ const ROWS={
 const KANA_NOTE_X={'っ':'っ kecil itu **jeda singkat**: konsonan setelahnya dibaca dobel (きって = kitte). Dia nggak punya bunyi sendiri.'};
 const HV={sc:'h',set:'dasar',sel:new Set([...'あいうえお']),hide:false,mode:'h2m',cnt:20,open:null};
 const practicable=u=>u!=='っ'&&!!RM(u);
-const unl=u=>unlocked(gOfUnit(u));
+const unl=u=>unlocked((HV.sc==='k'?'k':'')+gOfUnit(u));
 const canSel=u=>practicable(u)&&unl(u);
-const hStat=u=>{const s=MEM.u[u];if(!s||(s.c+s.w)===0)return 0;const sc=unitScore(u);if(s.c>=4&&sc<.5)return 3;if(s.c>=2&&sc<1)return 2;return 1};
+const hStat=u=>{const s=MEM.u[formOf(u)];if(!s||(s.c+s.w)===0)return 0;const sc=unitScore(formOf(u));if(s.c>=4&&sc<.5)return 3;if(s.c>=2&&sc<1)return 2;return 1};
 const ST_LONG=['Belum pernah dilatih','Baru kenal','Hampir hafal','Hafal'];
 const formOf=u=>HV.sc==='h'?u:toKata(u);
 const romOf=u=>(u==='っ'?'(jeda)':RM(toHira(u)));
-const allUnits=()=>Object.values(ROWS).flatMap(rs=>rs.flatMap(r=>r.cells.filter(Boolean)));
+const allUnits=()=>Object.entries(ROWS).filter(([k])=>k!=='khusus'||HV.sc==='k').flatMap(([k,rs])=>rs.flatMap(r=>r.cells.filter(Boolean)));
 const letterUnits=()=>allUnits().filter(practicable);
 
 /* pasangan huruf yang sering tertukar: pakai daftar rujukan Bab 0, ditambah ke pengecoh "mirip" */
@@ -1754,7 +1803,7 @@ function mnPlain(ch){return (KANA_MN[ch]||KANA_MN[ch[0].normalize('NFD')[0]]||''
   }
  });
 })();
-const hasLook=u=>LOOK.some(p=>p[0]===u||p[1]===u);
+const hasLook=u=>LOOK.some(p=>p[0]===u||p[1]===u)||LOOK_K.some(p=>p[0]===u||p[1]===u);
 function simOf(ch){
  const out=new Set();
  KANA_SIM.forEach(g=>{if(g.includes(ch))g.forEach(x=>{if(x!==ch)out.add(x)})});
@@ -1789,18 +1838,19 @@ function renderHuruf(){
  const hira=HV.sc==='h',rows=ROWS[HV.set],cols=HV.set==='yoon'?3:5;
  $('hvSc').querySelectorAll('button').forEach(b=>b.classList.toggle('on',b.dataset.v===HV.sc));
  $('hvSet').querySelectorAll('button').forEach(b=>b.classList.toggle('on',b.dataset.v===HV.set));
- $('hvLegend').hidden=!hira;$('hvProg').hidden=!hira;
+ $('hvKh').hidden=!(HV.sc==='k');
+ $('hvLegend').hidden=false;$('hvProg').hidden=false;
  let h=`<div class="hgrid c${cols>3?5:3}">`;
  rows.forEach(r=>{
   const sel=r.cells.filter(u=>u&&canSel(u));
-  const on=hira&&sel.length>0&&sel.every(u=>HV.sel.has(u));
+  const on=sel.length>0&&sel.every(u=>HV.sel.has(u));
   const nm=hira?r.name:r.name.replace(/[\u3041-\u3096]/g,h2k);
-  h+=`<button class="hrow${on?' on':''}" data-row="${r.name}" ${hira&&sel.length?'':'disabled'} aria-label="Pilih ${nm}">${on?'✓<br>':''}${nm}</button>`;
+  h+=`<button class="hrow${on?' on':''}" data-row="${r.name}" ${sel.length?'':'disabled'} aria-label="Pilih ${nm}">${on?'✓<br>':''}${nm}</button>`;
   const cells=r.cells.slice();while(cells.length<cols)cells.push(null);
   cells.forEach(u=>{
    if(!u){h+='<span class="hgap"></span>';return}
-   const F=formOf(u),st=hira&&practicable(u)?hStat(u):-1;
-   const lock=hira&&practicable(u)&&!unl(u);
+   const F=formOf(u),st=practicable(u)?hStat(u):-1;
+   const lock=practicable(u)&&!unl(u);
    const cf=fKey()==='acak'?` style="--kf:${FSTACK[FONTS[(u.charCodeAt(0)+(u.length>1?u.charCodeAt(1):0))%FONTS.length][0]]}"`:'';
    h+=`<button class="hcell${st>0?' st'+st:''}${lock?' lock':''}${HV.sel.has(u)?' sel':''}${HV.open===u?' open':''}" data-u="${u}" aria-label="${F}"${cf}><b>${F}</b><i>${HV.hide?'':romOf(F)}</i>${lock?'<em>🔒</em>':''}</button>`;
   });
@@ -1810,8 +1860,8 @@ function renderHuruf(){
  $('hvProgTxt').innerHTML=`<b>${hafal}</b> dari ${all.length} huruf sudah hafal`;
  $('hvBar').style.width=Math.round(hafal/all.length*100)+'%';
  $('hvHide').textContent=HV.hide?'Tampilkan bacaan':'Sembunyikan bacaan';
- $('hvAll').disabled=!hira;
- $('hvPractice').hidden=!hira;$('hvSoon').hidden=hira;
+ $('hvAll').disabled=false;
+ $('hvPractice').hidden=false;$('hvSoon').hidden=true;
  $('hvModes').querySelectorAll('button').forEach(b=>b.classList.toggle('on',b.dataset.m===HV.mode));
  $('hvCnt').querySelectorAll('button').forEach(b=>b.classList.toggle('on',Number(b.dataset.n)===HV.cnt));
  paintPetaInfo();
@@ -1821,7 +1871,7 @@ function paintPetaInfo(){
  const us=[...HV.sel].filter(canSel),n=Math.min(HV.cnt,us.length);
  let t=us.length?`${us.length} huruf dipilih, jadi ${n} soal.`:'Pilih dulu minimal satu baris (ketuk nama baris di tabel).';
  if(HV.mode==='mirip'&&us.length&&us.filter(hasLook).length<3)t+=' Huruf pilihanmu sedikit yang punya kembaran, jadi soalnya diacak seperti biasa.';
- if(!unlocked('2'))t+=' Huruf rumpun 2 dan 3 (🔒) terbuka setelah lulus Ujian Kenaikan.';
+ if(!unlocked(HV.sc==='k'?'k2':'2'))t+=' Huruf rumpun berikutnya (🔒) terbuka setelah lulus Ujian Kenaikan.';
  $('hvInfo').textContent=t;
  $('hvStart').disabled=!us.length;
 }
@@ -1883,11 +1933,11 @@ async function animDetail(){
 function paintDetail(play){
  const u=HV.open;if(!u){$('hvDetail').hidden=true;return}
  const hira=HV.sc==='h',F=formOf(u),ok=practicable(u);
- const st=hira&&ok?hStat(u):-1;
+ const st=ok?hStat(u):-1;
  const gl=[...F].filter(c=>KVG[c]);
  const total=gl.reduce((a,c)=>a+KVG[c].length,0);
  const simBtns=(F.length===1?simOf(F):[]).map(x=>{const hu=hira?x:toHira(x);return findLoc(hu)?`<button data-go="${hu}">${x} (${romOf(x)})</button>`:''}).join('');
- const other=hira?(ok?`Katakana-nya: <b>${toKata(u)}</b>`:''):(ok?`Hiragana-nya: <b>${u}</b>`:'');
+ const other=findLoc(u)==='khusus'?'':hira?(ok?`Katakana-nya: <b>${toKata(u)}</b>`:''):(ok?`Hiragana-nya: <b>${u}</b>`:'');
  let h=`<div class="hd-top"><div class="hd-big">${F}</div><div class="hd-main"><div class="hd-ro">${romOf(F)}</div>`;
  if(st>=0)h+=`<span class="hd-badge st${st}">${ST_LONG[st]}</span><br>`;
  h+=`<span class="hd-other">${other}</span></div><button class="hd-spk" id="hdSay" aria-label="Dengar">🔊</button></div>`;
@@ -1906,7 +1956,7 @@ function paintDetail(play){
  }
  h+=`<div class="hd-act">`;
  if(gl.length)h+=`<button id="hdWrite">✏️ Latihan menulis</button>`;
- if(hira&&ok)h+=`<button id="hdPick">${HV.sel.has(u)?'✓ Ada di latihan':'➕ Masukkan ke latihan'}</button>`;
+ if(ok)h+=`<button id="hdPick">${HV.sel.has(u)?'✓ Ada di latihan':'➕ Masukkan ke latihan'}</button>`;
  h+=`<button id="hdClose">Tutup</button></div>`;
  const d=$('hvDetail');d.innerHTML=h;d.hidden=false;
  $('hdSay').onclick=()=>{ctx();speak(F)};
@@ -1988,7 +2038,7 @@ addEventListener('keydown',e=>{if(e.key==='Escape'&&!$('wpov').hidden)closePad()
 
 /* ----- latihan dari peta ----- */
 function buildPeta(){
- let pool=[...HV.sel].filter(canSel).map(letterCard);
+ let pool=[...HV.sel].filter(canSel).map(u=>letterCard(formOf(u)));
  if(HV.mode==='mirip'){const p=pool.filter(c=>hasLook(c.jp));if(p.length>=3)pool=p}
  return pickWeighted(pool,Math.min(HV.cnt,pool.length),1.2);
 }
@@ -2118,6 +2168,7 @@ function showMateriPartikel(after){
  <div class="matrow"><b>を</b><span>Selalu dibaca <b>o</b>, sama seperti お. Cuma dipakai sebagai <b>partikel penanda objek</b>.<br>みず<b>を</b> のみます = mizu <b>o</b> nomimasu.</span></div>
  <div class="matrow"><b>へ</b><span>Biasanya dibaca <b>he</b> (へや = heya). Kalau jadi <b>partikel arah</b>, dibaca <b>e</b>.<br>がっこう<b>へ</b> いきます = gakkou <b>e</b> ikimasu.</span></div>
  <p class="tipx">Tips: partikel menempel di belakang kata. Di tulisan romaji, partikel dipisah spasi: watashi <b>wa</b>.</p>`;
+ $('matTitle').textContent='📖 Aturan Partikel は を へ';$('matSay').textContent='🔊 Dengar contoh';$('matGo').textContent='Mengerti, mulai latihan';
  $('matov').hidden=false;document.body.style.overflow='hidden';
  $('matSay').onclick=()=>{ctx();speak('わたしは がくせいです')};
  $('matGo').onclick=()=>{$('matov').hidden=true;document.body.style.overflow='';S.seenPart=true;saveS();if(after)after()};
@@ -2290,6 +2341,10 @@ function openHurufWith(units){
  toast('Huruf yang lemah sudah kupilih. Tinggal tekan Mulai Latihan.');
 }
 function paintMenuExtras(){
+ if(SC==='k'){
+  $('ptBox').innerHTML=`<div class="ptpromo"><div class="pti">🎌</div><div class="mid"><div class="t">Materi Katakana</div><div class="d">Cara bedain シ/ツ dan ソ/ン, tanda ー, ッ, dan bunyi serapan seperti ティ dan ファ.</div></div><button class="primary" id="btnMK">Buka materi</button></div>`;
+  $('btnMK').onclick=showMateriKata;paintStreak();return;
+ }
  const p=S.placement;
  let h=`<div class="ptpromo"><div class="pti">🎯</div><div class="mid"><div class="t">Tes Penempatan</div><div class="d">Sudah pernah belajar hiragana? Tes singkat (sekitar 35 soal: huruf satuan plus baca kata 2–4 huruf) buat tahu bagian mana yang benar-benar sudah kamu kuasai. Rumpun yang sudah dikuasai bisa dilewati.</div>${p?`<div class="d">Terakhir: ${fmtD(p.d)} · ${p.res.map(r=>`${GRP[r.g].short} ${r.pct}%`).join(' · ')}</div>`:''}</div><button class="primary" id="btnPT">${p?'Ulangi tes':'Mulai tes'}</button></div>`;
  $('ptBox').innerHTML=h;
@@ -2297,6 +2352,215 @@ function paintMenuExtras(){
  paintStreak();
 }
 
+/* =====================================================================
+   KATAKANA (Tahap 2)
+   Satu mesin yang sama dengan hiragana, ditambah: ー (panjang), ッ, ャュョ,
+   bunyi serapan (ティ ファ ウィ ジェ ...) dan pengecoh khas katakana.
+   ===================================================================== */
+const SMNK={'ャ':'ヤ','ュ':'ユ','ョ':'ヨ'},SMVK={'ァ':'ア','ィ':'イ','ゥ':'ウ','ェ':'エ','ォ':'オ'};
+const KATA_SRC=[
+['アメリカ','Amerika'],['イギリス','Inggris'],['インド','India'],['インドネシア','Indonesia'],['タイ','Thailand'],['ドイツ','Jerman'],['ブラジル','Brasil'],
+['エンジニア','insinyur'],['ノート','buku catatan'],['カード','kartu'],['ボールペン','pulpen'],['シャープペンシル','pensil mekanik'],['テレビ','televisi'],['ラジオ','radio'],['カメラ','kamera'],['コンピューター','komputer'],['チョコレート','cokelat'],['コーヒー','kopi'],
+['ロビー','lobi'],['トイレ','toilet'],['エレベーター','lift'],['エスカレーター','eskalator'],['ネクタイ','dasi'],['ワイン','anggur / wine'],['イタリア','Italia'],['スイス','Swiss'],['フランス','Prancis'],['ジャカルタ','Jakarta'],['バンコク','Bangkok'],['ベルリン','Berlin'],
+['デパート','toko serba ada'],['スーパー','supermarket'],['バス','bus'],['タクシー','taksi'],
+['パン','roti'],['ミルク','susu'],['ジュース','jus'],['ビール','bir'],['レポート','laporan'],['ビデオ','video'],['テニス','tenis'],['サッカー','sepak bola'],
+['スプーン','sendok'],['ナイフ','pisau'],['フォーク','garpu'],['パソコン','komputer pribadi'],['ケータイ','ponsel'],['メール','surel (email)'],['パンチ','pelubang kertas'],['ホッチキス','stapler'],['セロテープ','selotip'],['シャツ','kemeja'],['プレゼント','hadiah'],['クリスマス','Natal'],
+['ハンサム','tampan'],['レストラン','restoran'],['スポーツ','olahraga'],['ダンス','dansa'],['クラシック','musik klasik'],['ジャズ','jazz'],['コンサート','konser'],['カラオケ','karaoke'],['チケット','tiket'],['アルバイト','kerja sambilan'],
+['パンダ','panda'],['スイッチ','saklar'],['テーブル','meja'],['ベッド','tempat tidur'],['ドア','pintu'],['ポスト','kotak pos'],['ビル','gedung'],['コンビニ','minimarket'],['ナンプラー','saus ikan (nam pla)'],['コーナー','sudut / bagian'],
+['サンドイッチ','sandwich'],['アイスクリーム','es krim'],['カレー','kari'],['クラス','kelas'],['エアメール','pos udara'],
+['ホテル','hotel'],['パーティー','pesta'],['レモン','lemon'],['ホンコン','Hong Kong'],['シンガポール','Singapura'],['プール','kolam renang'],['スキー','ski'],
+['エアコン','AC (pendingin ruangan)'],['パスポート','paspor'],['コピー','fotokopi'],['カタログ','katalog'],['ソフト','perangkat lunak'],
+/* tambahan Kayuki (kata serapan umum, bukan dari buku) */
+['ガス','gas'],['バナナ','pisang'],['スイカ','semangka'],['テスト','tes / ujian'],['ココア','kokoa'],['カナダ','Kanada'],['コスト','biaya'],['ピザ','pizza'],['バイク','sepeda motor'],['ビザ','visa'],['カタカナ','katakana'],['ペン','pena'],
+['ピアノ','piano'],['ギター','gitar'],['ケーキ','kue'],['ゲーム','permainan'],['ハンバーガー','hamburger'],['サラダ','salad'],['トマト','tomat'],['ステーキ','steak'],['マッチ','korek api'],['バッグ','tas'],['コップ','gelas'],['カップ','cangkir'],
+['キャンプ','berkemah'],['ショップ','toko'],['パジャマ','piyama'],['ジャケット','jaket'],['ヨット','kapal layar'],['ジャム','selai'],['ジョギング','jogging'],['キッチン','dapur'],['ソース','saus'],['タオル','handuk'],['ベル','bel'],['サイズ','ukuran'],
+['ファイル','berkas'],['フィルム','film (rol)'],['ウェイター','pelayan pria'],['チェック','pengecekan'],['ディスコ','diskotek'],['シェフ','koki'],['ジェット','jet'],['ファン','penggemar'],['フォーム','formulir'],['ティッシュ','tisu'],['ウィンドウ','jendela etalase'],['ウォッチ','jam tangan'],['ミーティング','rapat'],['インターネット','internet'],['ネット','jaring / internet']
+];
+const KCARDS=KATA_SRC.map(([jp,meaning])=>{
+ const us=toks(jp);
+ return {jp,meaning,k:true,romaji:us.map(RM).join(''),g:Math.max(...us.map(gOfUnit))};
+});
+const KL1=toKata(L1),KL2=toKata(L2),KYOON=YOUON_ALL.map(toKata);
+const KSERAPAN=['ティ','ディ','ファ','フィ','フェ','フォ','ウィ','ウェ','ウォ','ジェ','チェ','シェ'];
+const KLONG=['アー','カー','キー','スー','テー','ノー','ヒー','ミー','ルー','ロー'];
+const KHUS_ROWS=[
+ ['ー①',['かー','きー','くー','けー','こー']],
+ ['ー②',['さー','たー','なー','はー','まー']],
+ ['ファ行',['ふぁ','ふぃ',null,'ふぇ','ふぉ']],
+ ['ウィ行',['うぃ',null,null,'うぇ','うぉ']],
+ ['ティ他',['てぃ','でぃ','しぇ','ちぇ','じぇ']]
+];
+ROWS.khusus=mkRows(KHUS_ROWS.map(([n,c])=>[n,c]));
+const KHUS_UNITS=KHUS_ROWS.flatMap(r=>r[1].filter(Boolean)).map(toKata);
+
+/* huruf katakana yang mirip: tulisan tangan sendiri dulu, sisanya dari daftar Bab 0 */
+const LOOK_K=[
+ ['シ','ツ','シ: goresan panjangnya naik ke kanan atas ↗, dua titiknya berjajar mendatar. ツ: goresan panjangnya turun ke kiri bawah ↙, titiknya berjajar agak tegak.'],
+ ['ソ','ン','ン: goresan panjangnya naik dari kiri bawah ↗. ソ: goresan panjangnya turun dari atas ke kiri bawah ↙.'],
+ ['ソ','ツ','ツ punya tiga goresan (dua titik dan satu goresan panjang), ソ cuma dua (satu titik dan satu goresan panjang).'],
+ ['シ','ン','シ punya tiga goresan (dua titik dan satu panjang), ン cuma dua.'],
+ ['ウ','ワ','ウ punya garis pendek tegak di puncak (kayak topi), ワ puncaknya rata tanpa topi.'],
+ ['ス','ヌ','ヌ punya goresan kecil tambahan di kanan bawah, ス nggak.'],
+ ['ノ','メ','メ punya dua goresan yang bersilang, ノ cuma satu goresan miring.'],
+ ['ル','レ','ル punya dua goresan (kiri pendek, kanan melengkung), レ cuma satu goresan melengkung.'],
+ ['コ','ユ','ユ garis bawahnya menjulur keluar ke kanan, コ garis bawahnya berhenti rapi.'],
+ ['チ','テ','テ punya dua garis mendatar (atas pendek, tengah panjang), チ cuma satu garis mendatar dengan goresan miring pendek di atasnya.']
+];
+(function(){
+ const have=new Set(LOOK_K.map(p=>p[0]+p[1]));
+ KANA_SIM.forEach(g=>{
+  if(/[ぁ-ゖ]/.test(g[0]))return;
+  for(let i=0;i<g.length;i++)for(let j=i+1;j<g.length;j++){
+   const x=g[i],y=g[j];
+   if(have.has(x+y)||have.has(y+x))continue;
+   have.add(x+y);
+   LOOK_K.push([x,y,`Ingat jembatan keledainya. 「${x}」: ${mnPlain(x)} 「${y}」: ${mnPlain(y)}`]);
+  }
+ });
+})();
+
+/* pengecoh katakana */
+function makeDistractorsK(card,n,opt){
+ const U=toks(card.jp),cands=[];
+ const ALLOW=allowedFor(Math.min(card.g||1,3)).map(toKata);
+ const add=(arr,type,why,pair)=>{
+  if(!arr.length||arr.some(u=>!RM(u)))return;
+  const kana=arr.join(''),romaji=arr.map(RM).join('');
+  if(kana===card.jp||romaji===card.romaji)return;
+  cands.push({kana,romaji,type,why,pair});
+ };
+ const singles=ALLOW.filter(w=>w.length===1&&w!=='ン');
+ const youons=ALLOW.filter(w=>w.length===2);
+ U.forEach((u,i)=>{
+  const rep=w=>{const a=[...U];a.splice(i,1,...(Array.isArray(w)?w:[w]));return a};
+  let core=u,long=false,sok=false;
+  if(core.endsWith('ー')){long=true;core=core.slice(0,-1)}
+  if(core[0]==='ッ'&&core.length>1){sok=true;core=core.slice(1)}
+  const pre=sok?'ッ':'',suf=long?'ー':'',wrap=x=>pre+x+suf;
+  const isY=core.length===2&&!!SMNK[core[1]],isS=core.length===2&&!!SMVK[core[1]],single=core.length===1;
+  const rr=RM(u);
+  if(long)add(rep(pre+core),'panjang',`Ada tanda 「ー」setelah 「${core}」: bunyinya ditahan dua ketukan, jadi dibaca ${rr} (bukan ${RM(pre+core)} yang pendek).`);
+  else if(/[aiueo]$/.test(rr)&&core!=='ッ')add(rep(u+'ー'),'panjang',`Di sini nggak ada 「ー」setelah 「${u}」, jadi bunyinya pendek: ${rr}. Di katakana, bunyi panjang selalu ditandai 「ー」.`);
+  if(sok){
+   add(rep(core+suf),'sokuon',`Ada 「ッ」kecil di depan 「${core}」: jeda singkat yang bikin konsonannya dobel, jadi dibaca ${rr}. Tanpa 「ッ」cuma ${RM(core+suf)}.`);
+   add(rep(['ツ',core+suf]),'kecil',`「ッ」kecil bukan 「ツ」biasa. 「ッ」nggak dibaca tsu, tapi jadi jeda yang menggandakan konsonan berikutnya (${rr}).`);
+  }
+  if(isY){
+   const b=core[0],sm=core[1];
+   add(rep([pre+b,SMNK[sm]+suf]),'kecil',`「${sm}」kecil menempel ke 「${b}」dan jadi satu bunyi: ${RM(core)}. Kalau 「${SMNK[sm]}」ukuran biasa, baru dibaca terpisah (${RM(b)}-${RM(SMNK[sm])}).`);
+   const r=RM(core);
+   youons.forEach(w=>{
+    if(w===core)return;const s=RM(w);let why='';
+    if(consOf(r)===consOf(s))why=`Konsonannya sama (${consOf(r)}), tapi huruf kecilnya beda: 「${core}」= ${r}, bukan ${s}.`;
+    else if(vowOf(r)===vowOf(s))why=`Vokalnya sama (${vowOf(r)}), tapi konsonannya beda: 「${core}」= ${r}, bukan ${s}.`;
+    if(why)add(rep(wrap(w)),'bunyi',why);
+   });
+  }
+  if(isS){
+   const b=core[0],sm=core[1],r=RM(core);
+   add(rep([pre+b,SMVK[sm]+suf]),'kecil',`「${sm}」kecil menempel ke 「${b}」dan jadi satu bunyi serapan: ${r}. Kalau 「${SMVK[sm]}」ukuran biasa, dibaca terpisah (${RM(b)}-${RM(SMVK[sm])}).`);
+   Object.keys(SMVK).forEach(x=>{if(x===sm)return;const w=b+x;if(RM(w))add(rep(wrap(w)),'bunyi',`Huruf kecilnya beda: 「${core}」= ${r}, bukan ${RM(w)}.`)});
+   Object.keys(SER).forEach(h=>{const w=toKata(h);if(w[1]===sm&&w!==core)add(rep(wrap(w)),'bunyi',`Konsonannya beda: 「${core}」= ${r}, bukan ${RM(w)}.`)});
+   dakSiblings(k2h(b)).forEach(d=>{const w=toKata(d)+sm;if(RM(w))add(rep(wrap(w)),'tenten',`「${b}」tanpa tenten, jadi 「${core}」= ${r}, bukan ${RM(w)}.`)});
+  }
+  if(single){
+   dakSiblings(k2h(core)).forEach(h=>{
+    const w=toKata(h),mk=markOf(k2h(core));
+    add(rep(wrap(w)),'tenten',mk?`「${core}」punya ${mk}, jadi bunyinya ${ROMA[k2h(core)]}, bukan ${ROMA[h]}.`:`「${core}」nggak punya tanda apa pun (tenten/maru), jadi dibaca polos: ${ROMA[k2h(core)]}, bukan ${ROMA[h]}.`);
+   });
+   LOOK_K.forEach(([x,y,tip])=>{
+    if(!ALLOW.includes(x)||!ALLOW.includes(y))return;
+    const why=`「${x}」dan 「${y}」memang mirip. ${tip}`;
+    if(core===x)add(rep(wrap(y)),'mirip',why,x+'/'+y);
+    if(core===y)add(rep(wrap(x)),'mirip',why,x+'/'+y);
+   });
+   if(core==='ン'){
+    ['ナ','ニ','ヌ','ネ','ノ'].forEach(w=>add(rep(wrap(w)),'bunyi',`「ン」bunyinya cuma n, berdiri sendiri tanpa vokal. 「${w}」punya vokal, dibaca ${ROMA[k2h(w)]}.`));
+   }else{
+    const r=ROMA[k2h(core)];
+    if(r)singles.forEach(w=>{
+     if(w===core)return;const s=ROMA[k2h(w)];let why='';
+     if(r.length===1&&s.length===1)why=`「${core}」= ${r}, bukan ${s}. Lima vokal dasar harus hafal: ア=a, イ=i, ウ=u, エ=e, オ=o.`;
+     else if(consOf(r)===consOf(s)&&consOf(r)!=='')why=`Konsonannya sama (${consOf(r)}), tapi vokalnya beda: 「${core}」= ${r}, bukan ${s}.`;
+     else if(vowOf(r)===vowOf(s)&&consOf(r)!==''&&consOf(s)!=='')why=`Vokalnya sama (${vowOf(r)}), tapi konsonannya beda: 「${core}」= ${r}, bukan ${s}.`;
+     if(why)add(rep(wrap(w)),'bunyi',why);
+    });
+   }
+  }
+ });
+ for(let i=0;i<U.length-1;i++){
+  if(U[i]===U[i+1])continue;
+  const a=[...U];[a[i],a[i+1]]=[a[i+1],a[i]];
+  add(a,'urutan',`Katakana dibaca dari kiri ke kanan, satu huruf satu bunyi: ${U.map(c=>`「${c}」(${RM(c)})`).join(' → ')}.`);
+ }
+ const by={};cands.forEach(c=>(by[c.type]=by[c.type]||[]).push(c));
+ const order=[...shuffleArr(['tenten','mirip','panjang','sokuon','kecil'].filter(t=>by[t])),...shuffleArr(['urutan','bunyi'].filter(t=>by[t]))];
+ const picked=[],seenR=new Set([card.romaji]),seenK=new Set([card.jp]);
+ let guard=0;
+ if(opt&&opt.look&&by.mirip){for(const c of shuffleArr(by.mirip)){if(picked.length>=n)break;if(seenR.has(c.romaji)||seenK.has(c.kana))continue;seenR.add(c.romaji);seenK.add(c.kana);picked.push(c)}}
+ while(picked.length<n&&guard++<60){
+  let progressed=false;
+  for(const t of order){
+   if(picked.length>=n)break;
+   const pool=shuffleArr(by[t]).filter(c=>!seenR.has(c.romaji)&&!seenK.has(c.kana));
+   if(!pool.length)continue;
+   const c=pool[0];seenR.add(c.romaji);seenK.add(c.kana);picked.push(c);progressed=true;
+  }
+  if(!progressed)break;
+ }
+ return picked;
+}
+
+/* catatan huruf katakana */
+function letterNoteK(u){
+ const NK={'シ':'dibaca shi, goresan panjangnya naik ↗ (bedakan dari ツ)','ツ':'dibaca tsu, goresan panjangnya turun ↙ (bedakan dari シ)','ソ':'dibaca so, goresan panjangnya turun ↙ (bedakan dari ン)','ン':'dibaca n, goresan panjangnya naik ↗ (bedakan dari ソ)','ヲ':'jarang dipakai, dibaca o','ヂ':'bunyinya sama dengan ジ (ji)','ヅ':'bunyinya sama dengan ズ (zu)'};
+ if(NK[u])return NK[u];
+ if(u.endsWith('ー'))return `${u[0]} ditahan dua ketukan: ${RM(u)}`;
+ if(u.length===2&&SMVK[u[1]])return `${u[0]} + ${u[1]} kecil, bunyi serapan: ${RM(u)}`;
+ return letterNote(k2h(u)).replace(/[ぁ-ゖ]/g,h2k);
+}
+
+/* =====================================================================
+   PILIH HURUF: Hiragana atau Katakana
+   ===================================================================== */
+function paintSc(){
+ $('scSeg').querySelectorAll('button').forEach(b=>b.classList.toggle('on',b.dataset.s===SC));
+ $('mapTitle').textContent=SC==='k'?'Peta belajar katakana':'Peta belajar hiragana';
+}
+function setScript(sc){
+ if(sc===SC)return;
+ SC=sc;S.sc=sc;saveS();
+ HV.sc=sc;HV.open=null;if(HV.set==='khusus'&&sc==='h')HV.set='dasar';
+ HV.sel=new Set(ROWS.dasar[0].cells.filter(Boolean));
+ grpPick=currentTarget(sc)||(sc==='k'?'k1':'1');
+ if(!unlocked(grpPick))grpPick=sc==='k'?'k1':'1';
+ paintSc();refreshCardGroups();
+ if(!$('viewMenu').hidden)renderMenu();
+ if(!$('viewHuruf').hidden)renderHuruf();
+ if(sc==='k'&&!S.seenKata)showMateriKata();
+}
+$('scSeg').onclick=e=>{const b=e.target.closest('button');if(b)setScript(b.dataset.s)};
+$('hvSc').hidden=true;
+
+function showMateriKata(){
+ $('matTitle').textContent='🎌 Kenalan sama Katakana';
+ $('matBody').innerHTML=`<p>Katakana dipakai buat <b>kata serapan</b> (コーヒー, テレビ), nama asing (アメリカ, インドネシア), dan nama benda tertentu. Bunyinya <b>sama persis</b> dengan hiragana: ア = あ = a. Yang beda cuma bentuknya.</p>
+ <div class="matrow"><b>シ ツ<br>ソ ン</b><span><b>Dua pasang paling sering ketuker.</b> Lihat arah goresan panjangnya:<br>シ dan ン goresan panjangnya <b>naik ↗</b>.<br>ツ dan ソ goresan panjangnya <b>turun ↙</b>.<br>Beda lagi: シ dan ツ punya 3 goresan, ソ dan ン cuma 2.</span></div>
+ <div class="matrow"><b>ー</b><span><b>Tanda tahan.</b> Bunyi huruf sebelumnya ditahan dua ketukan, ditulis dobel di romaji.<br>コーヒー = koohii, ビール = biiru, ケーキ = keeki.</span></div>
+ <div class="matrow"><b>ッ</b><span><b>Jeda kecil.</b> Konsonan setelahnya dibaca dobel.<br>サッカー = sakkaa, ベッド = beddo, ホッチキス = hocchikisu.</span></div>
+ <div class="matrow"><b>ャュョ</b><span>Huruf kecil menempel ke huruf di depannya: シャツ = shatsu, ジュース = juusu.</span></div>
+ <div class="matrow"><b>ティ<br>ファ</b><span><b>Bunyi serapan</b> (buat bunyi asing yang nggak ada di hiragana): ティ = ti, ディ = di, ファ = fa, フィ = fi, フェ = fe, フォ = fo, ウィ = wi, ウェ = we, ウォ = wo, ジェ = je, チェ = che, シェ = she.</span></div>
+ <p class="tipx">Saran urutan: selesaikan hiragana dulu, baru katakana. Tapi kalau kamu mau lompat ke katakana, silakan.</p>`;
+ $('matSay').onclick=()=>{ctx();speak('コーヒー')};
+ $('matSay').textContent='🔊 Dengar コーヒー';
+ $('matov').hidden=false;document.body.style.overflow='hidden';
+ const close=()=>{$('matov').hidden=true;document.body.style.overflow='';S.seenKata=true;saveS()};
+ $('matGo').textContent='Mengerti, ayo mulai';
+ $('matGo').onclick=close;$('matX').onclick=close;
+}
+
+HV.sc=SC;if(SC==='k')HV.sel=new Set(ROWS.dasar[0].cells.filter(Boolean));
+paintSc();
 refreshCardGroups();
 paintStreak();
 </script>
