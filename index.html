@@ -257,17 +257,19 @@ button.primary{background:linear-gradient(135deg,#2f80ff,#1448b8);border-color:#
 .wpov[hidden]{display:none}
 .matbox{max-width:520px;width:100%;background:#fff;border-radius:20px;padding:14px 16px;max-height:92vh;overflow:auto}
 .matrow{display:flex;gap:12px;align-items:flex-start;background:#f4f8fd;border-radius:14px;padding:10px 12px;margin:8px 0;font-size:.92rem}
-.matrow>b{font-size:2rem;color:var(--navy);line-height:1.1;min-width:2.2rem;text-align:center}
-.qbox .big.sm{font-size:clamp(1.5rem,6.5vw,2.3rem);line-height:1.6}
-.streakbox{background:linear-gradient(135deg,#fff3dc,#fff);border:2px solid #f2b134;border-radius:18px;padding:10px 12px;margin:6px 0 10px;text-align:center}
-.streakbox .sbig{font-size:1.15rem;color:#8a5a00}
+.matrow>b{font-size:1.5rem;color:var(--navy);line-height:1.1;min-width:2.2rem;text-align:center}
+.qbox .big.sm{font-size:clamp(1.15rem,4.6vw,1.6rem);line-height:1.7;word-break:keep-all;overflow-wrap:anywhere}
+.choices.sent .choice{font-size:.92rem;line-height:1.35;padding:12px 12px}
+.streakbox{background:linear-gradient(135deg,#fff3dc,#fff);border:2px solid #f2b134;border-radius:16px;padding:8px 10px;margin:6px 0 8px;text-align:center}
+.streakbox .tipx{font-size:.8rem}
+.streakbox .sbig{font-size:.98rem;color:#8a5a00}
 .streakbox .dots{display:flex;justify-content:center;gap:8px;margin:8px 0 2px}
-.streakbox .dots span{display:flex;flex-direction:column;align-items:center;font-size:.68rem;color:#64748b;gap:3px}
-.streakbox .dots i{width:22px;height:22px;border-radius:50%;background:#e5ebf3;display:block}
+.streakbox .dots span{display:flex;flex-direction:column;align-items:center;font-size:.62rem;color:#64748b;gap:3px}
+.streakbox .dots i{width:17px;height:17px;border-radius:50%;background:#e5ebf3;display:block}
 .streakbox .dots .on i{background:#f2b134;box-shadow:0 0 0 3px #f2b13444}
 .streakbox .dots .td{font-weight:800;color:var(--navy)}
 .ptpromo{display:flex;gap:10px;align-items:center;background:#eef6ff;border:2px solid #9cc4f2;border-radius:18px;padding:12px;margin:6px 0 12px}
-.ptpromo .pti{font-size:1.8rem}.ptpromo .mid{flex:1}.ptpromo .t{font-weight:800;color:var(--navy)}.ptpromo .d{font-size:.82rem;color:#4a5b70;margin-top:2px}
+.ptpromo .pti{font-size:1.8rem}.ptpromo .mid{flex:1}.ptpromo .t{font-weight:800;color:var(--navy);font-size:.95rem}.ptpromo .d{font-size:.78rem;color:#4a5b70;margin-top:2px}
 .ptcard{border:2px solid #d8e2ee;border-radius:16px;padding:10px 12px;margin:8px 0;background:#fff}
 .ptcard.hafal{border-color:#2fbf8a;background:#f0fbf6}.ptcard.sebagian{border-color:#f2b134;background:#fff8e6}.ptcard.awal{border-color:#e5736a;background:#fff3f2}
 .ptcard .pth{display:flex;justify-content:space-between;gap:8px;font-size:.95rem}
@@ -1165,7 +1167,7 @@ function drawQuestion(){
   qb.innerHTML=`<div class="ask">Mana hiragana yang dibaca:</div><div class="bigm">${card.romaji}</div>`;
  }
  const ch=$('choices');ch.innerHTML='';
- ch.className='choices'+(dir==='m2h'?' two':'');
+ ch.className='choices'+(dir==='m2h'?' two':'')+(card.sentence?' sent':'');
  Q.opts.forEach((o,i)=>{
   const b=document.createElement('button');
   b.className='choice'+(dir==='m2h'?' kj':'');
@@ -1192,7 +1194,7 @@ function answer(i){
  let fb='';
  if(Q.phase==='main'){
   const oo=Q.opts[i];
-  Q.results.push({card,ok,dir,ms:Math.min(30000,Date.now()-(Q.qStart||Date.now())),jawab:ok?oo.t:`${oo.t} [${oo.type}]`});
+  Q.results.push({card,ok,dir,ms:Math.min(30000,Date.now()-(Q.qStart||Date.now())),jawab:ok?oo.t:`${oo.t} [${oo.type}]`,o:oo});
   if(!ok){
    Q.wrongMap[card.jp]=(Q.wrongMap[card.jp]||0)+1;
    Q.errs[oo.type]=(Q.errs[oo.type]||0)+1;
@@ -2181,7 +2183,8 @@ function noteStudy(){
    Tiga tahap (rumpun 1, 2, 3), campur dua arah. Rumpun yang dikuasai
    (>= 90% dan tidak lambat) dibuka otomatis, huruf yang lemah dicatat.
    ===================================================================== */
-const PT_N={'1':12,'2':10,'3':8};
+const PT_N={'1':[8,4],'2':[7,4],'3':[6,4]};  /* [huruf, kata] per tahap */
+const PT_WQ=[2,3,3,4];  /* kata: 2 huruf, 3 huruf, 3 huruf, 4 huruf ke atas */
 const PT_G=['1','2','3'];
 let PT=null;
 const PT_SLOW_MS=9000;
@@ -2193,9 +2196,17 @@ function ptSample(g){
  const pool=letterPool(g).filter(c=>!'ぢづ'.includes(c.jp));
  const by={};pool.forEach(c=>{const r=rowName(c.jp)||c.jp;(by[r]=by[r]||[]).push(c)});
  const rows=shuffleArr(Object.keys(by)).map(r=>shuffleArr(by[r]));
- const out=[],n=Math.min(PT_N[g],pool.length);
+ const out=[],n=Math.min(PT_N[g][0],pool.length);
  while(out.length<n&&rows.some(r=>r.length))rows.forEach(r=>{if(out.length<n&&r.length)out.push(r.shift())});
- return shuffleArr(out);
+ /* kata 2-4 huruf: dipilih dari rumpun ini, tidak diulang */
+ const W=allCards.filter(c=>c.g===Number(g)&&ulen(c)>=2);
+ const used=new Set(),words=[];
+ PT_WQ.slice(0,PT_N[g][1]).forEach(L=>{
+  let cand=shuffleArr(W.filter(c=>!used.has(c.jp)&&(L>=4?ulen(c)>=4:ulen(c)===L)));
+  if(!cand.length)cand=shuffleArr(W.filter(c=>!used.has(c.jp)));
+  if(cand.length){used.add(cand[0].jp);words.push(cand[0])}
+ });
+ return shuffleArr([...out,...words]);
 }
 function startPlacement(){PT={stage:0,res:[]};ptStage()}
 function ptStage(){
@@ -2207,10 +2218,16 @@ function endTempat(){
  stopTimer();
  const g=Q.grp,R=Q.results,total=R.length,benar=R.filter(r=>r.ok).length,pct=Math.round(benar/total*100);
  const ms=R.map(r=>r.ms).filter(x=>x!=null),avg=ms.length?Math.round(ms.reduce((a,b)=>a+b,0)/ms.length/100)/10:null;
- const wrong=[...new Set(R.filter(r=>!r.ok).map(r=>r.card.jp))];
- const slow=[...new Set(R.filter(r=>r.ok&&r.ms>PT_SLOW_MS).map(r=>r.card.jp))];
- const lvl=pct>=90&&(avg==null||avg<=10)?'hafal':pct>=60?'sebagian':'awal';
- PT.res.push({g,pct,benar,total,avg,wrong,slow,lvl});
+ const RL=R.filter(r=>r.card.single),RW=R.filter(r=>!r.card.single);
+ const wrongL=[...new Set(RL.filter(r=>!r.ok).map(r=>r.card.jp))];
+ const wrongW=RW.filter(r=>!r.ok).map(r=>r.card);
+ const wrongWU=wrongW.flatMap(c=>{const r=R.find(x=>x.card===c);return diffUnits(c.jp,r&&r.o&&r.o.kana)});
+ const wrong=[...new Set([...wrongL,...wrongWU])].filter(u=>RM(u));
+ const slow=[...new Set(RL.filter(r=>r.ok&&r.ms>PT_SLOW_MS).map(r=>r.card.jp))];
+ const st=(A)=>({b:A.filter(r=>r.ok).length,t:A.length});
+ const sl=st(RL),sw=st(RW),wpct=sw.t?Math.round(sw.b/sw.t*100):100;
+ const lvl=pct>=90&&wpct>=75&&(avg==null||avg<=10)?'hafal':pct>=60?'sebagian':'awal';
+ PT.res.push({g,pct,benar,total,avg,wrong,slow,lvl,sl,sw,wpct,wrongW:wrongW.map(c=>c.jp+' ('+c.romaji+')')});
  const last=PT.stage>=PT_G.length-1;
  if(lvl==='awal'||last){ptFinish();return}
  const nxt=PT_G[PT.stage+1];
@@ -2233,15 +2250,17 @@ function ptFinish(){
   if(!p.lulus){p.lulus=true;p.tempat=true;p.tgl=ymd();p.pct=r.pct;if(r.avg!=null)p.avg=r.avg;opened.push(r.g);syncStatus('hira:rumpun-'+r.g,'hafal')}
  }
  const weakU=[...new Set(res.flatMap(r=>[...r.wrong,...r.slow]))];
- S.placement={d:ymd(),res:res.map(r=>({g:r.g,pct:r.pct,benar:r.benar,total:r.total,avg:r.avg,lvl:r.lvl})),weak:weakU.slice(0,30)};
+ S.placement={d:ymd(),res:res.map(r=>({g:r.g,pct:r.pct,benar:r.benar,total:r.total,avg:r.avg,lvl:r.lvl,wpct:r.wpct})),weak:weakU.slice(0,30)};
  saveS();
  const sn=touchDay();
  const byRow=u=>{const o={};u.forEach(x=>{const k=rowName(x)||x;(o[k]=o[k]||[]).push(x)});return Object.entries(o).map(([k,v])=>`${k}: ${v.map(x=>`${x} (${RM(x)})`).join(', ')}`).join(' · ')};
  let h=`<div class="hero">🎯</div><h2>Hasil Tes Penempatan</h2><p class="center tipx">Ini peta penguasaanmu sekarang. Kamu cukup fokus ke bagian yang perlu diperkuat.</p>`;
  res.forEach(r=>{
   const st=r.lvl==='hafal'?'✅ Sudah menguasai':r.lvl==='sebagian'?'🟡 Perlu diperkuat':'🔴 Mulai dari sini';
-  h+=`<div class="ptcard ${r.lvl}"><div class="pth"><b>${GRP[r.g].short}</b><span>${st}</span></div><div class="tipx">${r.benar} dari ${r.total} benar (${r.pct}%)${r.avg!=null?` · rata-rata ${r.avg} detik`:''}</div>`;
-  if(r.wrong.length)h+=`<div class="tipx">Salah: ${byRow(r.wrong)}</div>`;
+  h+=`<div class="ptcard ${r.lvl}"><div class="pth"><b>${GRP[r.g].short}</b><span>${st}</span></div><div class="tipx">${r.benar} dari ${r.total} benar (${r.pct}%)${r.avg!=null?` · rata-rata ${r.avg} detik`:''}</div><div class="tipx">Huruf: ${r.sl.b}/${r.sl.t} · Baca kata 2–4 huruf: ${r.sw.b}/${r.sw.t}</div>`;
+  if(r.sl.t&&r.sl.b<r.sl.t)h+=`<div class="tipx">Huruf yang salah: ${byRow([...new Set(r.wrong)])}</div>`;
+  if(r.wrongW.length)h+=`<div class="tipx">Kata yang salah baca: ${r.wrongW.join(', ')}</div>`;
+  if(r.lvl!=='hafal'&&r.wpct<75&&r.sl.b/r.sl.t>=.85)h+=`<div class="tipx">Hurufnya sudah lumayan, tapi membaca kata utuh masih tersendat. Perbanyak latihan baca kata lewat Latihan bebas level 2–4 huruf.</div>`;
   if(r.slow.length)h+=`<div class="tipx">Benar tapi ragu-ragu (lambat): ${byRow(r.slow)}</div>`;
   if(r.lvl==='hafal'&&opened.includes(r.g))h+=`<div class="tipx">🔓 Rumpun ini kulewati, nggak perlu Ujian Kenaikan.</div>`;
   h+='</div>';
@@ -2272,7 +2291,7 @@ function openHurufWith(units){
 }
 function paintMenuExtras(){
  const p=S.placement;
- let h=`<div class="ptpromo"><div class="pti">🎯</div><div class="mid"><div class="t">Tes Penempatan</div><div class="d">Sudah pernah belajar hiragana? Tes singkat (sekitar 30 soal) buat tahu bagian mana yang sudah hafal dan mana yang perlu diperkuat. Rumpun yang sudah hafal bisa dilewati.</div>${p?`<div class="d">Terakhir: ${fmtD(p.d)} · ${p.res.map(r=>`${GRP[r.g].short} ${r.pct}%`).join(' · ')}</div>`:''}</div><button class="primary" id="btnPT">${p?'Ulangi tes':'Mulai tes'}</button></div>`;
+ let h=`<div class="ptpromo"><div class="pti">🎯</div><div class="mid"><div class="t">Tes Penempatan</div><div class="d">Sudah pernah belajar hiragana? Tes singkat (sekitar 35 soal: huruf satuan plus baca kata 2–4 huruf) buat tahu bagian mana yang benar-benar sudah kamu kuasai. Rumpun yang sudah dikuasai bisa dilewati.</div>${p?`<div class="d">Terakhir: ${fmtD(p.d)} · ${p.res.map(r=>`${GRP[r.g].short} ${r.pct}%`).join(' · ')}</div>`:''}</div><button class="primary" id="btnPT">${p?'Ulangi tes':'Mulai tes'}</button></div>`;
  $('ptBox').innerHTML=h;
  $('btnPT').onclick=()=>startPlacement();
  paintStreak();
