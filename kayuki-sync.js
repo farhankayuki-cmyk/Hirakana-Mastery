@@ -146,7 +146,7 @@
   function css() {
     if (document.getElementById('ks-css')) return;
     var s = document.createElement('style'); s.id = 'ks-css';
-    s.textContent = '.ks{display:flex;flex-direction:column;gap:8px;font-size:14px}.ks input{font:inherit;padding:9px 11px;border:1.5px solid var(--line,#d6e1f7);border-radius:10px;background:var(--surface,#fff);color:var(--ink,#0e1c48);min-width:0;flex:1}.ks .r{display:flex;gap:8px;flex-wrap:wrap;align-items:center}.ks button{font:inherit;font-weight:700;padding:9px 14px;border-radius:10px;border:1.5px solid var(--line,#d6e1f7);background:var(--surface,#fff);color:var(--ink,#0e1c48);cursor:pointer}.ks button.p{background:#1d63d8;border-color:#1d63d8;color:#fff}.ks .m{color:var(--ink-2,#4b5b88);font-size:12.5px}.ks .e{color:#c0392b;font-size:12.5px}.ks .ok{color:#1f9d6b;font-weight:700}.ks .kt{overflow-x:auto}.ks table{width:100%;border-collapse:collapse;font-size:13px;font-variant-numeric:tabular-nums}.ks th,.ks td{text-align:left;padding:6px 8px;border-bottom:1px solid var(--line,#d6e1f7);white-space:nowrap}.ks th{font-size:12px;color:var(--ink-2,#4b5b88);font-weight:600}.ks tr.c{cursor:pointer}.ks .kd{border-top:1.5px solid var(--line,#d6e1f7);padding-top:10px;display:flex;flex-direction:column;gap:8px}.ks .sc{display:inline-flex;gap:4px}.ks .sc button{padding:6px 10px}.ks textarea{font:inherit;padding:9px 11px;border:1.5px solid var(--line,#d6e1f7);border-radius:10px;background:var(--surface,#fff);color:var(--ink,#0e1c48);min-height:64px}';
+    s.textContent = '.ks{display:flex;flex-direction:column;gap:8px;font-size:14px}.ks input{font:inherit;padding:9px 11px;border:1.5px solid var(--line,#d6e1f7);border-radius:10px;background:var(--surface,#fff);color:var(--ink,#0e1c48);min-width:0;flex:1}.ks .r{display:flex;gap:8px;flex-wrap:wrap;align-items:center}.ks button{font:inherit;font-weight:700;padding:9px 14px;border-radius:10px;border:1.5px solid var(--line,#d6e1f7);background:var(--surface,#fff);color:var(--ink,#0e1c48);cursor:pointer}.ks button.p{background:#1d63d8;border-color:#1d63d8;color:#fff}.ks .m{color:var(--ink-2,#4b5b88);font-size:12.5px}.ks .e{color:#c0392b;font-size:12.5px}.ks .ok{color:#1f9d6b;font-weight:700}.ks .kt{overflow-x:auto}.ks table{width:100%;border-collapse:collapse;font-size:13px;font-variant-numeric:tabular-nums}.ks th,.ks td{text-align:left;padding:6px 8px;border-bottom:1px solid var(--line,#d6e1f7);white-space:nowrap}.ks th{font-size:12px;color:var(--ink-2,#4b5b88);font-weight:600}.ks tr.c{cursor:pointer}.ks .kd{border-top:1.5px solid var(--line,#d6e1f7);padding-top:10px;display:flex;flex-direction:column;gap:8px}.ks .sc{display:inline-flex;gap:4px}.ks .sc button{padding:6px 10px}.ks select{font:inherit;padding:9px 11px;border:1.5px solid var(--line,#d6e1f7);border-radius:10px;background:var(--surface,#fff);color:var(--ink,#0e1c48);min-width:0}.ks textarea{font:inherit;padding:9px 11px;border:1.5px solid var(--line,#d6e1f7);border-radius:10px;background:var(--surface,#fff);color:var(--ink,#0e1c48);min-height:64px}';
     document.head.appendChild(s);
   }
   function fmtT(iso) { try { return new Date(iso).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }); } catch (e) { return ''; } }
@@ -205,6 +205,11 @@
     kayuki: ['Kosakata', 'Tata bahasa', 'Kanji', 'Membaca', 'Kesiapan ujian'],
     hirakana: ['Pengenalan huruf', 'Kecepatan baca', 'Ketepatan', 'Konsistensi latihan']
   };
+  var DAFTAR_SENSEI = ['Sopian Sensei', 'Andrian Sensei', 'Farhan Sensei', 'Cania Sensei'];
+  function opsiSensei(pilih) {
+    var l = DAFTAR_SENSEI.slice(); if (pilih && l.indexOf(pilih) < 0) l.push(pilih);
+    return '<option value="">Pilih sensei…</option>' + l.map(function (n) { return '<option' + (n === pilih ? ' selected' : '') + '>' + esc(n) + '</option>'; }).join('');
+  }
   var NAMA_APP = { mensetsu: 'Mensetsu', kayuki: 'Kayuki Latihan', hirakana: 'HiraKana' };
   var KMODE = { latihan: 'Latihan', shiken: 'Shiken', kenaikan: 'Ujian kenaikan', penempatan: 'Tes penempatan', simulasi: 'Simulasi', tes: 'Tes' };
   var SS = { rows: null, sel: null, det: null, err: '', busy: false, app: 'mensetsu', sc: null, note: '', nama: rd('kayuki-sync-sn', '') };
@@ -219,7 +224,7 @@
   }
   function mountSensei(el, o) {
     if (!el) return; css();
-    if (o && o.nama && !SS.nama) SS.nama = o.nama;
+    if (o && o.nama && !SS.nama && DAFTAR_SENSEI.indexOf(o.nama) >= 0) SS.nama = o.nama;
     var root = el;
     function load() {
       SS.busy = true; SS.err = ''; paint();
@@ -236,13 +241,13 @@
       if (!kk) {
         root.innerHTML = '<div class="ks"><div class="m">Masuk dengan kode kelas dan kunci sensei. Kunci hanya tersimpan di HP ini.</div>' +
           '<div class="r"><input id="kso-kode" placeholder="Kode kelas" autocapitalize="characters" autocomplete="off"><input id="kso-key" type="password" placeholder="Kunci sensei" autocomplete="off"></div>' +
-          '<div class="r"><input id="kso-nama" placeholder="Nama sensei (muncul di catatan)" value="' + esc(SS.nama) + '"></div>' +
+          '<div class="r"><select id="kso-nama" aria-label="Sensei yang memeriksa">' + opsiSensei(SS.nama) + '</select></div><div class="m">Pilih nama sensei yang memeriksa. Nama ini muncul di catatan dan penilaian.</div>' +
           (SS.err ? '<div class="e">' + esc(SS.err) + '</div>' : '') +
           '<div class="r"><button class="p" data-kso="login">Masuk</button></div></div>';
         return;
       }
       if (!SS.rows && !SS.busy && !SS.err) { setTimeout(load, 0); }
-      var rows = SS.rows || [], h = '<div class="ks"><div class="r" style="justify-content:space-between"><b>Kelas ' + esc(kk.kode) + ' · ' + rows.length + ' siswa</b><span><button data-kso="reload">' + (SS.busy ? 'Memuat...' : 'Muat ulang') + '</button> <button data-kso="logout">Keluar</button></span></div>';
+      var rows = SS.rows || [], h = '<div class="ks"><div class="r" style="justify-content:space-between"><b>Kelas ' + esc(kk.kode) + ' · ' + rows.length + ' siswa</b><span><button data-kso="reload">' + (SS.busy ? 'Memuat...' : 'Muat ulang') + '</button> <button data-kso="logout">Keluar</button></span></div><div class="r"><span class="m">Diperiksa oleh</span><select id="kso-oleh" aria-label="Sensei yang memeriksa">' + opsiSensei(SS.nama) + '</select></div>';
       if (SS.err) h += '<div class="e">' + esc(SS.err) + '</div>';
       if (rows.length) {
         h += '<div class="kt"><table><thead><tr><th>Nama</th><th>Mensetsu</th><th>HiraKana</th><th>Kayuki</th><th>Terakhir</th><th>Nilai</th><th>Aktif</th></tr></thead><tbody>';
@@ -288,7 +293,8 @@
     }
     if (!root.__kso) {
       root.__kso = true;
-      root.addEventListener('input', function (e) { if (e.target && e.target.id === 'kso-note') SS.note = e.target.value; if (e.target && e.target.id === 'kso-nama') SS.nama = e.target.value; });
+      root.addEventListener('input', function (e) { if (e.target && e.target.id === 'kso-note') SS.note = e.target.value; });
+      root.addEventListener('change', function (e) { var t = e.target; if (t && (t.id === 'kso-nama' || t.id === 'kso-oleh')) { SS.nama = t.value; wr('kayuki-sync-sn', SS.nama); } });
       root.addEventListener('click', function (e) {
         var t = e.target; if (!t || !t.closest) return;
         var row = t.closest('[data-kso-id]'); if (row) return open(row.getAttribute('data-kso-id'));
@@ -297,8 +303,9 @@
         var b = t.closest('[data-kso]'); if (!b) return; var a = b.getAttribute('data-kso');
         if (a === 'login') {
           var k = (root.querySelector('#kso-kode') || {}).value, key = (root.querySelector('#kso-key') || {}).value;
-          SS.nama = (root.querySelector('#kso-nama') || {}).value || SS.nama; wr('kayuki-sync-sn', SS.nama);
+          SS.nama = (root.querySelector('#kso-nama') || {}).value || ''; wr('kayuki-sync-sn', SS.nama);
           if (!k || !key) { SS.err = 'Isi kode kelas dan kunci sensei.'; return paint(); }
+          if (!SS.nama) { SS.err = 'Pilih nama sensei yang memeriksa.'; return paint(); }
           sensei.simpanKunci(k, key); SS.rows = null; SS.err = '';
           return sensei.rekap().then(function (r) { SS.rows = r; paint(); }).catch(function (er) { sensei.lupa(); SS.err = er.message; paint(); });
         }
@@ -306,6 +313,7 @@
         if (a === 'reload') return load();
         if (a === 'close') { SS.sel = null; SS.det = null; return paint(); }
         if (a === 'nilai' && SS.sel) {
+          if (!SS.nama) { SS.err = 'Pilih dulu sensei yang memeriksa (di atas).'; return paint(); }
           b.disabled = true; b.textContent = 'Mengirim...';
           sensei.nilai(SS.sel, SS.app, SS.sc.slice(), SS.note, SS.nama).then(function () { SS.note = ''; SS.sc = null; return load(); })
             .catch(function (er) { SS.err = er.message; paint(); });
@@ -327,6 +335,6 @@
   window.KayukiSync = {
     init: init, simpanStatus: simpanStatus, simpanHasil: simpanHasil, gabung: gabung, keluar: keluar, flush: flush,
     state: state, onChange: function (f) { listeners.push(f); }, masukan: function () { return rd(LS.inb, { penilaian: [], catatan: [] }); },
-    mountPanel: mountPanel, mountSensei: mountSensei, sensei: sensei, versi: 3
+    mountPanel: mountPanel, mountSensei: mountSensei, daftarSensei: DAFTAR_SENSEI, sensei: sensei, versi: 4
   };
 })();
