@@ -838,6 +838,18 @@ function RM(u){
  if(u.length===2&&SMV[u[1]]&&YPRE[u[0]])return YPRE[u[0]]+SMV[u[1]];
  return ROMA[u]||'';
 }
+/* aturan ん: sebelum b/m/p dibaca m (shimbun), sebelum vokal atau y ditulis n' (hon'ya) */
+function unitRoms(us){
+ const r=us.map(RM);
+ us.forEach((u,i)=>{
+  if(!/^[んン]$/.test(u)||i+1>=us.length)return;
+  const nx=r[i+1]||'';
+  if(/^[bmp]/.test(nx))r[i]='m';
+  else if(/^[aiueoy]/.test(nx))r[i]="n'";
+ });
+ return r;
+}
+const RJ=us=>unitRoms(us).join('');
 const DAK='がぎぐげござじずぜぞだぢづでどばびぶべぼ', DAKB='かきくけこさしすせそたちつてとはひふへほ';
 const HAN='ぱぴぷぺぽ', HANB='はひふへほ';
 const SET1=[...'あいうえおかきくけこさしすせそたちつてとなにぬねのはひふへほ'];
@@ -880,12 +892,23 @@ const LONGRE=/ou|oo|ei|ii|uu/;
 
 /* bikin pengecoh dari kesalahan baca yang NYATA dialami pemula */
 function makeDistractors(card,n,opt){
+ const res=makeDistractors0(card,n,opt);
+ if(card.sentence||(opt&&opt.dir==='m2h'))return res;
+ const us=toks(card.jp),ur=unitRoms(us);
+ const idx=us.map((u,i)=>/^[んン]$/.test(u)&&ur[i]==='m'?i:-1).filter(i=>i>=0);
+ if(!idx.length)return res;
+ const alt=us.map((u,i)=>idx.includes(i)?'n':ur[i]).join('');
+ if(res.some(x=>x.romaji===alt))return res;
+ const v={kana:card.jp,romaji:alt,type:'bunyi',why:'「ん」sebelum b, m, atau p dibaca <b>m</b> (bibir menutup), bukan n. Contoh: しんぶん = shimbun.'};
+ return [...res.slice(0,Math.max(0,n-1)),v];
+}
+function makeDistractors0(card,n,opt){
  if(card.sentence)return makeDistractorsS(card,n);
  if(card.k)return makeDistractorsK(card,n,opt);
  const U=toks(card.jp),cands=[],ALLOW=allowedFor(card.g);
  const add=(arr,type,why,pair)=>{
   if(!arr.length||arr.some(u=>!RM(u)))return;
-  const kana=arr.join(''),romaji=arr.map(RM).join('');
+  const kana=arr.join(''),romaji=RJ(arr);
   if(kana===card.jp||romaji===card.romaji)return;
   cands.push({kana,romaji,type,why,pair});
  };
@@ -977,7 +1000,8 @@ function makeDistractors(card,n,opt){
 
 function chipsHTML(card){
  let h='<div class="tipx" style="margin-top:8px"><b>Baca satu-satu dari kiri ke kanan:</b></div><div class="kcs">';
- for(const u of toks(card.jp)){
+ const US=toks(card.jp),RR=unitRoms(US);
+ for(const [ix,u] of US.entries()){
   let tag='',core=u;
   const lg=core.endsWith('ー');if(lg)core=core.slice(0,-1);
   const sk=/^[っッ]/.test(core)&&core.length>1;if(sk)core=core.slice(1);
@@ -991,7 +1015,9 @@ function chipsHTML(card){
    else if(hi>=0)tag=`${cv(HANB[hi])} + maru`;
   }
   if(lg)tag=(tag?tag+' · ':'')+'ー = tahan 2 ketukan';
-  h+=`<div class="kc"><b>${u}</b><i>${RM(u)||'?'}</i>${tag?`<em>${tag}</em>`:''}</div>`;
+  if(/^[んン]$/.test(u)&&RR[ix]==='m')tag='ん sebelum b/m/p jadi m';
+  if(/^[んン]$/.test(u)&&RR[ix]==="n'")tag="ん sebelum vokal/y ditulis n'";
+  h+=`<div class="kc"><b>${u}</b><i>${RR[ix]||'?'}</i>${tag?`<em>${tag}</em>`:''}</div>`;
  }
  return h+'</div>';
 }
@@ -1010,6 +1036,9 @@ function explainHTML(card,o,dir){
  if(/[ぁぃぅぇぉァィゥェォ]/.test(card.jp))notes.push('Huruf kecil <b>ァ ィ ゥ ェ ォ</b> menempel ke huruf di depannya dan jadi <b>bunyi serapan</b> (ティ = ti, ファ = fa, ウィ = wi).');
  if(/[っッ]/.test(card.jp))notes.push(K?'<b>ッ</b> kecil itu jeda singkat: konsonan setelahnya dibaca dobel (サッカー = sakkaa). Dia nggak punya bunyi sendiri.':'<b>っ</b> kecil itu jeda singkat: konsonan setelahnya dibaca dobel (きって = kitte). Dia nggak punya bunyi sendiri.');
  if(K&&/[シツソン]/.test(card.jp))notes.push('Awas mirip! <b>シ</b> dan <b>ン</b> goresan panjangnya naik ↗, sedangkan <b>ツ</b> dan <b>ソ</b> goresan panjangnya turun ↙.');
+ {const us=toks(card.jp),ur=unitRoms(us);
+  if(us.some((u,i)=>/^[んン]$/.test(u)&&ur[i]==='m'))notes.push('<b>ん</b> sebelum <b>b, m, p</b> dibaca <b>m</b> karena bibir menutup (しんぶん = shimbun, コンビニ = kombini).');
+  if(us.some((u,i)=>/^[んン]$/.test(u)&&ur[i]==="n'"))notes.push("<b>ん</b> sebelum vokal atau y ditulis <b>n'</b> biar nggak ketuker dengan な, に, dst (ほんや = hon'ya).");}
  for(const ch of new Set(card.jp)){const t=TRICKY[k2h(ch)];if(t)notes.push((isK(ch)?toKata(t):t)+'.')}
  notes.forEach(x=>h+=`<div class="tipx">💡 ${x}</div>`);
  return h;
@@ -1201,7 +1230,7 @@ function drawQuestion(){
  const {card,dir}=Q.cur;
  Q.qStart=Date.now();
  perItemFont($('viewQuiz'));
- const ds=makeDistractors(card,3,{look:!!Q.look});
+ const ds=makeDistractors(card,3,{look:!!Q.look,dir});
  Q.opts=shuffleArr([{ok:true,kana:card.jp,romaji:card.romaji,why:''},...ds.map(d=>({...d,ok:false}))])
   .map(o=>({...o,t:dir==='h2m'?o.romaji:o.kana}));
  const qb=$('qBox');
@@ -2112,16 +2141,16 @@ function parseSent(src){
  text.split(' ').forEach(ch=>{
   let m=/^(.*?)\[(.)\]([。？！]*)$/.exec(ch),m2=/^(.*?)\{(.)\}([。？！]*)$/.exec(ch);
   if(m){
-   if(m[1]){toksP.push({h:m[1],r:toks(m[1]).map(RM).join('')})}
+   if(m[1]){toksP.push({h:m[1],r:RJ(toks(m[1]))})}
    toksP.push({h:m[2],r:PART[m[2]][0],lit:PART[m[2]][1],part:true});
    disp.push(m[1]+m[2]+m[3]);
   }else if(m2){
-   toksP.push({h:m2[1],r:toks(m2[1]).map(RM).join('')});
+   toksP.push({h:m2[1],r:RJ(toks(m2[1]))});
    toksP.push({h:m2[2],r:PART[m2[2]][0],lit:PART[m2[2]][1],part:true,glue:true});
    disp.push(m2[1]+m2[2]+m2[3]);
   }else{
    const w=ch.replace(/[。？！]+$/,'');
-   toksP.push({h:w,r:toks(w).map(RM).join('').replace(/desuka$/,'desu ka')});disp.push(ch);
+   toksP.push({h:w,r:RJ(toks(w)).replace(/desuka$/,'desu ka')});disp.push(ch);
   }
  });
  const rom=ts=>ts.map((t,i)=>(i&&!t.glue?' ':'')+t.r).join('');
@@ -2378,7 +2407,7 @@ const KATA_SRC=[
 ];
 const KCARDS=KATA_SRC.map(([jp,meaning])=>{
  const us=toks(jp);
- return {jp,meaning,k:true,romaji:us.map(RM).join(''),g:Math.max(...us.map(gOfUnit))};
+ return {jp,meaning,k:true,romaji:RJ(us),g:Math.max(...us.map(gOfUnit))};
 });
 const KL1=toKata(L1),KL2=toKata(L2),KYOON=YOUON_ALL.map(toKata);
 const KSERAPAN=['ティ','ディ','ファ','フィ','フェ','フォ','ウィ','ウェ','ウォ','ジェ','チェ','シェ'];
@@ -2425,7 +2454,7 @@ function makeDistractorsK(card,n,opt){
  const ALLOW=allowedFor(Math.min(card.g||1,3)).map(toKata);
  const add=(arr,type,why,pair)=>{
   if(!arr.length||arr.some(u=>!RM(u)))return;
-  const kana=arr.join(''),romaji=arr.map(RM).join('');
+  const kana=arr.join(''),romaji=RJ(arr);
   if(kana===card.jp||romaji===card.romaji)return;
   cands.push({kana,romaji,type,why,pair});
  };
@@ -2559,6 +2588,7 @@ function showMateriKata(){
  $('matGo').onclick=close;$('matX').onclick=close;
 }
 
+allCards.forEach(c=>{c.romaji=RJ(toks(c.jp))});
 HV.sc=SC;if(SC==='k')HV.sel=new Set(ROWS.dasar[0].cells.filter(Boolean));
 paintSc();
 refreshCardGroups();
