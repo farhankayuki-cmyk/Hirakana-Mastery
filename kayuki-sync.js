@@ -140,6 +140,7 @@
     rekap: function () { var k = sk(); if (!k) return Promise.reject(new Error('Belum masuk sebagai sensei.')); return rpc('sensei_rekap', { p_kode: k.kode, p_key: k.key }).catch(function (e) { throw new Error(pesan(e)); }); },
     detail: function (siswa) { var k = sk(); return rpc('sensei_detail', { p_kode: k.kode, p_key: k.key, p_siswa: siswa }).catch(function (e) { throw new Error(pesan(e)); }); },
     nilai: function (siswa, a, sc, catatan, oleh) { var k = sk(); return rpc('sensei_nilai', { p_kode: k.kode, p_key: k.key, p_siswa: siswa, p_app: a, p_sc: sc, p_catatan: catatan || '', p_oleh: oleh || '' }).catch(function (e) { throw new Error(pesan(e)); }); },
+    hasilKelas: function (a, mode) { var k = sk(); if (!k) return Promise.reject(new Error('Belum masuk sebagai sensei.')); return rpc('sensei_hasil_kelas', { p_kode: k.kode, p_key: k.key, p_app: a, p_mode: mode }).catch(function (e) { throw new Error(pesan(e)); }); },
     hadirAmbil: function (dari, sampai) { var k = sk(); return rpc('sensei_hadir_ambil', { p_kode: k.kode, p_key: k.key, p_dari: dari, p_sampai: sampai }).catch(function (e) { throw new Error(pesan(e)); }); },
     hadirSimpan: function (tgl, items, oleh) { var k = sk(); return rpc('sensei_hadir_simpan', { p_kode: k.kode, p_key: k.key, p_tanggal: tgl, p_items: items, p_oleh: oleh || '' }).catch(function (e) { throw new Error(pesan(e)); }); },
     periode: function (dari, sampai) { var k = sk(); return rpc('sensei_rekap_periode', { p_kode: k.kode, p_key: k.key, p_dari: dari, p_sampai: sampai }).catch(function (e) { throw new Error(pesan(e)); }); },
@@ -760,6 +761,6 @@
   window.KayukiSync = {
     init: init, simpanStatus: simpanStatus, simpanHasil: simpanHasil, gabung: gabung, keluar: keluar, flush: flush,
     state: state, onChange: function (f) { listeners.push(f); }, masukan: function () { return rd(LS.inb, { penilaian: [], catatan: [] }); },
-    mountPanel: mountPanel, mountSensei: mountSensei, daftarSensei: DAFTAR_SENSEI, sensei: sensei, versi: 5
+    mountPanel: mountPanel, mountSensei: mountSensei, daftarSensei: DAFTAR_SENSEI, sensei: sensei, versi: 6
   };
 })();
