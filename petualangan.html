@@ -83,6 +83,8 @@ button{font:inherit;cursor:pointer}
 .qtop{display:flex;justify-content:space-between;align-items:center;gap:8px;font-weight:800}
 .qtop .chip{box-shadow:none;white-space:nowrap;font-size:.82rem;padding:5px 10px}
 #qBar{height:10px;background:#ffffff33;border-radius:99px;overflow:hidden}
+#qTimeW{height:7px;background:#ffffff26;border-radius:99px;overflow:hidden;margin-top:-4px}#qTime{height:100%;width:100%;background:#f2b134;border-radius:99px}
+#qOpts.one{grid-template-columns:1fr}#qOpts.one button{font-size:1rem;padding:13px 10px}
 #qBar i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--gold),#ffd978);border-radius:99px;transition:width .3s}
 #qCard{flex:1 1 auto;min-height:0;background:var(--cream);border:3px solid #fff;border-radius:26px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;color:var(--navy);text-align:center;padding:12px;position:relative}
 #qPrompt{font-size:.85rem;font-weight:800;color:#5b6f90;letter-spacing:.04em}
@@ -171,6 +173,7 @@ button{font:inherit;cursor:pointer}
   <div class="qw">
     <div class="qtop"><span class="chip" id="qTitle"></span><span class="chip" id="qHearts"></span><span class="chip" id="qPoin"></span></div>
     <div id="qBar"><i></i></div>
+    <div id="qTimeW" hidden><div id="qTime"></div></div>
     <div id="qCard"><button id="qSpk" aria-label="Dengar">🔊</button><div id="qPrompt"></div><div id="qJP" class="jp"></div><div id="qMean"></div></div>
     <div id="qOpts"></div>
     <div id="qFb"></div>
@@ -205,25 +208,52 @@ const sfx={ok(){beep(660,.1);setTimeout(()=>beep(880,.14),90)},bad(){beep(180,.2
 function speak(t){if(!S.sound||!('speechSynthesis' in window))return;try{speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(t);u.lang='ja-JP';u.rate=.85;const v=speechSynthesis.getVoices().find(v=>/^ja/i.test(v.lang));if(v)u.voice=v;speechSynthesis.speak(u)}catch(e){}}
 
 /* ===== data huruf ===== */
-const ROWSTR=['あいうえお','かきくけこ','さしすせそ','たちつてと','なにぬねの','はひふへほ','がぎぐげご','ざじずぜぞ','だでど','ばびぶべぼ','ぱぴぷぺぽ'];
-const ROMS=[['a','i','u','e','o'],['ka','ki','ku','ke','ko'],['sa','shi','su','se','so'],['ta','chi','tsu','te','to'],['na','ni','nu','ne','no'],['ha','hi','fu','he','ho'],['ga','gi','gu','ge','go'],['za','ji','zu','ze','zo'],['da','de','do'],['ba','bi','bu','be','bo'],['pa','pi','pu','pe','po']];
+const ROWSTR=['あいうえお','かきくけこ','さしすせそ','たちつてと','なにぬねの','はひふへほ','まみむめも','やゆよ','らりるれろ','わを','ん','がぎぐげご','ざじずぜぞ','だでど','ばびぶべぼ','ぱぴぷぺぽ'];
+const ROMS=[['a','i','u','e','o'],['ka','ki','ku','ke','ko'],['sa','shi','su','se','so'],['ta','chi','tsu','te','to'],['na','ni','nu','ne','no'],['ha','hi','fu','he','ho'],['ma','mi','mu','me','mo'],['ya','yu','yo'],['ra','ri','ru','re','ro'],['wa','o'],['n'],['ga','gi','gu','ge','go'],['za','ji','zu','ze','zo'],['da','de','do'],['ba','bi','bu','be','bo'],['pa','pi','pu','pe','po']];
 const RM={};ROWSTR.forEach((s,i)=>[...s].forEach((k,j)=>RM[k]=ROMS[i][j]));
 const rowOf=k=>ROWSTR.find(s=>s.includes(k));
+/* huruf kecil ゃ ゅ ょ */
+const YB=[['き','ky'],['し','sh'],['ち','ch'],['に','ny'],['ひ','hy'],['み','my'],['り','ry'],['ぎ','gy'],['じ','j'],['び','by'],['ぴ','py']];
+const YV=[['ゃ','a'],['ゅ','u'],['ょ','o']];
+const YR={};YB.forEach(([b,r])=>YV.forEach(([sm,v])=>YR[b+sm]=r+v));
+const SMALL='ゃゅょ';
+const romU=u=>u.length===2?YR[u]:RM[u];
+function toks(w){const a=[...w],o=[];for(let i=0;i<a.length;i++){let k=a[i];if(k==='っ'){o.push('っ');continue}if(!RM[k])continue;if(SMALL.includes(a[i+1])&&YR[k+a[i+1]]){k+=a[i+1];i++}o.push(k)}return o}
+function romWord(w,noAssim){
+  const u=toks(w);let out='';
+  for(let i=0;i<u.length;i++){const k=u[i];
+    if(k==='っ'){const nx=u[i+1];if(nx&&nx!=='っ'){const r=romU(nx);out+=r.startsWith('ch')?'t':r[0]}continue}
+    if(k==='ん'){const nx=u[i+1],nr=nx&&nx!=='っ'?romU(nx):'';out+=(!noAssim&&/^[bmp]/.test(nr))?'m':(/^[aiueoy]/.test(nr)?"n'":'n');continue}
+    out+=romU(k)}
+  return out}
+const romOf=romWord;
 const SIM={};
-[['あ','お'],['さ','ち'],['は','ほ'],['ぬ','ね'],['け','は'],['く','へ'],['た','な'],['い','こ'],['う','え'],['す','ふ'],['し','じ'],['か','が'],['さ','ざ'],['た','だ'],['は','ば'],['は','ぱ'],['ば','ぱ'],['き','ぎ'],['く','ぐ'],['け','げ'],['こ','ご'],['す','ず'],['せ','ぜ'],['そ','ぞ'],['て','で'],['と','ど'],['ひ','び'],['ひ','ぴ'],['び','ぴ'],['ふ','ぶ'],['ふ','ぷ'],['ぶ','ぷ'],['へ','べ'],['へ','ぺ'],['べ','ぺ'],['ほ','ぼ'],['ほ','ぽ'],['ぼ','ぽ']].forEach(([a,b])=>{(SIM[a]=SIM[a]||[]).push(b);(SIM[b]=SIM[b]||[]).push(a)});
-const romOf=w=>[...w].map(k=>RM[k]).join('');
-const TIPS={'あ':'あ punya garis silang di kiri, sedangkan お punya titik di kanan atas.','お':'お punya titik di kanan atas, sedangkan あ punya garis silang di kiri.','は':'は dan ほ mirip. ほ punya satu garis datar tambahan di atas.','ほ':'ほ punya satu garis datar tambahan di atas, sedangkan は tidak.'};
-const WORDS_A=[['あさ','pagi'],['あし','kaki'],['いえ','rumah'],['いす','kursi'],['うえ','atas'],['えき','stasiun'],['おか','bukit'],['かお','wajah'],['かさ','payung'],['くち','mulut'],['くつ','sepatu'],['くに','negara'],['けさ','pagi ini'],['こえ','suara'],['すし','sushi'],['たこ','gurita'],['ねこ','kucing'],['はな','bunga'],['ひと','orang'],['ふく','baju'],['ほし','bintang'],['とけい','jam'],['さかな','ikan'],['あかい','merah'],['あおい','biru'],['たかい','tinggi / mahal'],['ちかい','dekat'],['せかい','dunia'],['すき','suka'],['きく','mendengar'],['かく','menulis'],['いく','pergi'],['つくえ','meja'],['ここ','sini'],['そこ','situ'],['あそこ','sana']].filter(([w])=>[...w].every(k=>RM[k]));
-const WORDS_B=[['かぎ','kunci'],['ごご','sore hari'],['つぎ','berikutnya'],['ひげ','jenggot'],['えがお','wajah tersenyum'],['おじ','paman'],['おば','bibi'],['ぞう','gajah'],['かぞく','keluarga'],['ちず','peta'],['ぶどう','anggur'],['でぐち','pintu keluar'],['とうふ','tahu'],['かば','kuda nil']].filter(([w])=>[...w].every(k=>RM[k]));
+[['あ','お'],['さ','ち'],['は','ほ'],['ぬ','ね'],['け','は'],['く','へ'],['た','な'],['い','こ'],['う','え'],['す','ふ'],['し','じ'],['か','が'],['さ','ざ'],['た','だ'],['は','ば'],['は','ぱ'],['ば','ぱ'],['き','ぎ'],['く','ぐ'],['け','げ'],['こ','ご'],['す','ず'],['せ','ぜ'],['そ','ぞ'],['て','で'],['と','ど'],['ひ','び'],['ひ','ぴ'],['び','ぴ'],['ふ','ぶ'],['ふ','ぷ'],['ぶ','ぷ'],['へ','べ'],['へ','ぺ'],['べ','ぺ'],['ほ','ぼ'],['ほ','ぽ'],['ぼ','ぽ'],
+ ['ぬ','め'],['る','ろ'],['わ','れ'],['ね','れ'],['ね','わ'],['ま','ほ'],['む','す'],['ゆ','わ'],['り','い'],['や','か'],['よ','ま'],['も','せ'],['め','ね'],['を','お'],['ん','そ'],['み','さ'],['ら','う'],['れ','ち']].forEach(([a,b])=>{(SIM[a]=SIM[a]||[]).push(b);(SIM[b]=SIM[b]||[]).push(a)});
+function altsOf(u){
+  if(u==='っ')return [''];
+  if(u.length===2){const b=u[0],sm=u[1];return [...SMALL].filter(x=>x!==sm).map(x=>b+x).filter(x=>YR[x]).concat(YB.map(y=>y[0]).filter(x=>x!==b&&YR[x+sm]).slice(0,3).map(x=>x+sm))}
+  return (SIM[u]||[]).concat([...(rowOf(u)||'')]).filter(x=>x!==u&&RM[x]);
+}
+const TIPS={'あ':'あ punya garis silang di kiri, sedangkan お punya titik di kanan atas.','お':'お punya titik di kanan atas, sedangkan あ punya garis silang di kiri.','は':'は dan ほ mirip. ほ punya satu garis datar tambahan di atas.','ほ':'ほ punya satu garis datar tambahan di atas, sedangkan は tidak.','ぬ':'ぬ dan め mirip. ぬ punya lingkaran kecil di ujung ekornya.','め':'め dan ぬ mirip. ぬ punya lingkaran kecil di ujung ekornya, め tidak.','る':'る punya lingkaran kecil di bawah, sedangkan ろ tidak.','ろ':'ろ tidak punya lingkaran di bawah, sedangkan る punya.','を':'を dibaca "o" (sama seperti お). Hampir selalu dipakai sebagai partikel.','ん':'ん dibaca "n". Dia tidak pernah ada di awal kata.'};
+const WORDS_A=[['あさ','pagi'],['あし','kaki'],['いえ','rumah'],['いす','kursi'],['うえ','atas'],['えき','stasiun'],['おか','bukit'],['かお','wajah'],['かさ','payung'],['くち','mulut'],['くつ','sepatu'],['くに','negara'],['けさ','pagi ini'],['こえ','suara'],['すし','sushi'],['たこ','gurita'],['ねこ','kucing'],['はな','bunga'],['ひと','orang'],['ふく','baju'],['ほし','bintang'],['とけい','jam'],['さかな','ikan'],['あかい','merah'],['あおい','biru'],['たかい','tinggi / mahal'],['ちかい','dekat'],['せかい','dunia'],['すき','suka'],['きく','mendengar'],['かく','menulis'],['いく','pergi'],['つくえ','meja'],['ここ','sini'],['そこ','situ'],['あそこ','sana']];
+const WORDS_B=[['かぎ','kunci'],['ごご','sore hari'],['つぎ','berikutnya'],['ひげ','jenggot'],['えがお','wajah tersenyum'],['おじ','paman'],['おば','bibi'],['ぞう','gajah'],['かぞく','keluarga'],['ちず','peta'],['ぶどう','anggur'],['でぐち','pintu keluar'],['とうふ','tahu'],['かば','kuda nil']];
+const WORDS_C=[['みず','air'],['みち','jalan'],['まち','kota'],['もも','persik'],['むし','serangga'],['やま','gunung'],['ゆき','salju'],['ゆめ','mimpi'],['よる','malam'],['ろく','enam'],['わたし','saya'],['ほん','buku'],['にほん','Jepang'],['にほんご','bahasa Jepang'],['せんせい','guru'],['ともだち','teman'],['ありがとう','terima kasih'],['おはよう','selamat pagi'],['さようなら','sampai jumpa'],['おやすみ','selamat tidur'],['おいしい','enak'],['かわいい','imut'],['あたらしい','baru'],['たのしい','menyenangkan'],['やさしい','baik / mudah'],['ふるい','lama'],['うれしい','senang'],['おもしろい','menarik / lucu'],['りんご','apel'],['みなさん','semuanya'],['おとこ','laki-laki'],['おかあさん','ibu'],['おとうさん','ayah'],['くるま','mobil'],['みせ','toko'],['まいにち','setiap hari'],['まいあさ','setiap pagi'],['らいげつ','bulan depan'],['がくせい','siswa'],['めがね','kacamata'],['なまえ','nama'],['でんわ','telepon'],['しんぶん','koran'],['てんき','cuaca'],['えんぴつ','pensil']];
+const WORDS_D=[['しゃしん','foto'],['かいしゃ','perusahaan'],['きょうしつ','ruang kelas'],['りょこう','wisata'],['ちょっと','sedikit'],['びょういん','rumah sakit'],['おちゃ','teh'],['じゅぎょう','pelajaran'],['しゅくだい','PR'],['ぎゅうにゅう','susu'],['きょう','hari ini'],['ひゃく','seratus'],['きって','perangko'],['ざっし','majalah'],['がっこう','sekolah'],['にっき','buku harian'],['いっしょ','bersama'],['きっぷ','tiket'],['けっこん','pernikahan'],['まっすぐ','lurus'],['りょうり','masakan'],['しょくどう','kantin']];
+const SENTS=[['わたし[は] がくせい です','Saya adalah siswa.'],['これ[は] ほん です','Ini adalah buku.'],['みず[を] のみます','Saya minum air.'],['ごはん[を] たべます','Saya makan nasi.'],['ほん[を] よみます','Saya membaca buku.'],['がっこう[へ] いきます','Saya pergi ke sekolah.'],['にほん[へ] いきます','Saya pergi ke Jepang.'],['やま[へ] いきます','Saya pergi ke gunung.'],['せんせい[は] やさしい です','Sensei itu baik.'],['ゆき[は] しろい です','Salju itu putih.'],['やま[は] たかい です','Gunung itu tinggi.'],['わたし[は] ゆめ[を] みます','Saya bermimpi.'],['おちゃ[を] のみます','Saya minum teh.'],['わたし[は] にほん[へ] いきます','Saya pergi ke Jepang.'],['ともだち[は] がっこう[へ] いきます','Teman pergi ke sekolah.'],['わたし[は] にほんご[を] べんきょう します','Saya belajar bahasa Jepang.']];
+const PRT={'は':['wa','ha'],'を':['o','wo'],'へ':['e','he']};
+function parseS(mk){return mk.trim().split(/\s+/).map(tk=>{const segs=[];tk.replace(/\[(.)\]|([^\[]+)/g,(m,p,w)=>{segs.push(p?{p}:{w})});return segs})}
+const sentJP=ps=>ps.map(sg=>sg.map(x=>x.p||x.w).join('')).join(' ')+'。';
+const sentRom=(ps,wrong)=>{let pi=0;return ps.map(sg=>sg.map(x=>x.p?PRT[x.p][(wrong===pi++)?1:0]:romWord(x.w)).join(' ')).join(' ')};
 
 /* ===== penampilan ===== */
 const HAIR=[['pendek','Pendek',0],['bob','Bob',0],['panjang','Panjang',0],['kuncir','Kuncir',0],['jabrik','Jabrik',0]];
-const HAIRC=[['Hitam','#25222e',0],['Cokelat tua','#5a3a24',0],['Cokelat','#9a5f34',0],['Pirang','#e0b56a',30],['Ungu','#8d5c9c',40],['Biru salju','#6ea6d8',50]];
+const HAIRC=[['Hitam','#25222e',0],['Cokelat tua','#5a3a24',0],['Cokelat','#9a5f34',0],['Pirang','#e0b56a',30],['Ungu','#8d5c9c',40],['Biru salju','#6ea6d8',50],['Hijau neon','#39ff14',60],['Pink neon','#ff2bd6',60],['Biru neon','#1fe5ff',60],['Kuning neon','#f4ff2e',60]];
 const SKIN=[['#f6d8c3'],['#e7b890'],['#c38b63'],['#8f5a3b']];
 const SUIT=[['blazer','Jas',0],['pelaut','Pelaut',0],['gakuran','Gakuran',0],['gi','Gi Kayuki',60]];
-const SUITC=[['Biru Kayuki','#1d3f8f',0],['Hijau tua','#2f6b52',0],['Ungu','#7a5b86',30],['Abu','#6d7077',30],['Marun','#8d2f3e',40]];
+const SUITC=[['Biru Kayuki','#1d3f8f',0],['Hijau tua','#2f6b52',0],['Ungu','#7a5b86',30],['Abu','#6d7077',30],['Marun','#8d2f3e',40],['Hijau neon','#39ff14',50],['Pink neon','#ff2bd6',50],['Biru neon','#1fe5ff',50]];
 const ACC=[['none','Tanpa',0],['kacamata','Kacamata',0],['bando','Ikat kepala salju',50],['syal','Syal salju',40],['topi','Topi',70]];
-const ACCC=[['Merah','#e04458',0],['Kuning','#f2b134',0],['Hijau','#47b89a',0],['Ungu','#8a79d1',0]];
+const ACCC=[['Merah','#e04458',0],['Kuning','#f2b134',0],['Hijau','#47b89a',0],['Ungu','#8a79d1',0],['Hijau neon','#39ff14',30],['Pink neon','#ff2bd6',30],['Biru neon','#1fe5ff',30]];
 const CATS=[['hair','Rambut',HAIR],['hairC','Warna rambut',HAIRC],['skin','Kulit',SKIN],['suit','Seragam',SUIT],['suitC','Warna seragam',SUITC],['acc','Aksesori',ACC],['accC','Warna aksesori',ACCC]];
 const owned=(cat,i)=>{const arr=CATS.find(c=>c[0]===cat)[2];const p=arr[i][arr[i].length-1];return typeof p!=='number'||p===0||S.own[cat+i]};
 
@@ -254,10 +284,12 @@ const flakeTex=canvasTex(128,128,(g,w,h)=>{g.fillStyle='#111';g.fillRect(0,0,w,h
 const boardTex=canvasTex(512,256,(g,w,h)=>{g.fillStyle='#f8fbff';g.fillRect(0,0,w,h);g.fillStyle='#1d63d8';g.font='700 120px "KF Gothic",sans-serif';g.textAlign='center';g.textBaseline='middle';g.fillText('あ か さ',w/2,h*.45);g.fillStyle='#d64550';g.font='700 40px system-ui';g.fillText('a   ka   sa',w/2,h*.85)});
 
 /* ===== model manusia ===== */
+const NEON=new Set(['#39ff14','#ff2bd6','#1fe5ff','#f4ff2e']);
+const MN=c=>NEON.has(c)?M(c,{emissive:c,emissiveIntensity:.35,roughness:.5}):M(c);
 function mkMouth(){const m=new THREE.Mesh(new THREE.TorusGeometry(.07,.014,6,12,Math.PI),M('#7a2c2c'));m.rotation.z=Math.PI;return m}
 function buildHuman(sp){
   const g=new THREE.Group();
-  const skin=M(sp.skin),pants=M(sp.pants||'#1c2230'),suitM=M(sp.suitCol),shoe=M('#12161e');
+  const skin=M(sp.skin),pants=M(sp.pants||'#1c2230'),suitM=MN(sp.suitCol),shoe=M('#12161e');
   const legs=[],arms=[];
   [-1,1].forEach(s=>{
     const lg=new THREE.Group();lg.position.set(s*.17,.72,0);
@@ -296,7 +328,7 @@ function buildHuman(sp){
     const b=new THREE.Mesh(new THREE.CircleGeometry(.055,10),new THREE.MeshBasicMaterial({color:0xff8fa3,transparent:true,opacity:.45}));b.position.set(s*.21,-.08,.318);b.rotation.y=s*.25;head.add(b);
     if(sp.brow!==false){const br=box(.09,.02,.02,M('#2a2024'));br.position.set(s*.125,.13,.315);br.rotation.z=s*-.08;head.add(br)}});
   head.add(at(mkMouth(),0,-.1,.325));
-  const hc=M(sp.hairCol||'#25222e');
+  const hc=MN(sp.hairCol||'#25222e');
   const cap=(r=.375,ph=.4)=>{const c=new THREE.Mesh(new THREE.SphereGeometry(r,18,10,0,Math.PI*2,0,Math.PI*ph),hc);c.position.set(0,.035,-.012);return c};
   const hs2=sp.hair;
   if(hs2!=='none'){head.add(cap());head.add(at(box(.68,.36,.12,hc),0,.0,-.27));
@@ -312,7 +344,7 @@ function buildHuman(sp){
     else if(hs2==='bun'){head.add(at(box(.46,.08,.13,hc),0,.25,.24));head.add(at(sph(.14,hc,10,8),0,.1,-.4));[-1,1].forEach(s=>head.add(at(box(.05,.2,.2,hc),s*.34,.04,.02)))}
   }
   if(sp.glasses){const gm=M(sp.glassC||'#1a1a1a',{roughness:.4});[-1,1].forEach(s=>{const t=new THREE.Mesh(new THREE.TorusGeometry(.095,.014,6,16),gm);t.position.set(s*.125,.02,.335);head.add(t)});head.add(at(box(.07,.015,.015,gm),0,.03,.335));[-1,1].forEach(s=>head.add(at(box(.015,.015,.3,gm),s*.222,.03,.19)))}
-  const ac=sp.acc&&sp.acc.k,acm=M(sp.acc?sp.acc.c:'#e04458');
+  const ac=sp.acc&&sp.acc.k,acm=MN(sp.acc?sp.acc.c:'#e04458');
   if(ac==='bando'){const b=cyl(.375,.375,.09,acm,18);b.position.y=.17;head.add(b);const s=sph(.05,M('#fff'),8,6);s.position.set(0,.17,.37);head.add(s)}
   if(ac==='syal'){const t=new THREE.Mesh(new THREE.TorusGeometry(.26,.085,8,16),acm);t.rotation.x=Math.PI/2;t.position.set(0,-.33,0);head.add(t);head.add(at(box(.14,.46,.07,acm),.12,-.6,.25))}
   if(ac==='topi'){head.add(at(cyl(.3,.37,.2,acm,16),0,.36,0));head.add(at(box(.5,.03,.3,acm),0,.27,.3))}
@@ -478,7 +510,9 @@ function renderPortrait(){
   pcam.lookAt(hp.x,hp.y-(u.kind==='yuki'?.05:.12),hp.z);
   /* sembunyikan penanda saat render potret */
   const mv=Object.values(marks).map(m=>m.visible);Object.values(marks).forEach(m=>m.visible=false);
+  const ac=[player,yuki,cania,farhan],av=ac.map(a=>a.visible);ac.forEach(a=>{if(a!==o)a.visible=false});
   pr.render(scene,pcam);
+  ac.forEach((a,i)=>a.visible=av[i]);
   Object.values(marks).forEach((m,i)=>m.visible=mv[i]);
 }
 
@@ -516,64 +550,96 @@ const hearts=(n,max)=>'❤️'.repeat(n)+'🖤'.repeat(Math.max(0,max-n));
 const MAT={
   m1:{title:'Kenalan dulu: baris あ か さ',rows:['あいうえお','かきくけこ','さしすせそ'],note:'Ketuk huruf untuk mendengar suaranya. Ingat: し dibaca "shi", bukan "si".'},
   m2:{title:'Lanjut: baris た な は',rows:['たちつてと','なにぬねの','はひふへほ'],note:'Awas yang tricky: ち = "chi", つ = "tsu", ふ = "fu".'},
-  m4:{title:'Tanda tenten (゛) dan maru (゜)',rows:['がぎぐげご','ざじずぜぞ','だでど','ばびぶべぼ','ぱぴぷぺぽ'],note:'Tenten (゛) bikin bunyi jadi "berat": か→が, さ→ざ, た→だ, は→ば. Maru (゜) khusus baris は: は→ぱ. ぢ/づ jarang dipakai, kita lewati dulu.'}
+  m4:{title:'Tanda tenten (゛) dan maru (゜)',rows:['がぎぐげご','ざじずぜぞ','だでど','ばびぶべぼ','ぱぴぷぺぽ'],note:'Tenten (゛) bikin bunyi jadi "berat": か→が, さ→ざ, た→だ, は→ば. Maru (゜) khusus baris は: は→ぱ. ぢ/づ jarang dipakai, kita lewati dulu.'},
+  m5:{title:'Baris ま dan や',rows:['まみむめも','やゆよ'],note:'Hati-hati: ぬ dan め mirip banget. ぬ punya lingkaran kecil di ujung ekornya.'},
+  m6:{title:'Baris ら, わ, を, ん',rows:['らりるれろ','わを','ん'],note:'Catatan penting: を dibaca "o" (bukan "wo"), dan ん dibaca "n". る punya lingkaran kecil di bawah, ろ tidak.'},
+  m8:{title:'Huruf kecil ゃ ゅ ょ dan っ',rows:['きゃきゅきょ','しゃしゅしょ','ちゃちゅちょ','にゃにゅにょ','ひゃひゅひょ','りゃりゅりょ'],note:'ゃ ゅ ょ (kecil) menempel pada huruf sebelumnya dan dibaca jadi satu bunyi: き + ゃ = kya (bukan ki-ya). Sedangkan っ kecil itu jeda singkat: konsonan setelahnya dibaca dobel.',ex:[['きって','kitte (bukan "kite")'],['がっこう','gakkou'],['ざっし','zasshi']]},
+  m9:{title:'Tiga huruf jago nyamar: は を へ',rows:['はをへ'],note:'Kalau dipakai sebagai partikel (penanda kata), cara bacanya BERUBAH: は dibaca "wa", を dibaca "o", へ dibaca "e". Di dalam kata biasa, mereka tetap dibaca normal (ha, he).',ex:[['わたしは がくせいです','watashi wa gakusei desu'],['みずを のみます','mizu o nomimasu'],['がっこうへ いきます','gakkou e ikimasu']],special:{'は':'wa','を':'o','へ':'e'}}
 };
 function materi(id){const m=MAT[id];
-  const h=`<h2>${m.title}</h2><p class="hint">${m.note}</p>`+m.rows.map(r=>`<div class="chips">${[...r].map(k=>`<button class="jp" data-k="${k}"><b>${k}</b><small>${RM[k]}</small></button>`).join('')}${'<i class="gap"></i>'.repeat(Math.max(0,5-r.length))}</div>`).join('')+`<button class="btn" id="mOk" style="width:100%;margin-top:8px">Siap, aku paham!</button>`;
+  const chip=k=>`<button class="jp" data-k="${k}"><b>${k}</b><small>${(m.special&&m.special[k])||romWord(k)}</small></button>`;
+  const h=`<h2>${m.title}</h2><p class="hint">${m.note}</p>`+m.rows.map(r=>{const us=toks(r);return `<div class="chips">${us.map(chip).join('')}${'<i class="gap"></i>'.repeat(Math.max(0,5-us.length))}</div>`}).join('')+(m.ex?`<div class="list" style="margin:8px 0">${m.ex.map(([a,b])=>`<div class="li"><span class="jp" style="font-size:1.15rem">${a}</span><small style="text-align:right">${b}</small></div>`).join('')}</div>`:'')+`<button class="btn" id="mOk" style="width:100%;margin-top:8px">Siap, aku paham!</button>`;
   return panel(h,(close,b)=>{b.querySelectorAll('.chips button').forEach(x=>x.onclick=()=>{sfx.tap();speak(x.dataset.k)});b.querySelector('#mOk').onclick=()=>close()})}
 
 /* ===== mesin soal ===== */
 function optsLetter(ans,pool){
-  const rom=RM[ans],c=new Set();
-  (SIM[ans]||[]).filter(x=>pool.includes(x)&&RM[x]!==rom).slice(0,2).forEach(x=>c.add(RM[x]));
-  for(const x of shuffle(pool)){if(c.size>=3)break;if(RM[x]!==rom)c.add(RM[x])}
-  return shuffle([rom,...c]);
+  const rom=romU(ans),c=new Set();
+  if(ans.length===2){
+    [...SMALL].map(sm=>ans[0]+sm).concat(pool.filter(x=>x.length===2&&x[1]===ans[1])).filter(x=>x!==ans&&YR[x]).forEach(x=>{if(c.size<3&&romU(x)!==rom)c.add(romU(x))});
+  }else{
+    (SIM[ans]||[]).filter(x=>pool.includes(x)&&romU(x)!==rom).slice(0,2).forEach(x=>c.add(romU(x)));
+  }
+  for(const x of shuffle(pool)){if(c.size>=3)break;if(romU(x)&&romU(x)!==rom)c.add(romU(x))}
+  return shuffle([rom,...[...c].slice(0,3)]);
 }
 function optsWord(w){
-  const ks=[...w],rom=romOf(w),set=new Set();let n=0;
-  while(set.size<3&&n++<80){
-    const p=rnd(ks.length),o=ks[p];
-    const alts=(SIM[o]||[]).concat([...rowOf(o)||'']).filter(x=>x!==o&&RM[x]);
-    if(!alts.length)continue;
-    const nk=ks.slice();nk[p]=pick(alts);const r=romOf(nk.join(''));
-    if(r!==rom)set.add(r);
+  const u=toks(w),rom=romWord(w),set=new Set();
+  const rn=romWord(w,true);if(rn!==rom)set.add(rn);
+  let n=0;
+  while(set.size<3&&n++<120){
+    const p=rnd(u.length),alts=altsOf(u[p]);if(!alts.length)continue;
+    const nk=u.slice();nk[p]=pick(alts);const r=romWord(nk.join(''));if(r&&r!==rom)set.add(r);
   }
-  const all=Object.keys(RM);let g=0;
-  while(set.size<3&&g++<200){const nk=ks.slice();nk[rnd(ks.length)]=pick(all);const r=romOf(nk.join(''));if(r!==rom)set.add(r)}
-  return shuffle([rom,...set]);
+  const all=Object.keys(RM).filter(k=>k!=='ん');let g=0;
+  while(set.size<3&&g++<300){const nk=u.slice(),p=rnd(u.length);if(nk[p]==='っ')continue;nk[p]=pick(all);const r=romWord(nk.join(''));if(r!==rom)set.add(r)}
+  return shuffle([rom,...[...set].slice(0,3)]);
 }
-const L=s=>[...s];
+function optsSent(ps){
+  const rom=sentRom(ps,-1),set=new Set();
+  const np=ps.flat().filter(x=>x.p).length;
+  for(let i=0;i<np;i++)set.add(sentRom(ps,i));
+  set.delete(rom);
+  let n=0;
+  while(set.size<3&&n++<200){
+    const cp=ps.map(sg=>sg.map(x=>({...x})));
+    const ws=cp.flat().filter(x=>x.w),x=pick(ws),u=toks(x.w),p=rnd(u.length),alts=altsOf(u[p]);
+    if(!alts.length)continue;u[p]=pick(alts);x.w=u.join('');
+    const r=sentRom(cp,-1);if(r!==rom)set.add(r);
+  }
+  return shuffle([rom,...[...set].slice(0,3)]);
+}
+const qL=(k,pool)=>({t:'L',jp:k,rom:romU(k),opts:optsLetter(k,pool),tip:TIPS[k]});
 function makeQs(m){
-  if(m.kind==='L'){
-    const pool=m.pool,rev=m.rev||[];
-    let base=shuffle(pool).slice(0,m.n-(rev.length?3:0));
-    const r=shuffle(rev).slice(0,3);
-    const items=shuffle([...base,...r]);
-    const all=[...new Set([...pool,...rev])];
-    return items.map(k=>({t:'L',jp:k,rom:RM[k],opts:optsLetter(k,all),tip:TIPS[k]}));
-  }
-  if(m.kind==='W'){
-    return shuffle(m.words).slice(0,m.n).map(([w,mean])=>({t:'W',jp:w,rom:romOf(w),mean,opts:optsWord(w)}));
-  }
-  if(m.kind==='X'){
-    const lets=shuffle(m.pool).slice(0,5).map(k=>({t:'L',jp:k,rom:RM[k],opts:optsLetter(k,m.pool),tip:TIPS[k]}));
-    const wds=shuffle(m.words).slice(0,m.n-5).map(([w,mean])=>({t:'W',jp:w,rom:romOf(w),mean,opts:optsWord(w)}));
-    return shuffle([...lets,...wds]);
-  }
+  const out=[];
+  if(m.L){const {pool,n,rev=[]}=m.L,nr=rev.length?Math.min(3,n-1):0,base=shuffle(pool).slice(0,n-nr),r=shuffle(rev).slice(0,nr),all=[...new Set([...pool,...rev])];[...base,...r].forEach(k=>out.push(qL(k,all)))}
+  if(m.W)shuffle(m.W.words).slice(0,m.W.n).forEach(([w,mean])=>out.push({t:'W',jp:w,rom:romWord(w),mean,opts:optsWord(w)}));
+  if(m.S)shuffle(m.S.sents).slice(0,m.S.n).forEach(([mk,mean])=>{const ps=parseS(mk);out.push({t:'S',jp:sentJP(ps),rom:sentRom(ps,-1),mean,opts:optsSent(ps)})});
+  return shuffle(out);
 }
-const ROW_A=L('あいうえおかきくけこさしすせそ'),ROW_B=L('たちつてとなにぬねのはひふへほ'),DAK=L('がぎぐげござじずぜぞだでどばびぶべぼぱぴぷぺぽ');
+const ROW_A=[...'あいうえおかきくけこさしすせそ'],ROW_B=[...'たちつてとなにぬねのはひふへほ'],DAK=[...'がぎぐげござじずぜぞだでどばびぶべぼぱぴぷぺぽ'];
+const R2A=[...'まみむめもやゆよ'],R2B=[...'らりるれろわをん'],YOON=['きゃ','きゅ','きょ','しゃ','しゅ','しょ','ちゃ','ちゅ','ちょ','にゃ','にゅ','にょ','ひゃ','ひゅ','ひょ','りゃ','りゅ','りょ'];
+const WORDS_AC=WORDS_A.concat(WORDS_C),WORDS_ALL=WORDS_AC.concat(WORDS_B);
 const MISSIONS=[
- {id:'m1',npc:'cania',title:'Papan Nama Kelas',sub:'Baca huruf あ か さ',hearts:5,n:8,kind:'L',pool:ROW_A,mat:'m1',
+ {id:'m1',bab:1,npc:'cania',title:'Papan Nama Kelas',sub:'Baca huruf あ か さ',hearts:5,L:{pool:ROW_A,n:8},mat:'m1',
   intro:[['cania','Nah, kita mulai dari yang paling dasar. Hiragana itu huruf yang dipakai buat kata-kata asli Jepang. Hari ini kita kenalan sama tiga baris: あ, か, dan さ.'],['cania','Lihat dulu materinya, ketuk huruf buat dengar suaranya. Setelah itu kita latihan baca ya!']],
   outro:[['cania','Bagus! Kamu sudah bisa membaca huruf pertamamu. Kalau ada yang masih lupa, nggak apa-apa, nanti kita ulang lagi.']]},
- {id:'m2',npc:'cania',title:'Baris Lanjutan',sub:'Baca huruf た な は',hearts:5,n:8,kind:'L',pool:ROW_B,rev:ROW_A,mat:'m2',need:'m1',
+ {id:'m2',bab:1,npc:'cania',title:'Baris Lanjutan',sub:'Baca huruf た な は',hearts:5,L:{pool:ROW_B,n:8,rev:ROW_A},mat:'m2',need:'m1',
   intro:[['cania','Siap lanjut? Sekarang tiga baris berikutnya: た, な, dan は. Sebagian bakal dicampur sama huruf yang tadi, biar nggak lupa.']],
   outro:[['cania','Mantap! Sekarang kamu sudah kenal 30 huruf dasar. Coba ngobrol sama Yuki Sensei, beliau punya tantangan buat kamu.']]},
- {id:'m3',npc:'yuki',title:'Kata-kata di Kelas',sub:'Baca kata 2–4 huruf',hearts:5,n:8,kind:'W',words:WORDS_A,need:'m2',
+ {id:'m3',bab:1,npc:'yuki',title:'Kata-kata di Kelas',sub:'Baca kata 2–4 huruf',hearts:5,W:{words:WORDS_A,n:8},need:'m2',
   intro:[['yuki','Konnichiwa! Sekarang naik level: baca kata utuh! Gabungkan bunyi tiap huruf jadi satu kata, misalnya ね + こ = ne-ko.'],['yuki','Tiap kata ada artinya, jadi sambil belajar kamu nambah kosakata. Yuk!']],
   outro:[['yuki','Hebat banget! Membaca kata utuh itu bukan hal kecil. Satu tantangan lagi, ya.']]},
- {id:'m4',npc:'yuki',title:'Tantangan Yuki Sensei',sub:'Tenten, maru, dan campuran',hearts:4,n:10,kind:'X',pool:DAK,words:WORDS_B,mat:'m4',need:'m3',
+ {id:'m4',bab:1,npc:'yuki',title:'Tantangan Yuki Sensei',sub:'Tenten, maru, dan campuran',hearts:4,L:{pool:DAK,n:5},W:{words:WORDS_B,n:5},mat:'m4',need:'m3',end:'bab1',
   intro:[['yuki','Ini tantangan terakhir Babak 1. Kamu bakal ketemu huruf dengan tanda tenten dan maru. Lihat dulu materinya, lalu kita adu! Semangatmu cuma 4 ❤️ di sini.']],
+  outro:[]},
+ /* ===== Babak 2 ===== */
+ {id:'m5',bab:2,npc:'cania',title:'Baris ま dan や',sub:'Baca huruf ま み む め も や ゆ よ',hearts:5,L:{pool:R2A,n:8},mat:'m5',need:'m4',
+  intro:[['cania','Selamat datang di Babak 2! Kita lanjut ke huruf-huruf berikutnya: baris ま dan や.'],['cania','Awas, ada beberapa yang mirip, contohnya ぬ dan め. Perhatikan bentuknya baik-baik ya.']],
+  outro:[['cania','Bagus! Tinggal satu rumpun lagi buat melengkapi semua huruf hiragana dasar.']]},
+ {id:'m6',bab:2,npc:'cania',title:'Baris ら, わ, を, ん',sub:'Huruf terakhir hiragana dasar',hearts:5,L:{pool:R2B,n:8,rev:R2A},mat:'m6',need:'m5',
+  intro:[['cania','Ini dia huruf-huruf terakhir: baris ら, lalu わ, を, dan ん. Ada dua yang unik: を dibaca "o" dan ん dibaca "n".']],
+  outro:[['cania','Luar biasa! Sekarang kamu sudah mengenal semua huruf hiragana dasar. Yuki Sensei sudah nunggu buat kata-kata baru.']]},
+ {id:'m7',bab:2,npc:'yuki',title:'Kata-kata Baru',sub:'Kosakata dari semua baris',hearts:5,W:{words:WORDS_AC,n:10},need:'m6',
+  intro:[['yuki','Konnichiwa lagi! Sekarang kamu sudah punya semua huruf dasar, saatnya baca kata-kata yang lebih panjang. Ada "ゆき" (salju), kesukaanku!'],['yuki','Perhatikan ん di tengah kata. Kadang bunyinya jadi "m" kalau ketemu b, m, atau p, contohnya しんぶん dibaca "shimbun".']],
+  outro:[['yuki','Keren! Kosakatamu makin banyak. Sekarang ada trik baru dari Cania Sensei.']]},
+ {id:'m8',bab:2,npc:'cania',title:'Huruf Kecil ゃ ゅ ょ dan っ',sub:'Bunyi gabungan dan jeda',hearts:4,L:{pool:YOON,n:5},W:{words:WORDS_D,n:6},mat:'m8',need:'m7',
+  intro:[['cania','Sekarang bagian yang sering bikin bingung: huruf kecil. ゃ, ゅ, ょ menempel ke huruf sebelumnya, dan っ kecil itu jeda singkat.'],['cania','Santai aja, lihat materinya dulu ya. Semangatmu 4 ❤️ di misi ini.']],
+  outro:[['cania','Mantap! Huruf kecil sering jadi batu sandungan, tapi kamu berhasil melewatinya.']]},
+ {id:'m9',bab:2,npc:'yuki',title:'Partikel は を へ',sub:'Baca kalimat sederhana',hearts:4,S:{sents:SENTS,n:8},mat:'m9',need:'m8',
+  intro:[['yuki','Saatnya baca kalimat! Tapi hati-hati, ada tiga huruf yang jago nyamar: は, を, dan へ.'],['yuki','Kalau jadi partikel, bacanya berubah: は jadi "wa", を jadi "o", へ jadi "e". Simak materinya dulu!']],
+  outro:[['yuki','Kamu sudah bisa membaca kalimat utuh! Satu ujian terakhir untuk Babak 2.']]},
+ {id:'m10',bab:2,npc:'cania',title:'Ujian Kelas',sub:'Campuran, ada batas waktu!',hearts:4,timer:20,L:{pool:[...R2A,...R2B,...YOON.slice(0,9)],n:4},W:{words:WORDS_ALL.concat(WORDS_D),n:4},S:{sents:SENTS,n:4},need:'m9',end:'bab2',
+  intro:[['cania','Ujian Kelas Babak 2! Semua yang sudah kamu pelajari dicampur jadi satu. Tiap soal ada batas waktu 20 detik, jadi jangan kelamaan mikir ya.'],['yuki','Semangat! Kami percaya sama kamu!']],
   outro:[]}
 ];
 const mById=id=>MISSIONS.find(m=>m.id===id);
@@ -583,32 +649,39 @@ const nextMission=npc=>MISSIONS.find(m=>m.npc===npc&&!S.done[m.id]&&mOpen(m));
 async function runQuiz(m){
   const qs=makeQs(m);let h=m.hearts,wrong=0,combo=0,gain=0;
   const Q=$('quiz');Q.hidden=false;$('qTitle').textContent=m.title;
+  $('qTimeW').hidden=!m.timer;
   const upd=()=>{$('qHearts').textContent=hearts(h,m.hearts);$('qPoin').textContent='❄️ '+S.poin};
   upd();
   let ok=true;
   for(let i=0;i<qs.length;i++){
     const q=qs[i];window.__Q=q;
     $('qBar').firstElementChild.style.width=(i/qs.length*100)+'%';
-    $('qPrompt').textContent=q.t==='L'?'Huruf ini dibaca apa?':'Kata ini dibaca apa?';
-    const jp=$('qJP');jp.textContent=q.jp;jp.style.fontSize=q.jp.length>2?'clamp(2.8rem,17vw,5rem)':'';jp.className='jp pop';
-    $('qMean').textContent=q.t==='W'?'':'';
-    $('qFb').textContent=m.id==='m4'&&i===0?'Ingat: tenten bikin bunyi jadi lebih "berat".':'Pilih bunyi yang benar.';
+    $('qPrompt').textContent=q.t==='L'?'Huruf ini dibaca apa?':q.t==='W'?'Kata ini dibaca apa?':'Kalimat ini dibaca apa?';
+    const jp=$('qJP');jp.textContent=q.jp;jp.className='jp pop';
+    jp.style.whiteSpace=q.t==='S'?'normal':'nowrap';
+    jp.style.fontSize=q.t==='S'?(q.jp.length>12?'clamp(1.5rem,7.4vw,2.3rem)':'clamp(1.8rem,9vw,2.8rem)'):(q.jp.length>2?(q.jp.length>4?'clamp(2.3rem,13vw,4rem)':'clamp(2.8rem,17vw,5rem)'):'');
+    $('qMean').textContent='';
+    $('qFb').textContent=m.id==='m4'&&i===0?'Ingat: tenten bikin bunyi jadi lebih "berat".':m.id==='m9'&&i===0?'Ingat: は = wa, を = o, へ = e kalau jadi partikel.':'Pilih bunyi yang benar.';
     $('qNext').hidden=true;
-    const box=$('qOpts');box.innerHTML='';
+    const box=$('qOpts');box.innerHTML='';box.className=q.t==='S'?'one':'';
+    let tmr=null,raf=0;
     const pickIdx=await new Promise(res=>{
       q.opts.forEach((o,k)=>{const b=document.createElement('button');b.textContent=o;b.onclick=()=>res(k);box.appendChild(b)});
-      $('qSpk').onclick=()=>speak(q.jp);
+      $('qSpk').onclick=()=>speak(q.t==='S'?q.jp.replace(/\s/g,''):q.jp);
+      if(m.timer){const t0=performance.now(),bar=$('qTime');const tick=()=>{const f=Math.max(0,1-(performance.now()-t0)/(m.timer*1000));bar.style.width=(f*100)+'%';bar.style.background=f<.25?'#d64550':'#f2b134';if(f<=0){res(-1)}else raf=requestAnimationFrame(tick)};tick()}
     });
-    const good=q.opts[pickIdx]===q.rom;
+    cancelAnimationFrame(raf);
+    const good=pickIdx>=0&&q.opts[pickIdx]===q.rom;
     [...box.children].forEach((b,k)=>{b.disabled=true;if(q.opts[k]===q.rom)b.classList.add('ok');else if(k===pickIdx)b.classList.add('bad');else b.classList.add('dim')});
     let msg;
     if(good){combo++;const g=4+Math.min(5,combo-1);gain+=g;setPoin(g);sfx.ok();
       msg=`Benar! +${g} ❄️${combo>2?`  Kombo ×${combo} 🔥`:''}`}
-    else{combo=0;h--;wrong++;setPoin(-2);sfx.bad();document.getElementById('qCard').classList.remove('shake');void document.getElementById('qCard').offsetWidth;document.getElementById('qCard').classList.add('shake');
-      msg=`Belum tepat. Jawabannya "${q.rom}". −1 ❤️, −2 ❄️`}
-    if(q.t==='W'){$('qMean').textContent=`${q.rom} = ${q.mean}`}
+    else{combo=0;h--;wrong++;setPoin(-2);sfx.bad();const c=$('qCard');c.classList.remove('shake');void c.offsetWidth;c.classList.add('shake');
+      msg=(pickIdx<0?'Waktu habis! ':'Belum tepat. ')+`Jawabannya "${q.rom}". −1 ❤️, −2 ❄️`}
+    if(q.t==='W')$('qMean').textContent=`${q.rom} = ${q.mean}`;
+    if(q.t==='S')$('qMean').textContent=q.mean;
     $('qFb').textContent=msg+(q.tip?`\nTips: ${q.tip}`:'');
-    upd();speak(q.jp);
+    upd();speak(q.t==='S'?q.jp.replace(/\s/g,''):q.jp);
     if(h<=0){ok=false;await sleep(900);break}
     $('qNext').hidden=false;
     await new Promise(r=>{$('qNext').onclick=()=>{sfx.tap();r()}});
@@ -638,14 +711,20 @@ async function startMission(m){
   await panel(`<h2 class="cen">Misi selesai! 🎉</h2><div class="stars">${'⭐'.repeat(stars)}${'☆'.repeat(3-stars)}</div><p class="cen big">+${res.gain+bonus} ❄️</p><p class="hint cen">${first?`Bonus misi pertama: +${bonus} ❄️`:'Bonus ulang: +5 ❄️'}<br>Salah: ${res.wrong}× · Semangat tersisa: ${hearts(res.h,m.hearts)}</p><button class="btn" id="ok" style="width:100%">Lanjut</button>`,(cl,b)=>{b.querySelector('#ok').onclick=()=>cl()});
   mode='dialog';
   if(m.outro.length){await say(m.outro);hideDlg()}
-  if(m.id==='m4'&&first)await endBab1();
+  if(m.end&&first)await (m.end==='bab1'?endBab1():endBab2());
   mode='idle';refreshMarks();
 }
 async function endBab1(){
   mode='dialog';
-  await say([['yuki','Selamat! Babak 1 selesai! Kamu sudah bisa membaca hiragana dasar, lengkap dengan tenten dan maru. Itu pondasi yang kuat banget.'],['cania','Kami bangga sama kamu. Berikutnya ada katakana, dan kamu juga akan ketemu dengan para sensei lain.'],['yuki','Babak 2 dan seterusnya lagi disiapkan. Sambil nunggu, kamu bisa ngobrol sama Farhan Sensei lewat menu "Pratinjau sesi konseling" ya!']]);
+  await say([['yuki','Selamat! Babak 1 selesai! Kamu sudah bisa membaca hiragana dasar, lengkap dengan tenten dan maru. Itu pondasi yang kuat banget.'],['cania','Kami bangga sama kamu. Babak 2 sudah terbuka! Temui aku lagi untuk lanjut ke huruf-huruf berikutnya.']]);
   hideDlg();
-  await panel(`<h2 class="cen">Babak 1 tamat 🏆</h2><p class="hint cen">Babak 2: Hiragana lanjutan, kalimat &amp; partikel akan segera hadir. Poinmu tersimpan, dan bisa dipakai buat ganti penampilan.</p><button class="btn" id="ok" style="width:100%">Oke</button>`,(cl,b)=>{b.querySelector('#ok').onclick=()=>cl()});
+  await panel(`<h2 class="cen">Babak 1 tamat 🏆</h2><p class="hint cen">Babak 2: Kelas Makin Seru sudah terbuka. Poinmu tersimpan, dan bisa dipakai buat ganti penampilan.</p><button class="btn" id="ok" style="width:100%">Oke</button>`,(cl,b)=>{b.querySelector('#ok').onclick=()=>cl()});
+}
+async function endBab2(){
+  mode='dialog';
+  await say([['cania','Ujian Kelas selesai dengan baik! Sekarang kamu sudah mengenal SEMUA huruf hiragana, termasuk huruf kecil dan partikel.'],['yuki','Hebat banget! Babak berikutnya adalah katakana, huruf untuk kata-kata serapan. Di sana kamu akan ketemu sensei yang lain juga.'],['yuki','Babak 3 lagi disiapkan. Sambil nunggu, kamu bisa ngobrol sama Farhan Sensei lewat menu "Pratinjau sesi konseling" ya!']]);
+  hideDlg();
+  await panel(`<h2 class="cen">Babak 2 tamat 🏆</h2><p class="hint cen">Semua hiragana sudah kamu kuasai. Babak 3: Dunia Katakana akan segera hadir.</p><button class="btn" id="ok" style="width:100%">Oke</button>`,(cl,b)=>{b.querySelector('#ok').onclick=()=>cl()});
 }
 
 /* ===== sesi konseling ===== */
@@ -710,14 +789,14 @@ function refreshMarks(){
   marks.cania.visible=!!nextMission('cania')&&mode!=='kons';
   const nm=MISSIONS.find(m=>!S.done[m.id]&&mOpen(m));
   $('goal').hidden=false;
-  $('goalT').textContent=nm?`Tujuan: bicara dengan ${NAMES[nm.npc]} (${nm.title})`:'Babak 1 selesai! Buka menu untuk pratinjau konseling';
+  $('goalT').textContent=nm?`Tujuan: bicara dengan ${NAMES[nm.npc]} (${nm.title})`:'Babak 2 selesai! Babak 3 segera hadir. Coba pratinjau konseling di menu ☰';
 }
 async function talkTo(id){
   if(mode!=='idle')return;
   const m=nextMission(id);
   mode='dialog';const a=actors[id];face(a,player);face(player,a);
   if(m){await startMission(m);return}
-  const chat={yuki:[['yuki','Kamu sudah menyelesaikan semua misi Babak 1! Kalau mau latihan lagi, buka Peta Misi (🗺️) dan ulangi misi kapan saja.']],cania:[['cania','Kalau masih ada huruf yang suka lupa, ulangi misi dari Peta Misi ya. Latihan ulang itu bagus banget.']]}[id];
+  const chat={yuki:[['yuki','Kamu sudah menyelesaikan semua misi yang tersedia! Kalau mau latihan lagi, buka Peta Misi (🗺️) dan ulangi misi kapan saja.']],cania:[['cania','Kalau masih ada huruf yang suka lupa, ulangi misi dari Peta Misi ya. Latihan ulang itu bagus banget.']]}[id];
   const need=MISSIONS.find(x=>!S.done[x.id]&&mOpen(x));
   if(need&&need.npc!==id)await say([[id,`Coba temui ${NAMES[need.npc]} dulu ya, ada misi buat kamu.`]]);
   else await say(chat);
@@ -800,13 +879,18 @@ async function lookPanel(){
 async function mapPanel(){
   if(mode!=='idle')return;mode='menu';
   const babs=['Hari Pertama di Kayuki','Kelas Makin Seru','Dunia Katakana','Sesi Konseling','Berangkat ke Jepang'];
-  const h=`<h2>Peta Misi</h2><p class="hint">Jalan Menuju Jepang · 5 babak</p><div class="list">`+
-   `<div class="li"><div>Babak 1 · ${babs[0]}<small>Hiragana rumpun あ–ほ</small></div><span>${MISSIONS.every(m=>S.done[m.id])?'✅':'▶'}</span></div>`+
-   MISSIONS.map(m=>`<div class="li ${mOpen(m)?'':'lk'}" style="margin-left:14px"><div>${m.title}<small>${m.sub} · ${NAMES[m.npc]}</small></div><span>${S.done[m.id]?'⭐'.repeat(S.stars[m.id]||1):mOpen(m)?'▶':'🔒'}</span></div>`).join('')+
-   babs.slice(1).map((b,i)=>`<div class="li lk"><div>Babak ${i+2} · ${b}<small>Segera hadir</small></div><span>🔒</span></div>`).join('')+
-   `</div><div class="sp"></div><div class="row"><button class="btn" id="mc" style="flex:1">Tutup</button></div>`;
-  const r=await panel(h,(cl,b)=>{b.querySelector('#mc').onclick=()=>cl()});
+  const subs=['Hiragana あ–ほ, tenten, maru','Hiragana ま–ん, huruf kecil, partikel','Katakana & serapan','Bersama Farhan Sensei','Pilih jalur: Kerja atau Study'];
+  let h=`<h2>Peta Misi</h2><p class="hint">Jalan Menuju Jepang · 5 babak</p><div class="list">`;
+  babs.forEach((bn,i)=>{
+    const ms=MISSIONS.filter(m=>m.bab===i+1);
+    if(!ms.length){h+=`<div class="li lk"><div>Babak ${i+1} · ${bn}<small>Segera hadir</small></div><span>🔒</span></div>`;return}
+    h+=`<div class="li"><div>Babak ${i+1} · ${bn}<small>${subs[i]}</small></div><span>${ms.every(m=>S.done[m.id])?'✅':'▶'}</span></div>`;
+    h+=ms.map(m=>`<${mOpen(m)?'button data-id="'+m.id+'"':'div'} class="li ${mOpen(m)?'':'lk'}" style="margin-left:14px;text-align:left;width:calc(100% - 14px)"><div>${m.title}<small>${m.sub} · ${NAMES[m.npc]}</small></div><span>${S.done[m.id]?'⭐'.repeat(S.stars[m.id]||1):mOpen(m)?'▶':'🔒'}</span></${mOpen(m)?'button':'div'}>`).join('');
+  });
+  h+=`</div><div class="sp"></div><div class="row"><button class="btn" id="mc" style="flex:1">Tutup</button></div>`;
+  const sel=await panel(h,(cl,b)=>{b.querySelector('#mc').onclick=()=>cl();b.querySelectorAll('button[data-id]').forEach(x=>x.onclick=()=>cl(x.dataset.id))});
   mode='idle';
+  if(sel)await startMission(mById(sel));
 }
 $('bMenu').onclick=openMenu;$('bMap').onclick=mapPanel;
 
@@ -858,7 +942,7 @@ rebuildPlayer();
 titleScreen();
 loop();
 if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').catch(()=>{});
-window.__G={get S(){return S},get mode(){return mode},scene,cam,actors,makeQs,MISSIONS,KONS,startMission,konseling,talkTo,setPoin,save,renderer};
+window.__G={romWord,optsWord,optsSent,optsLetter,parseS,sentRom,sentJP,SENTS,WORDS_A,WORDS_B,WORDS_C,WORDS_D,YOON,R2A,R2B,get S(){return S},get mode(){return mode},scene,cam,actors,makeQs,MISSIONS,KONS,startMission,konseling,talkTo,setPoin,save,renderer};
 </script>
 </body>
 </html>
