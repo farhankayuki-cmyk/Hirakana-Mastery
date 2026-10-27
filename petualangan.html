@@ -39,6 +39,13 @@ button{font:inherit;cursor:pointer}
 .chipbtn{border:2px solid #fff;background:#fffaf0ee;border-radius:14px;width:42px;height:42px;font-size:1.2rem;box-shadow:0 4px 12px #0004;padding:0}
 #hudL{display:flex;flex-direction:column;gap:6px;align-items:flex-start}
 #hudR{display:flex;gap:6px}
+#pad{position:fixed;left:calc(16px + env(safe-area-inset-left));bottom:calc(18px + env(safe-area-inset-bottom));width:132px;height:132px;border-radius:50%;background:#ffffff26;border:2px solid #ffffff55;z-index:9;touch-action:none;backdrop-filter:blur(3px)}
+#pad i{position:absolute;left:50%;top:50%;width:56px;height:56px;margin:-28px 0 0 -28px;border-radius:50%;background:#f2b134;box-shadow:0 3px 0 #b9831a;pointer-events:none}
+#pad b{position:absolute;color:#ffffffaa;font-size:.8rem;pointer-events:none}
+#pad .u{left:50%;top:4px;transform:translateX(-50%)}#pad .d{left:50%;bottom:4px;transform:translateX(-50%)}#pad .l{left:9px;top:50%;transform:translateY(-50%)}#pad .r{right:9px;top:50%;transform:translateY(-50%)}
+#act{position:fixed;right:calc(16px + env(safe-area-inset-right));bottom:calc(34px + env(safe-area-inset-bottom));z-index:9;font-size:1.05rem;padding:15px 20px}
+#kb{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(10px + env(safe-area-inset-bottom));z-index:8;color:#ffffffaa;font-size:.75rem;pointer-events:none;display:none}
+@media (hover:hover) and (pointer:fine) and (min-width:700px){#kb{display:block}}
 #goal{position:fixed;left:10px;right:10px;top:calc(58px + env(safe-area-inset-top));z-index:9;pointer-events:none;display:flex;justify-content:center}
 #goal span{background:#102b50cc;color:#fff;padding:6px 14px;border-radius:999px;font-size:.82rem;font-weight:700;backdrop-filter:blur(4px)}
 
@@ -136,6 +143,9 @@ button{font:inherit;cursor:pointer}
   <div id="hudL"><div class="chip" id="hPoin">❄️ <span id="poin">0</span></div></div>
   <div id="hudR"><button class="chipbtn" id="bMap" aria-label="Peta misi">🗺️</button><button class="chipbtn" id="bMenu" aria-label="Menu">☰</button></div>
 </div>
+<div id="pad" hidden><b class="u">▲</b><b class="d">▼</b><b class="l">◀</b><b class="r">▶</b><i id="padK"></i></div>
+<button class="btn" id="act" hidden>💬 Bicara</button>
+<div id="kb" hidden>Gerak: panah / WASD · Bicara: E atau Enter</div>
 <div id="goal" hidden><span id="goalT"></span></div>
 
 <div id="title" class="ov" hidden>
@@ -405,8 +415,9 @@ const STAFF={
 };
 
 /* ===== diorama lobi Kayuki ===== */
-const world=new THREE.Group();scene.add(world);
-(function buildRoom(){
+const worlds=[];
+function newWorld(){const w=new THREE.Group();scene.add(w);w.visible=false;worlds.push(w);return w}
+(function buildRoom(){const world=newWorld();
   const floor=box(15,.3,10,M('#e8dcc8',{roughness:.55}));floor.position.set(0,-.15,0);world.add(floor);
   const rug=box(5.2,.02,3.2,M('#1d3f8f'));rug.position.set(0,.01,1.2);world.add(rug);
   const rug2=box(5.6,.015,3.6,M('#f2b134'));rug2.position.set(0,.005,1.2);world.add(rug2);
@@ -433,9 +444,133 @@ const world=new THREE.Group();scene.add(world);
   const N=70,pos=new Float32Array(N*3);for(let i=0;i<N;i++){pos[i*3]=(Math.random()-.5)*13;pos[i*3+1]=Math.random()*4.8;pos[i*3+2]=(Math.random()-.5)*8}
   const pg=new THREE.BufferGeometry();pg.setAttribute('position',new THREE.BufferAttribute(pos,3));
   const pm=new THREE.PointsMaterial({color:0xffffff,size:.09,transparent:true,opacity:.75,depthWrite:false});
-  snow=new THREE.Points(pg,pm);world.add(snow);
+  world.userData.snow=new THREE.Points(pg,pm);world.add(world.userData.snow);
 })();
 var snow;
+function mkParticles(w,color,size,op,n=70){const pos=new Float32Array(n*3);for(let i=0;i<n;i++){pos[i*3]=(Math.random()-.5)*13;pos[i*3+1]=Math.random()*4.8;pos[i*3+2]=(Math.random()-.5)*8}const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.BufferAttribute(pos,3));const p=new THREE.Points(g,new THREE.PointsMaterial({color,size,transparent:true,opacity:op,depthWrite:false}));w.userData.snow=p;w.add(p)}
+function logoPlaque(w,x,y,sz){const f=box(sz+.2,sz+.2,.12,M('#c99a3b',{metalness:.4,roughness:.4}));f.position.set(x,y,-4.62);w.add(f);const l=new THREE.Mesh(new THREE.PlaneGeometry(sz,sz),new THREE.MeshBasicMaterial({map:logoTex}));l.position.set(x,y,-4.54);w.add(l)}
+function slab(w,sx,sy,sz,col,x,y,z,o){const m=box(sx,sy,sz,M(col,o));m.position.set(x,y,z);w.add(m);return m}
+function plane(w,tex,pw,ph,x,y,z,ry=0){const m=new THREE.Mesh(new THREE.PlaneGeometry(pw,ph),new THREE.MeshBasicMaterial({map:tex}));m.position.set(x,y,z);m.rotation.y=ry;w.add(m);return m}
+const k3img=new Image(),k3tex=[];let k3ok=false;
+k3img.onload=()=>{k3ok=true;k3tex.forEach(([t,f])=>{f();t.needsUpdate=true})};k3img.src='icons/k3-logo.png';
+function k3Tex(tall){
+  const W=tall?230:640,H=tall?470:360,c=document.createElement('canvas');c.width=W;c.height=H;const g=c.getContext('2d');
+  const draw=()=>{g.clearRect(0,0,W,H);const gr=g.createLinearGradient(0,0,tall?0:W,H);gr.addColorStop(0,'#1d63d8');gr.addColorStop(1,'#0d2147');g.fillStyle=gr;g.fillRect(0,0,W,H);
+    g.textAlign='center';g.textBaseline='middle';
+    const box=tall?[25,25,180,180]:[28,40,280,280];
+    g.fillStyle='#fff';g.beginPath();g.roundRect(box[0],box[1],box[2],box[3],tall?22:30);g.fill();
+    if(k3ok){const m=tall?10:14;g.drawImage(k3img,box[0]+m,box[1]+m,box[2]-2*m,box[3]-2*m)}
+    if(tall){g.fillStyle='#fffaf0';g.font='800 30px system-ui';g.fillText('K3 Japanese',W/2,248);g.fillStyle='#f2b134';g.font='700 27px system-ui';g.fillText('The Best',W/2,305);g.fillText('Japanese',W/2,340);g.fillText('Online Course',W/2,375);g.fillStyle='#cfe0ff';g.font='600 20px system-ui';g.fillText('Belajar di mana saja',W/2,425)}
+    else{const x=W*.66;g.fillStyle='#fffaf0';g.font='900 64px system-ui';g.fillText('K3',x,100);g.font='800 52px system-ui';g.fillText('Japanese',x,160);g.fillStyle='#f2b134';g.font='700 30px system-ui';g.fillText('The Best Japanese',x,222);g.fillText('Online Course',x,262);g.fillStyle='#cfe0ff';g.font='600 22px system-ui';g.fillText('▶ Belajar kapan saja',x,315)}
+  };
+  draw();const t=new THREE.CanvasTexture(c);t.colorSpace=THREE.SRGBColorSpace;t.anisotropy=4;k3tex.push([t,draw]);return t}
+const BGS=['#0c1c36','#a9d8f3','#0c1c36','#2b1a12'];
+const txtTex=(w,h,fn)=>canvasTex(w,h,(g,W,H)=>{g.textAlign='center';g.textBaseline='middle';fn(g,W,H)});
+const JP='"KF Gothic",sans-serif';
+/* ===== Babak 2: taman depan Gedung Kayuki ===== */
+(function buildGarden(){const w=newWorld();
+  slab(w,70,.3,50,'#7cc27a',0,-.15,8,{roughness:.95});
+  slab(w,3.4,.03,13,'#ddd5c4',0,.02,1.8);
+  for(let i=0;i<9;i++)slab(w,3.4,.035,.04,'#c9c0ad',0,.025,-4+i*1.3);
+  /* gedung */
+  slab(w,15,5.4,.5,'#f3ead8',0,2.7,-4.85);
+  slab(w,15.4,.5,.9,'#102b50',0,5.55,-4.75);slab(w,15.2,.14,.8,'#f2b134',0,5.22,-4.65);
+  slab(w,.3,5.4,.5,'#e8dcc2',-7.4,2.7,-4.85);
+  /* pintu kaca */
+  slab(w,2.7,2.4,.14,'#102b50',0,1.2,-4.55);
+  [-.62,.62].forEach(x=>slab(w,1.15,2.05,.08,'#9fd0f0',x,1.1,-4.47,{roughness:.1,metalness:.3}));
+  [-.12,.12].forEach(x=>slab(w,.05,.5,.06,'#f2b134',x,1.1,-4.4));
+  /* papan nama */
+  slab(w,6.2,.95,.14,'#102b50',0,2.95,-4.55);slab(w,6.0,.8,.04,'#f2b134',0,2.95,-4.47);
+  plane(w,txtTex(1024,200,(g,W,H)=>{g.fillStyle='#102b50';g.fillRect(0,0,W,H);g.fillStyle='#f2b134';g.font='700 92px '+JP;g.fillText('花雪 Kayuki',W*.5,H*.34);g.fillStyle='#fffaf0';g.font='700 56px system-ui';g.fillText('NIHONGO GAKKOU',W*.5,H*.76)}),5.8,.7,0,2.95,-4.44);
+  logoPlaque(w,-4.3,3.0,.9);logoPlaque(w,4.3,3.0,.9);
+  /* jendela */
+  [-5.6,-3.0,3.0,5.6].forEach(x=>{slab(w,1.7,1.5,.1,'#102b50',x,1.8,-4.58);slab(w,1.5,1.3,.06,'#bfe3f7',x,1.8,-4.52,{roughness:.1,metalness:.2});slab(w,.05,1.3,.08,'#102b50',x,1.8,-4.5)});
+  /* semak depan gedung */
+  [-6.6,-5.4,-4.2,-3.0,3.0,4.2,5.4,6.6].forEach((x,i)=>{const b=sph(.5,M(i%2?'#3f8f58':'#4aa266'),10,8);b.scale.y=.8;b.position.set(x,.35,-4.1);w.add(b)});
+  /* sakura */
+  [[-5.6,-2.0,1],[6.0,-1.6,1.1],[-6.6,2.4,.8],[6.4,2.6,.85]].forEach(([x,z,k])=>{slab(w,.32*k,2.2*k,.32*k,'#6d4a33',x,1.1*k,z);[[0,2.6,0,1.15],[.7,2.2,.2,.8],[-.7,2.25,-.1,.85],[.1,3.2,-.2,.7]].forEach(([a,b,c,r])=>{const l=sph(r*k,M('#f7b6c8'),10,8);l.position.set(x+a*k,b*k,z+c*k);w.add(l)})});
+  /* bangku */
+  slab(w,1.6,.1,.5,'#a5733f',4.6,.5,1.4);slab(w,1.6,.5,.08,'#a5733f',4.6,.8,1.18);[-.7,.7].forEach(a=>slab(w,.08,.5,.4,'#4a3320',4.6+a,.25,1.4));
+  /* lampu taman */
+  slab(w,.07,2.6,.07,'#2a2f3a',-2.6,1.3,1.9);const lamp=sph(.24,new THREE.MeshBasicMaterial({color:0xfff0b8}),10,8);lamp.position.set(-2.6,2.7,1.9);w.add(lamp);
+  /* bedeng bunga */
+  [[-4.4,.6],[4.2,-.2]].forEach(([x,z])=>{slab(w,2.4,.25,.7,'#8a6a4a',x,.12,z);['#ff6b8b','#ffd23f','#ffffff','#b27cff'].forEach((c,i)=>{for(let j=0;j<3;j++){const f=sph(.11,M(c),6,5);f.position.set(x-.9+i*.55+j*.12,.34,z-.2+j*.2);w.add(f)}})});
+  /* papan petunjuk */
+  slab(w,.08,1.0,.08,'#4a3320',1.9,.5,2.6);slab(w,1.2,.5,.08,'#102b50',1.9,1.15,2.6);
+  plane(w,txtTex(256,110,(g,W,H)=>{g.fillStyle='#102b50';g.fillRect(0,0,W,H);g.fillStyle='#fffaf0';g.font='700 38px '+JP;g.fillText('ようこそ',W/2,H*.35);g.fillStyle='#f2b134';g.font='700 26px system-ui';g.fillText('Selamat datang',W/2,H*.75)}),1.15,.45,1.9,1.15,2.65);
+  mkParticles(w,0xffb7c5,.13,.9,70);
+})();
+/* ===== Babak 3: resepsionis Kayuki ===== */
+(function buildReception(){const w=newWorld();
+  slab(w,15,.3,10,'#efe9dd',0,-.15,0,{roughness:.35});
+  slab(w,15,5.4,.3,'#17356a',0,2.7,-4.85);slab(w,.3,5.4,10,'#1b3d70',-7.35,2.7,0);
+  slab(w,15,.18,.34,'#f2b134',0,.09,-4.8);slab(w,15,.12,.34,'#f2b134',0,5.0,-4.8);
+  /* panel kayu di balik konter */
+  for(let i=0;i<16;i++)slab(w,.2,3.6,.12,i%2?'#7a4a2a':'#8a5732',1.7+i*.32,1.9,-4.66);
+  /* papan nama besar */
+  slab(w,6.4,1.5,.12,'#0d2147',-.4,4.1,-4.66);
+  plane(w,txtTex(1024,240,(g,W,H)=>{g.fillStyle='#0d2147';g.fillRect(0,0,W,H);g.shadowColor='#f2b134';g.shadowBlur=22;g.fillStyle='#f2b134';g.font='700 96px '+JP;g.fillText('花雪 KAYUKI',W/2,H*.36);g.shadowBlur=0;g.fillStyle='#fffaf0';g.font='700 62px system-ui';g.fillText('NIHONGO GAKKOU',W/2,H*.78)}),6.2,1.4,-.4,4.1,-4.58);
+  logoPlaque(w,-4.1,3.4,1.6);
+  /* TV dinding K3 Japanese */
+  slab(w,3.0,1.75,.1,'#0b0b0f',-1.4,2.0,-4.66);
+  plane(w,k3Tex(),2.85,1.6,-1.4,2.0,-4.6);
+  /* konter */
+  slab(w,4.8,1.05,1.2,'#f4efe4',4.3,.52,-3.5);slab(w,5.0,.12,1.4,'#2a1c12',4.3,1.1,-3.5,{roughness:.35});
+  slab(w,4.6,.07,.04,'#f2b134',4.3,.7,-2.9);
+  plane(w,txtTex(512,128,(g,W,H)=>{g.fillStyle='#f4efe4';g.fillRect(0,0,W,H);g.fillStyle='#102b50';g.font='700 54px '+JP;g.fillText('花雪 Kayuki',W/2,H*.5)}),2.6,.65,4.3,.38,-2.89);
+  /* PC resepsionis dengan K3 Japanese */
+  const mon=slab(w,1.55,1.0,.07,'#0b0b0f',4.9,1.78,-3.55);mon.rotation.y=.28;
+  const scr=plane(w,k3Tex(),1.42,.88,4.9,1.78,-3.51,.28);
+  slab(w,.12,.35,.1,'#9aa3b2',4.9,1.3,-3.6);slab(w,.55,.04,.3,'#9aa3b2',4.9,1.14,-3.55);
+  slab(w,.9,.03,.3,'#222a36',4.7,1.16,-3.1);slab(w,.35,.3,.3,'#c8372d',3.2,1.3,-3.5);
+  /* standee K3 */
+  slab(w,1.25,2.5,.08,'#0d2147',-5.6,1.35,-3.9);slab(w,.7,.06,.5,'#444',-5.6,.03,-3.9);
+  plane(w,k3Tex(true),1.15,2.35,-5.6,1.35,-3.85);
+  /* karpet logo */
+  slab(w,5.6,.02,3.4,'#102b50',0,.01,1.3);slab(w,5.9,.015,3.7,'#f2b134',0,.005,1.3);
+  const rl=new THREE.Mesh(new THREE.PlaneGeometry(2.2,2.2),new THREE.MeshBasicMaterial({map:logoTex,transparent:true}));rl.rotation.x=-Math.PI/2;rl.position.set(0,.03,1.3);w.add(rl);
+  /* sofa tunggu */
+  slab(w,.9,.45,2.2,'#1d63d8',-6.2,.3,-.6);slab(w,.25,.9,2.2,'#1d63d8',-6.6,.7,-.6);slab(w,.9,.2,.3,'#1d63d8',-6.2,.5,.6);slab(w,.9,.2,.3,'#1d63d8',-6.2,.5,-1.8);
+  slab(w,.8,.35,.8,'#e9dcc4',-4.9,.2,-.6);
+  /* bendera */
+  [[6.5,'jp'],[6.9,'id']].forEach(([x,k])=>{slab(w,.04,2.2,.04,'#bbb',x,1.1,-4.5);plane(w,txtTex(90,60,(g,W,H)=>{if(k==='jp'){g.fillStyle='#fff';g.fillRect(0,0,W,H);g.fillStyle='#c8102e';g.beginPath();g.arc(W/2,H/2,16,0,7);g.fill()}else{g.fillStyle='#d6232c';g.fillRect(0,0,W,H/2);g.fillStyle='#fff';g.fillRect(0,H/2,W,H/2)}}),.6,.4,x-.32,2.0,-4.46)});
+  /* tanaman */
+  [[-6.4,-3.8],[6.7,-1.2]].forEach(([x,z])=>{w.add(at(cyl(.4,.3,.6,M('#cfc7bb')),x,.3,z));const lm=M('#3f8f58');[[0,1.0,0,.45],[.25,1.4,.1,.35],[-.22,1.35,-.1,.33]].forEach(([a,b,c,r])=>{const l=sph(r,lm,8,6);l.position.set(x+a,b,z+c);w.add(l)})});
+  mkParticles(w,0xffe9a8,.07,.8,50);
+})();
+/* ===== Babak 4: ruang konseling ===== */
+(function buildCounsel(){const w=newWorld();
+  slab(w,15,.3,10,'#b88a5c',0,-.15,0,{roughness:.55});
+  slab(w,15,5.4,.3,'#efe0c8',0,2.7,-4.85);slab(w,.3,5.4,10,'#e6d4b6',-7.35,2.7,0);
+  slab(w,15,.14,.34,'#f2b134',0,1.35,-4.7);
+  for(let i=0;i<10;i++)slab(w,.2,3.2,.1,i%2?'#8a5732':'#7a4a2a',2.4+i*.3,1.55,-4.68);
+  /* karpet bundar */
+  const r1=cyl(2.9,2.9,.02,M('#f2b134'),40);r1.position.set(0,.01,.6);w.add(r1);const r2=cyl(2.65,2.65,.03,M('#102b50'),40);r2.position.set(0,.02,.6);w.add(r2);
+  const rl=new THREE.Mesh(new THREE.PlaneGeometry(2.0,2.0),new THREE.MeshBasicMaterial({map:logoTex,transparent:true}));rl.rotation.x=-Math.PI/2;rl.position.set(0,.04,.6);w.add(rl);
+  /* jendela senja */
+  slab(w,3.5,2.5,.1,'#f4efe4',-3.0,2.9,-4.66);
+  plane(w,canvasTex(256,180,(g,W,H)=>{const gr=g.createLinearGradient(0,0,0,H);gr.addColorStop(0,'#2e3f7a');gr.addColorStop(.6,'#f08a5d');gr.addColorStop(1,'#ffd27a');g.fillStyle=gr;g.fillRect(0,0,W,H);g.fillStyle='#fff';for(let i=0;i<14;i++){g.fillRect(Math.random()*W,Math.random()*H*.5,2,2)}}),3.2,2.2,-3.0,2.9,-4.6);
+  slab(w,.06,2.2,.08,'#f4efe4',-3.0,2.9,-4.55);slab(w,3.2,.06,.08,'#f4efe4',-3.0,2.9,-4.55);
+  slab(w,.5,2.7,.18,'#e7d3b0',-5.0,2.8,-4.55);slab(w,.5,2.7,.18,'#e7d3b0',-1.0,2.8,-4.55);
+  logoPlaque(w,.9,3.1,1.5);
+  plane(w,txtTex(384,100,(g,W,H)=>{g.fillStyle='#102b50';g.fillRect(0,0,W,H);g.fillStyle='#f2b134';g.font='700 40px '+JP;g.fillText('相談室',W/2,H*.35);g.fillStyle='#fffaf0';g.font='700 24px system-ui';g.fillText('Ruang Konseling Kayuki',W/2,H*.75)}),1.8,.47,.9,1.9,-4.58);
+  /* sertifikat */
+  [[3.3],[4.5],[5.7]].forEach(([x])=>{slab(w,.9,1.2,.06,'#c99a3b',x,3.3,-4.62);slab(w,.78,1.08,.04,'#fffaf0',x,3.3,-4.58)});
+  /* sofa */
+  slab(w,2.6,.5,1.0,'#1d3f8f',-4.9,.3,.6).rotation.y=Math.PI/2;slab(w,.3,.9,2.6,'#1d3f8f',-5.4,.75,.6);slab(w,1.0,.3,.3,'#1d3f8f',-4.9,.6,-.65);slab(w,1.0,.3,.3,'#1d3f8f',-4.9,.6,1.85);
+  /* meja kecil + teh */
+  const tb=cyl(.5,.5,.06,M('#e9dcc4'),20);tb.position.set(0,.42,.55);w.add(tb);slab(w,.1,.4,.1,'#6b4528',0,.2,.55);[[-.15,0],[.18,.1]].forEach(([a,b])=>{const c=cyl(.07,.06,.1,M('#fffaf0'),12);c.position.set(a,.51,.55+b);w.add(c)});
+  /* rak buku */
+  slab(w,2.2,2.6,.5,'#8a5a30',5.8,1.3,-4.4);[0,1,2,3].forEach(i=>[...Array(7)].forEach((_,j)=>slab(w,.22,.45,.34,['#e04a4a','#1d63d8','#f2b134','#3f9d6e'][(i+j)%4],5.0+j*.28,.42+i*.6,-4.25)));
+  /* lampu berdiri */
+  slab(w,.06,2.0,.06,'#2a2f3a',6.4,1.0,1.4);const sh=cyl(.3,.4,.45,new THREE.MeshBasicMaterial({color:0xffe2a0}),14);sh.position.set(6.4,2.2,1.4);w.add(sh);
+  [[-6.3,-3.8],[6.5,-.2]].forEach(([x,z])=>{w.add(at(cyl(.4,.3,.6,M('#cfc7bb')),x,.3,z));const lm=M('#3f8f58');[[0,1.0,0,.45],[.25,1.4,.1,.35],[-.22,1.35,-.1,.33]].forEach(([a,b,c,r])=>{const l=sph(r,lm,8,6);l.position.set(x+a,b,z+c);w.add(l)})});
+  mkParticles(w,0xffd9a0,.06,.7,40);
+})();
+let curTheme=-1,themeOverride=null;
+const themeIdx=()=>{if(themeOverride!=null)return themeOverride;const nm=MISSIONS.find(m=>!S.done[m.id]&&mOpen(m));return Math.min(3,nm?nm.bab:3)-1};
+async function syncTheme(fade){const want=Math.min(themeIdx(),worlds.length-1);if(want===curTheme)return;if(fade&&curTheme>=0)await fadeTo(true);worlds.forEach((w,i)=>w.visible=i===want);curTheme=want;document.body.style.background=BGS[want];snow=worlds[want].userData.snow;if(fade)await fadeTo(false)}
 
 /* aktor */
 const actors={};
@@ -443,9 +578,9 @@ function place(o,x,z,ry=0){o.position.set(x,0,z);o.rotation.y=ry;return o}
 const player=new THREE.Group();scene.add(player);
 let pModel=null;
 function rebuildPlayer(){if(pModel)player.remove(pModel);pModel=buildHuman(playerSpec());player.add(pModel);player.userData=pModel.userData;player.userData.name=S.name||'Kamu'}
-const yuki=place(buildYuki(),1.8,-1.2,-.5);yuki.userData.name='Yuki Sensei';scene.add(yuki);
+const yuki=place(buildYuki(),1.1,-1.0,-.4);yuki.userData.name='Yuki Sensei';scene.add(yuki);
 const cania=place(buildHuman(STAFF.cania),-3.4,-2.6,.5);cania.userData.name='Cania Sensei';scene.add(cania);
-const diki=place(buildHuman(STAFF.diki),3.3,-2.4,-.7);diki.userData.name='Diki Sensei';scene.add(diki);diki.visible=false;
+const diki=place(buildHuman(STAFF.diki),3.4,-2.4,-.6);diki.userData.name='Diki Sensei';scene.add(diki);diki.visible=false;
 const farhan=place(buildHuman(STAFF.farhan),.4,-.8,0);farhan.userData.name='Farhan Sensei';scene.add(farhan);farhan.visible=false;
 actors.yuki=yuki;actors.cania=cania;actors.diki=diki;actors.farhan=farhan;actors.me=player;
 yuki.userData.id='yuki';cania.userData.id='cania';farhan.userData.id='farhan';diki.userData.id='diki';
@@ -483,6 +618,23 @@ function updateCam(dt){
 }
 const clock=new THREE.Clock();
 const walk={on:false,tx:0,tz:0,cb:null};
+/* kontrol manual: joystick layar + keyboard */
+const inp={x:0,z:0},keys={};let actNear=null,nearTick=0;
+function inVec(){let x=inp.x,z=inp.z;if(keys.arrowleft||keys.a)x-=1;if(keys.arrowright||keys.d)x+=1;if(keys.arrowup||keys.w)z-=1;if(keys.arrowdown||keys.s)z+=1;const l=Math.hypot(x,z);if(l>1){x/=l;z/=l}return [x,z]}
+(function(){
+  const pad=$('pad'),knob=$('padK');let pid=null;
+  const setK=e=>{const r=pad.getBoundingClientRect(),cx=r.left+r.width/2,cy=r.top+r.height/2;let dx=e.clientX-cx,dz=e.clientY-cy;const R=r.width/2-18,l=Math.hypot(dx,dz);if(l>R){dx=dx/l*R;dz=dz/l*R}inp.x=dx/R;inp.z=dz/R;knob.style.transform=`translate(${dx}px,${dz}px)`};
+  const end=()=>{pid=null;inp.x=inp.z=0;knob.style.transform=''};
+  pad.addEventListener('pointerdown',e=>{pid=e.pointerId;pad.setPointerCapture(pid);setK(e);e.preventDefault()});
+  pad.addEventListener('pointermove',e=>{if(e.pointerId===pid)setK(e)});
+  pad.addEventListener('pointerup',end);pad.addEventListener('pointercancel',end);
+  addEventListener('keydown',e=>{if(/INPUT|TEXTAREA/.test((e.target.tagName)||''))return;const k=e.key.length===1?e.key.toLowerCase():e.key.toLowerCase();
+    if(['arrowleft','arrowright','arrowup','arrowdown','w','a','s','d'].includes(k)){keys[k]=true;if(k.startsWith('arrow'))e.preventDefault();return}
+    if((k==='e'||k==='enter'||k===' ')&&actNear&&mode==='idle'&&!$('act').hidden){e.preventDefault();talkTo(actNear)}});
+  addEventListener('keyup',e=>{keys[e.key.toLowerCase()]=false});
+  addEventListener('blur',()=>{for(const k in keys)keys[k]=false;end()});
+  $('act').onclick=()=>{if(actNear&&mode==='idle')talkTo(actNear)};
+})();
 const PBOUND={x:[-6.2,6.2],z:[-3.2,3.8]};
 function animHuman(o,t,moving){
   const u=o.userData;if(!u||!u.legs)return;
@@ -498,7 +650,19 @@ function loop(){
   const dt=Math.min(clock.getDelta(),.05),t=clock.elapsedTime;
   /* jalan */
   let moving=false;
-  if(walk.on&&mode==='idle'){
+  const ctl=mode==='idle'&&camMode==='play'&&!$('hud').hidden;
+  if($('pad').hidden===ctl){$('pad').hidden=!ctl;$('kb').hidden=!ctl}
+  if(!ctl){inp.x=inp.z=0}
+  else{
+    const [ix,iz]=inVec();
+    if(Math.hypot(ix,iz)>.12){walk.on=false;walk.cb=null;const sp=3.4*dt;
+      player.position.x=THREE.MathUtils.clamp(player.position.x+ix*sp,...PBOUND.x);player.position.z=THREE.MathUtils.clamp(player.position.z+iz*sp,...PBOUND.z);
+      player.rotation.y=Math.atan2(ix,iz);moving=true}
+    if((++nearTick)%5===0){let nr=null,nd=2.4;[['yuki',yuki],['cania',cania],['diki',diki]].forEach(([id,a])=>{if(!a.visible)return;const d=Math.hypot(a.position.x-player.position.x,a.position.z-player.position.z);if(d<nd){nd=d;nr=id}});
+      if(nr!==actNear){actNear=nr;$('act').hidden=!nr;if(nr)$('act').textContent='💬 Bicara: '+NAMES[nr].split(' ')[0]}}
+  }
+  if(!ctl&&actNear){actNear=null;$('act').hidden=true}
+  if(walk.on&&mode==='idle'&&!moving){
     const dx=walk.tx-player.position.x,dz=walk.tz-player.position.z,d=Math.hypot(dx,dz);
     if(d<.08){walk.on=false;const cb=walk.cb;walk.cb=null;if(cb)cb()}
     else{const sp=3.4*dt,k=Math.min(1,sp/d);player.position.x+=dx*k;player.position.z+=dz*k;player.rotation.y=Math.atan2(dx,dz);moving=true}
@@ -758,7 +922,7 @@ async function startMission(m){
   await panel(`<h2 class="cen">Misi selesai! 🎉</h2><div class="stars">${'⭐'.repeat(stars)}${'☆'.repeat(3-stars)}</div><p class="cen big">+${res.gain+bonus} ❄️</p><p class="hint cen">${first?`Bonus misi pertama: +${bonus} ❄️`:'Bonus ulang: +5 ❄️'}<br>Salah: ${res.wrong}× · Semangat tersisa: ${hearts(res.h,m.hearts)}</p><button class="btn" id="ok" style="width:100%">Lanjut</button>`,(cl,b)=>{b.querySelector('#ok').onclick=()=>cl()});
   mode='dialog';
   if(m.outro.length){await say(m.outro);hideDlg()}
-  if(m.end&&first)await (m.end==='bab1'?endBab1():m.end==='bab2'?endBab2():endBab3());
+  if(m.end&&first){await (m.end==='bab1'?endBab1():m.end==='bab2'?endBab2():endBab3());await syncTheme(true)}
   mode='idle';refreshMarks();
 }
 async function endBab1(){
@@ -769,9 +933,9 @@ async function endBab1(){
 }
 async function endBab2(){
   mode='dialog';
-  await say([['cania','Ujian Kelas selesai dengan baik! Sekarang kamu sudah mengenal SEMUA huruf hiragana, termasuk huruf kecil dan partikel.'],['yuki','Hebat banget! Babak berikutnya adalah katakana, huruf untuk kata-kata serapan.'],['yuki','Eh, lihat deh, ada yang baru datang di dekat meja resepsionis. Temui dia ya!']]);
+  await say([['cania','Ujian Kelas selesai dengan baik! Sekarang kamu sudah mengenal SEMUA huruf hiragana, termasuk huruf kecil dan partikel.'],['yuki','Hebat banget! Babak berikutnya adalah katakana, huruf untuk kata-kata serapan.'],['yuki','Eh, lihat deh, ada yang baru datang di sisi kanan ruangan. Temui dia ya!']]);
   hideDlg();crewShow(true);refreshMarks();
-  await panel(`<h2 class="cen">Babak 2 tamat 🏆</h2><p class="hint cen">Semua hiragana sudah kamu kuasai. Babak 3: Dunia Katakana sudah terbuka. Temui Diki Sensei di dekat meja resepsionis.</p><button class="btn" id="ok" style="width:100%">Oke</button>`,(cl,b)=>{b.querySelector('#ok').onclick=()=>cl()});
+  await panel(`<h2 class="cen">Babak 2 tamat 🏆</h2><p class="hint cen">Semua hiragana sudah kamu kuasai. Babak 3: Dunia Katakana sudah terbuka. Temui Diki Sensei di sisi kanan ruangan.</p><button class="btn" id="ok" style="width:100%">Oke</button>`,(cl,b)=>{b.querySelector('#ok').onclick=()=>cl()});
 }
 async function endBab3(){
   mode='dialog';
@@ -799,7 +963,7 @@ const KONS=[
 ];
 async function konseling(){
   mode='dialog';
-  await fadeTo(true);$('hud').hidden=true;$('goal').hidden=true;
+  await fadeTo(true);$('hud').hidden=true;$('goal').hidden=true;themeOverride=3;await syncTheme(false);
   crewShow(false);Object.values(marks).forEach(m=>m.visible=false);farhan.visible=true;
   player.position.set(-.3,0,1.3);player.rotation.y=Math.PI*.1;farhan.position.set(.5,0,-.2);face(farhan,player);
   camMode='kons';
@@ -828,7 +992,7 @@ async function konseling(){
   hideDlg();
   S.kons={ans,skor,tier,ext,jalur,at:Date.now()};save();
   await panel(`<h2 class="cen">Sesi konseling selesai 🤝</h2><p class="hint cen">Jalur pilihanmu: <b>${jalur===1?'Study 🎓':'Kerja 💼'}</b><br>Babak 5 (perjalanan ke Jepang) akan menyesuaikan jalur ini. Segera hadir!</p><button class="btn" id="ok" style="width:100%">Kembali ke kelas</button>`,(cl,b)=>{b.querySelector('#ok').onclick=()=>cl()});
-  await fadeTo(true);$('hud').hidden=false;
+  await fadeTo(true);$('hud').hidden=false;themeOverride=null;await syncTheme(false);
   farhan.visible=false;crewShow(true);camMode='play';
   player.position.set(0,0,2.5);player.rotation.y=Math.PI;
   await fadeTo(false);
@@ -838,6 +1002,7 @@ function fadeTo(on){$('fade').classList.toggle('on',on);return sleep(450)}
 
 /* ===== interaksi dunia ===== */
 function refreshMarks(){
+  syncTheme(false);
   marks.yuki.visible=!!nextMission('yuki')&&mode!=='kons';
   marks.cania.visible=!!nextMission('cania')&&mode!=='kons';
   marks.diki.visible=diki.visible&&!!nextMission('diki')&&mode!=='kons';
@@ -951,12 +1116,12 @@ $('bMenu').onclick=openMenu;$('bMap').onclick=mapPanel;
 /* ===== alur awal ===== */
 async function prologue(){
   const p=$('prolog');p.hidden=false;
-  p.innerHTML='<div><b>Cianjur, pagi hari.</b><br>Kamu berdiri di depan sebuah gedung dengan logo bunga dan salju.<br>Hari pertamamu di <b>Nihongo Gakkou Kayuki</b>.<br><br>Mimpimu besar: <b>Jepang</b>.<br><small style="opacity:.6">ketuk untuk lanjut</small></div>';
+  p.innerHTML='<div><b>Cianjur, pagi hari.</b><br>Kamu berdiri di depan sebuah gedung dengan logo bunga dan salju.<br>Hari pertamamu di <b>Kayuki Nihongo Gakkou</b>.<br><br>Mimpimu besar: <b>Jepang</b>.<br><small style="opacity:.6">ketuk untuk lanjut</small></div>';
   await new Promise(r=>p.onclick=()=>r());p.hidden=true;p.onclick=null;
 }
 async function intro(){
   mode='dialog';
-  await say([['yuki','Konnichiwa! Selamat datang di Nihongo Gakkou Kayuki! Aku Yuki Sensei, maskot sekaligus pemandu belajarmu. Salam kenal!'],
+  await say([['yuki','Konnichiwa! Selamat datang di Kayuki Nihongo Gakkou! Aku Yuki Sensei, maskot sekaligus pemandu belajarmu. Salam kenal!'],
    ['me',`Konnichiwa, Sensei! Aku ${S.name}.`],
    ['yuki',`${S.name}, nama yang bagus! Di sini kamu akan belajar membaca hiragana dan katakana, selangkah demi selangkah, sampai siap menuju Jepang.`],
    ['cania','Hai, aku Cania Sensei. Aku yang akan menemani kamu belajar di kelas bareng Yuki Sensei.'],
@@ -984,7 +1149,7 @@ async function continueGame(){
 }
 function hide(ids){ids.forEach(i=>$(i).hidden=true)}
 function titleScreen(){
-  mode='title';camMode='title';crewShow(true);
+  mode='title';camMode='title';crewShow(true);syncTheme(false);
   player.visible=false;
   $('title').hidden=false;
   const has=!!S.name&&S.intro;
@@ -996,7 +1161,7 @@ rebuildPlayer();
 titleScreen();
 loop();
 if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').catch(()=>{});
-window.__G={KW,KA1,KA2,KA3,KDAK,KYOON,KSER,diki,refreshMarks,romWord,optsWord,optsSent,optsLetter,parseS,sentRom,sentJP,SENTS,WORDS_A,WORDS_B,WORDS_C,WORDS_D,YOON,R2A,R2B,get S(){return S},get mode(){return mode},scene,cam,actors,makeQs,MISSIONS,KONS,startMission,konseling,talkTo,setPoin,save,renderer};
+window.__G={worlds,syncTheme,inp,keys,KW,KA1,KA2,KA3,KDAK,KYOON,KSER,diki,refreshMarks,romWord,optsWord,optsSent,optsLetter,parseS,sentRom,sentJP,SENTS,WORDS_A,WORDS_B,WORDS_C,WORDS_D,YOON,R2A,R2B,get S(){return S},get mode(){return mode},scene,cam,actors,makeQs,MISSIONS,KONS,startMission,konseling,talkTo,setPoin,save,renderer};
 </script>
 </body>
 </html>
