@@ -1,8 +1,8 @@
 /* Service worker HiraKana Mastery Kayuki.
    Ganti angka VERSI kalau mau memaksa semua perangkat mengambil file baru. */
-const VERSI = 'hirakana-v14';
+const VERSI = 'hirakana-v15';
 const INTI = [
-  './', 'index.html', 'manifest.webmanifest',
+  './', 'index.html', 'petualangan.html', 'lib/three.module.min.js', 'manifest.webmanifest',
   'fonts/gothic.woff2', 'fonts/mincho.woff2', 'fonts/kyokasho.woff2', 'fonts/tangan.woff2', 'fonts/kuas.woff2',
   'icons/icon-192.png', 'icons/icon-512.png', 'icons/icon-maskable-512.png', 'icons/apple-touch-icon.png',
   'kayuki-sync.js'                                /* penyambung kelas online */

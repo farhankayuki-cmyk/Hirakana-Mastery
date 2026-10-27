@@ -80,3 +80,8 @@ Tanpa mengganti angka itu, perangkat tetap mengambil versi baru diam-diam dan ta
 - **Tes Penempatan** (hiragana dan katakana, sesuai tombol yang aktif): huruf satuan plus baca kata 2–4 huruf, per rumpun. Rumpun yang dikuasai terbuka otomatis, huruf lemah dikirim ke tab Huruf.
 - **Katakana**: tombol あ Hiragana / ア Katakana di bawah tab. Rumpun Katakana 1–4 lalu Ujian Akhir Katakana, dengan Kartu, Ujian Kenaikan, Kilat Huruf, Latihan Penguat, Peta Huruf (plus set "ー & serapan"), dan materi Katakana. Pengecoh khas katakana: シ/ツ, ソ/ン, ー (panjang vs pendek), ッ, bunyi serapan.
 - Kosakata katakana ada di array `KATA_SRC` (bagian bawah index.html). Kata dari buku Bab 1–15 plus tambahan Kayuki; tinggal tambah baris `['カタカナ','arti']` untuk menambah kata.
+
+## Game baru: Petualangan Kayuki (prototipe)
+- Halaman: `petualangan.html` (tombol 🎮 di atas halaman HiraKana). Three.js disimpan lokal di `lib/three.module.min.js`, jadi tetap jalan offline.
+- Isi prototipe: lobi Kayuki 3D, karakter kustom, Yuki & Cania Sensei, 4 misi hiragana Babak 1, sistem ❤️ semangat dan ❄️ poin, serta pratinjau sesi konseling Farhan Sensei (menu ☰).
+- Progres game disimpan di browser dengan kunci `kayuki-game-v1` (terpisah dari progres HiraKana).

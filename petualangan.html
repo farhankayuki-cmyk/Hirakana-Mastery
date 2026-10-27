@@ -1,0 +1,859 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+<meta name="theme-color" content="#102b50">
+<title>Jalan Menuju Jepang · Kayuki</title>
+<link rel="icon" href="icons/icon-192.png">
+<style>
+@font-face{font-family:"KF Gothic";src:url(fonts/gothic.woff2) format("woff2");font-display:swap;unicode-range:U+3040-30FF,U+3099-309C,U+30FC}
+:root{--navy:#102b50;--blue:#1d63d8;--gold:#f2b134;--cream:#fffaf0;--ink:#182638;--green:#1f9d6b;--red:#d64550;--snow:#eaf4ff}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+[hidden]{display:none!important}
+html,body{margin:0;height:100%;overflow:hidden;background:#0c1c36;font-family:system-ui,-apple-system,"Segoe UI",sans-serif;color:var(--ink);touch-action:manipulation;user-select:none;-webkit-user-select:none}
+#gl{position:fixed;inset:0;width:100%;height:100%;display:block;background:linear-gradient(180deg,#0e2447,#1b4a86 62%,#2a6bb0)}
+.ov{position:fixed;inset:0;z-index:20;display:flex;flex-direction:column}
+button{font:inherit;cursor:pointer}
+.jp{font-family:"KF Gothic","Hiragino Sans","Noto Sans JP","Yu Gothic",system-ui,sans-serif}
+.btn{border:0;border-radius:16px;padding:13px 18px;font-weight:800;font-size:1rem;background:var(--gold);color:#3a2800;box-shadow:0 4px 0 #b9831a;transition:transform .08s}
+.btn:active{transform:translateY(3px);box-shadow:0 1px 0 #b9831a}
+.btn.sec{background:#fff;color:var(--navy);box-shadow:0 4px 0 #b9c7dd}
+.btn.sec:active{box-shadow:0 1px 0 #b9c7dd}
+.btn.blue{background:var(--blue);color:#fff;box-shadow:0 4px 0 #123f95}
+.btn[disabled]{opacity:.45;pointer-events:none}
+
+/* judul */
+#title{justify-content:space-between;align-items:center;padding:calc(34px + env(safe-area-inset-top)) 18px calc(24px + env(safe-area-inset-bottom));background:linear-gradient(180deg,#0a1a33cc 0%,#0a1a3300 30%,#0a1a3300 55%,#0a1a33ee 100%);text-align:center;color:#fff}
+#title .logo{width:min(130px,32vw);border-radius:26px;box-shadow:0 10px 30px #0008;margin-bottom:10px}
+#title h1{margin:0;font-size:clamp(1.7rem,8vw,2.4rem);line-height:1.05;text-shadow:0 3px 0 #0a2a6e,0 8px 22px #000a}
+#title h1 small{display:block;font-size:.42em;letter-spacing:.22em;color:var(--gold);margin-bottom:6px}
+#title p{margin:10px 0 16px;max-width:340px;color:#dbe9ff;font-size:.95rem;line-height:1.45}
+#title .col{display:flex;flex-direction:column;gap:10px;width:min(320px,100%)}
+#title a.btn{text-decoration:none;display:block;text-align:center}
+
+/* hud */
+#hud{position:fixed;left:0;right:0;top:0;z-index:10;display:flex;justify-content:space-between;align-items:flex-start;gap:8px;padding:calc(10px + env(safe-area-inset-top)) 10px 0;pointer-events:none}
+#hud>*{pointer-events:auto}
+.chip{background:#fffaf0ee;border:2px solid #fff;border-radius:999px;padding:6px 12px;font-weight:800;font-size:.9rem;color:var(--navy);box-shadow:0 4px 12px #0004;display:flex;align-items:center;gap:6px}
+.chipbtn{border:2px solid #fff;background:#fffaf0ee;border-radius:14px;width:42px;height:42px;font-size:1.2rem;box-shadow:0 4px 12px #0004;padding:0}
+#hudL{display:flex;flex-direction:column;gap:6px;align-items:flex-start}
+#hudR{display:flex;gap:6px}
+#goal{position:fixed;left:10px;right:10px;top:calc(58px + env(safe-area-inset-top));z-index:9;pointer-events:none;display:flex;justify-content:center}
+#goal span{background:#102b50cc;color:#fff;padding:6px 14px;border-radius:999px;font-size:.82rem;font-weight:700;backdrop-filter:blur(4px)}
+
+/* dialog */
+#dlg{position:fixed;left:0;right:0;bottom:0;z-index:15;padding:0 10px calc(10px + env(safe-area-inset-bottom));display:flex;justify-content:center;pointer-events:auto}
+.dbox{position:relative;width:min(560px,100%);background:var(--cream);border:3px solid #fff;border-radius:22px;box-shadow:0 10px 30px #0007,0 0 0 4px #102b5088;padding:12px 14px 14px;min-height:112px;display:flex;gap:12px;align-items:flex-start}
+#pcWrap{width:84px;height:84px;flex:0 0 84px;border-radius:18px;overflow:hidden;border:3px solid var(--navy);background:#fff3d6;margin-top:2px}
+#pc{width:100%;height:100%;display:block}
+.dmain{flex:1;min-width:0}
+#dName{display:inline-block;background:var(--navy);color:#fff;font-weight:800;font-size:.8rem;padding:3px 10px;border-radius:999px;margin-bottom:6px}
+#dText{font-size:1rem;line-height:1.45;color:var(--ink);min-height:3.9em;white-space:pre-wrap}
+#dMore{position:absolute;right:16px;bottom:8px;color:var(--blue);font-size:.9rem;animation:bob 1s infinite}
+@keyframes bob{50%{transform:translateY(4px)}}
+#dChoices{display:flex;flex-direction:column;gap:8px;margin-top:10px}
+#dChoices button{background:#fff;border:2px solid var(--navy);border-radius:14px;padding:10px 12px;text-align:left;font-weight:700;color:var(--navy);font-size:.95rem}
+#dChoices button:active{background:#e7f0ff}
+.dbox.noPc #pcWrap{display:none}
+
+/* panel umum */
+.panel{margin:auto;width:min(520px,calc(100% - 20px));max-height:calc(100% - 20px);overflow:auto;background:var(--cream);border:3px solid #fff;border-radius:24px;box-shadow:0 18px 50px #000a;padding:16px}
+.panel h2{margin:0 0 4px;color:var(--navy);font-size:1.25rem}
+.panel .hint{color:#4b5d78;font-size:.88rem;margin:0 0 12px;line-height:1.4}
+.row{display:flex;gap:8px;flex-wrap:wrap}
+.sp{height:10px}
+
+/* kreator */
+#creator{justify-content:flex-end;pointer-events:none}
+#creator .sheet{pointer-events:auto;background:var(--cream);border-radius:26px 26px 0 0;border-top:3px solid #fff;box-shadow:0 -10px 40px #0008;max-height:54vh;overflow:auto;padding:14px 14px calc(14px + env(safe-area-inset-bottom))}
+#creator h3{margin:10px 0 6px;font-size:.78rem;letter-spacing:.08em;color:#4b5d78;text-transform:uppercase}
+#nm{width:100%;border:3px solid var(--navy);border-radius:14px;padding:11px 12px;font-size:1rem;font-weight:700;color:var(--navy);background:#fff;outline:none;user-select:text;-webkit-user-select:text}
+.opt{position:relative;border:3px solid var(--navy);background:#fff;border-radius:13px;padding:8px 12px;font-weight:700;color:var(--navy);font-size:.9rem;min-width:44px}
+.opt.on{background:var(--gold);border-color:#3a2800}
+.opt.lock{opacity:.8;border-style:dashed;border-color:#7b8aa3;color:#5c6b85}
+.opt .pr{position:absolute;top:-10px;right:-6px;background:var(--navy);color:#fff;border-radius:999px;font-size:.68rem;padding:2px 6px}
+.sw{width:42px;height:42px;padding:0;border-radius:12px}
+.sw i{display:block;width:100%;height:100%;border-radius:8px}
+
+/* kuis */
+#quiz{background:linear-gradient(180deg,#0e2447,#1b4a86);color:#fff;padding:calc(12px + env(safe-area-inset-top)) 14px calc(14px + env(safe-area-inset-bottom));align-items:center}
+.qw{width:min(520px,100%);display:flex;flex-direction:column;height:100%;gap:10px}
+.qtop{display:flex;justify-content:space-between;align-items:center;gap:8px;font-weight:800}
+.qtop .chip{box-shadow:none;white-space:nowrap;font-size:.82rem;padding:5px 10px}
+#qBar{height:10px;background:#ffffff33;border-radius:99px;overflow:hidden}
+#qBar i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--gold),#ffd978);border-radius:99px;transition:width .3s}
+#qCard{flex:1 1 auto;min-height:0;background:var(--cream);border:3px solid #fff;border-radius:26px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;color:var(--navy);text-align:center;padding:12px;position:relative}
+#qPrompt{font-size:.85rem;font-weight:800;color:#5b6f90;letter-spacing:.04em}
+#qJP{font-size:clamp(3.6rem,24vw,7rem);line-height:1.15;font-weight:700;max-width:100%;white-space:nowrap}
+#qMean{min-height:1.4em;font-weight:700;color:var(--blue)}
+#qSpk{position:absolute;right:10px;top:10px;border:0;background:#e7f0ff;border-radius:50%;width:42px;height:42px;font-size:1.2rem}
+#qOpts{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+#qOpts button{padding:16px 8px;border-radius:18px;border:3px solid #fff;background:#fff;color:var(--navy);font-weight:800;font-size:1.25rem;box-shadow:0 5px 0 #b9c7dd}
+#qOpts button:active{transform:translateY(3px);box-shadow:0 2px 0 #b9c7dd}
+#qOpts button.ok{background:var(--green);color:#fff;border-color:#bdf3dc;box-shadow:0 5px 0 #0f6b47}
+#qOpts button.bad{background:var(--red);color:#fff;border-color:#ffd1d5;box-shadow:0 5px 0 #8c2430}
+#qOpts button.dim{opacity:.5}
+#qFb{min-height:3.3em;background:#ffffff1f;border-radius:16px;padding:9px 12px;font-size:.92rem;line-height:1.4}
+#qNext{width:100%}
+.pop{animation:pop .35s}
+@keyframes pop{0%{transform:scale(.8)}60%{transform:scale(1.1)}100%{transform:scale(1)}}
+.shake{animation:shake .35s}
+@keyframes shake{25%{transform:translateX(-8px)}75%{transform:translateX(8px)}}
+
+/* materi */
+.chips{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin:8px 0}
+.chips button{border:2px solid var(--navy);background:#fff;border-radius:12px;padding:6px 0;color:var(--navy)}
+.chips button b{display:block;font-size:1.7rem;line-height:1.1}
+.chips button small{font-weight:800;color:var(--blue)}
+.chips .gap{visibility:hidden}
+.rowtag{font-weight:800;color:var(--navy);margin-top:8px}
+
+/* hasil */
+.stars{font-size:2.4rem;letter-spacing:6px;text-align:center;margin:6px 0}
+.big{font-size:1.8rem;font-weight:900;color:var(--navy);text-align:center}
+.cen{text-align:center}
+.list{display:flex;flex-direction:column;gap:8px}
+.li{display:flex;justify-content:space-between;align-items:center;background:#fff;border:2px solid #d3deef;border-radius:14px;padding:10px 12px;font-weight:700;color:var(--navy);gap:8px}
+.li small{color:#5b6f90;font-weight:600;display:block}
+.li.lk{opacity:.55}
+
+#toast{position:fixed;left:50%;top:calc(70px + env(safe-area-inset-top));transform:translateX(-50%);z-index:50;background:#102b50;color:#fff;padding:9px 16px;border-radius:999px;font-weight:700;font-size:.9rem;box-shadow:0 6px 20px #0006;opacity:0;pointer-events:none;transition:opacity .25s;max-width:92%;text-align:center}
+#toast.on{opacity:1}
+#fade{position:fixed;inset:0;background:#0a1a33;z-index:40;opacity:0;pointer-events:none;transition:opacity .4s}
+#fade.on{opacity:1;pointer-events:auto}
+#prolog{background:#0a1a33;color:#fff;justify-content:center;align-items:center;text-align:center;padding:30px;z-index:45;font-size:1.1rem;line-height:1.7}
+#prolog b{color:var(--gold)}
+</style>
+</head>
+<body>
+<canvas id="gl"></canvas>
+
+<div id="hud" hidden>
+  <div id="hudL"><div class="chip" id="hPoin">❄️ <span id="poin">0</span></div></div>
+  <div id="hudR"><button class="chipbtn" id="bMap" aria-label="Peta misi">🗺️</button><button class="chipbtn" id="bMenu" aria-label="Menu">☰</button></div>
+</div>
+<div id="goal" hidden><span id="goalT"></span></div>
+
+<div id="title" class="ov" hidden>
+  <div><h1><small>KAYUKI NIHONGO GAKKOU</small>Jalan Menuju<br>Jepang</h1></div>
+  <div style="display:flex;flex-direction:column;align-items:center;width:100%"><p>Petualangan baca hiragana &amp; katakana. Dari kelas kecil di Cianjur sampai berangkat ke Jepang. Ceritanya kamu yang tentukan!</p>
+  <div class="col">
+    <button class="btn" id="bStart">▶ Mulai petualangan</button>
+    <button class="btn blue" id="bCont" hidden>Lanjutkan</button>
+    <a class="btn sec" href="index.html">← Kembali ke HiraKana</a>
+  </div></div>
+</div>
+
+<div id="prolog" class="ov" hidden></div>
+
+<div id="creator" class="ov" hidden>
+  <div class="sheet">
+    <h2 style="margin:0;color:var(--navy)">Buat karaktermu</h2>
+    <p class="hint" style="margin:2px 0 8px">Kepingan salju ❄️ didapat dari misi, dan bisa dipakai membuka item baru.</p>
+    <input id="nm" maxlength="14" placeholder="Nama kamu (contoh: Rizki)" autocomplete="off">
+    <div id="cOpts"></div>
+    <div class="sp"></div>
+    <button class="btn" id="bGo" style="width:100%">Mulai sekolah ▶</button>
+  </div>
+</div>
+
+<div id="dlg" hidden>
+  <div class="dbox" id="dbox">
+    <div id="pcWrap"><canvas id="pc" width="168" height="168"></canvas></div>
+    <div class="dmain"><div id="dName"></div><div id="dText"></div><div id="dChoices"></div></div>
+    <div id="dMore">▼</div>
+  </div>
+</div>
+
+<div id="quiz" class="ov" hidden>
+  <div class="qw">
+    <div class="qtop"><span class="chip" id="qTitle"></span><span class="chip" id="qHearts"></span><span class="chip" id="qPoin"></span></div>
+    <div id="qBar"><i></i></div>
+    <div id="qCard"><button id="qSpk" aria-label="Dengar">🔊</button><div id="qPrompt"></div><div id="qJP" class="jp"></div><div id="qMean"></div></div>
+    <div id="qOpts"></div>
+    <div id="qFb"></div>
+    <button class="btn" id="qNext" hidden>Lanjut ▶</button>
+  </div>
+</div>
+
+<div id="pan" class="ov" hidden style="background:#0a1a33aa"><div class="panel" id="panBody"></div></div>
+<div id="toast"></div>
+<div id="fade"></div>
+
+<script type="module">
+import * as THREE from './lib/three.module.min.js';
+
+/* ===== util ===== */
+const $=id=>document.getElementById(id);
+const rnd=n=>Math.floor(Math.random()*n);
+const pick=a=>a[rnd(a.length)];
+const shuffle=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=rnd(i+1);[a[i],a[j]]=[a[j],a[i]]}return a};
+const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+const KEY='kayuki-game-v1';
+const blank=()=>({v:1,name:'',look:{hair:0,hairC:0,skin:0,suit:0,suitC:0,acc:0,accC:0},own:{},poin:0,intro:false,done:{},stars:{},kons:null,sound:true});
+let S=blank();
+try{const r=JSON.parse(localStorage.getItem(KEY)||'null');if(r&&r.v===1)S=Object.assign(blank(),r)}catch(e){}
+const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}};
+let toastT;const toast=t=>{const e=$('toast');e.textContent=t;e.classList.add('on');clearTimeout(toastT);toastT=setTimeout(()=>e.classList.remove('on'),2200)};
+const setPoin=d=>{S.poin=Math.max(0,S.poin+d);$('poin').textContent=S.poin;save()};
+
+/* audio sederhana */
+let AC;const beep=(f,d=.12,t='sine',v=.08)=>{if(!S.sound)return;try{AC=AC||new (window.AudioContext||window.webkitAudioContext)();const o=AC.createOscillator(),g=AC.createGain();o.type=t;o.frequency.value=f;g.gain.value=v;o.connect(g);g.connect(AC.destination);o.start();g.gain.exponentialRampToValueAtTime(.0001,AC.currentTime+d);o.stop(AC.currentTime+d)}catch(e){}};
+const sfx={ok(){beep(660,.1);setTimeout(()=>beep(880,.14),90)},bad(){beep(180,.22,'sawtooth',.06)},tap(){beep(520,.05,'triangle',.05)},win(){[523,659,784,1046].forEach((f,i)=>setTimeout(()=>beep(f,.18),i*110))}};
+function speak(t){if(!S.sound||!('speechSynthesis' in window))return;try{speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(t);u.lang='ja-JP';u.rate=.85;const v=speechSynthesis.getVoices().find(v=>/^ja/i.test(v.lang));if(v)u.voice=v;speechSynthesis.speak(u)}catch(e){}}
+
+/* ===== data huruf ===== */
+const ROWSTR=['あいうえお','かきくけこ','さしすせそ','たちつてと','なにぬねの','はひふへほ','がぎぐげご','ざじずぜぞ','だでど','ばびぶべぼ','ぱぴぷぺぽ'];
+const ROMS=[['a','i','u','e','o'],['ka','ki','ku','ke','ko'],['sa','shi','su','se','so'],['ta','chi','tsu','te','to'],['na','ni','nu','ne','no'],['ha','hi','fu','he','ho'],['ga','gi','gu','ge','go'],['za','ji','zu','ze','zo'],['da','de','do'],['ba','bi','bu','be','bo'],['pa','pi','pu','pe','po']];
+const RM={};ROWSTR.forEach((s,i)=>[...s].forEach((k,j)=>RM[k]=ROMS[i][j]));
+const rowOf=k=>ROWSTR.find(s=>s.includes(k));
+const SIM={};
+[['あ','お'],['さ','ち'],['は','ほ'],['ぬ','ね'],['け','は'],['く','へ'],['た','な'],['い','こ'],['う','え'],['す','ふ'],['し','じ'],['か','が'],['さ','ざ'],['た','だ'],['は','ば'],['は','ぱ'],['ば','ぱ'],['き','ぎ'],['く','ぐ'],['け','げ'],['こ','ご'],['す','ず'],['せ','ぜ'],['そ','ぞ'],['て','で'],['と','ど'],['ひ','び'],['ひ','ぴ'],['び','ぴ'],['ふ','ぶ'],['ふ','ぷ'],['ぶ','ぷ'],['へ','べ'],['へ','ぺ'],['べ','ぺ'],['ほ','ぼ'],['ほ','ぽ'],['ぼ','ぽ']].forEach(([a,b])=>{(SIM[a]=SIM[a]||[]).push(b);(SIM[b]=SIM[b]||[]).push(a)});
+const romOf=w=>[...w].map(k=>RM[k]).join('');
+const TIPS={'あ':'あ punya garis silang di kiri, sedangkan お punya titik di kanan atas.','お':'お punya titik di kanan atas, sedangkan あ punya garis silang di kiri.','は':'は dan ほ mirip. ほ punya satu garis datar tambahan di atas.','ほ':'ほ punya satu garis datar tambahan di atas, sedangkan は tidak.'};
+const WORDS_A=[['あさ','pagi'],['あし','kaki'],['いえ','rumah'],['いす','kursi'],['うえ','atas'],['えき','stasiun'],['おか','bukit'],['かお','wajah'],['かさ','payung'],['くち','mulut'],['くつ','sepatu'],['くに','negara'],['けさ','pagi ini'],['こえ','suara'],['すし','sushi'],['たこ','gurita'],['ねこ','kucing'],['はな','bunga'],['ひと','orang'],['ふく','baju'],['ほし','bintang'],['とけい','jam'],['さかな','ikan'],['あかい','merah'],['あおい','biru'],['たかい','tinggi / mahal'],['ちかい','dekat'],['せかい','dunia'],['すき','suka'],['きく','mendengar'],['かく','menulis'],['いく','pergi'],['つくえ','meja'],['ここ','sini'],['そこ','situ'],['あそこ','sana']].filter(([w])=>[...w].every(k=>RM[k]));
+const WORDS_B=[['かぎ','kunci'],['ごご','sore hari'],['つぎ','berikutnya'],['ひげ','jenggot'],['えがお','wajah tersenyum'],['おじ','paman'],['おば','bibi'],['ぞう','gajah'],['かぞく','keluarga'],['ちず','peta'],['ぶどう','anggur'],['でぐち','pintu keluar'],['とうふ','tahu'],['かば','kuda nil']].filter(([w])=>[...w].every(k=>RM[k]));
+
+/* ===== penampilan ===== */
+const HAIR=[['pendek','Pendek',0],['bob','Bob',0],['panjang','Panjang',0],['kuncir','Kuncir',0],['jabrik','Jabrik',0]];
+const HAIRC=[['Hitam','#25222e',0],['Cokelat tua','#5a3a24',0],['Cokelat','#9a5f34',0],['Pirang','#e0b56a',30],['Ungu','#8d5c9c',40],['Biru salju','#6ea6d8',50]];
+const SKIN=[['#f6d8c3'],['#e7b890'],['#c38b63'],['#8f5a3b']];
+const SUIT=[['blazer','Jas',0],['pelaut','Pelaut',0],['gakuran','Gakuran',0],['gi','Gi Kayuki',60]];
+const SUITC=[['Biru Kayuki','#1d3f8f',0],['Hijau tua','#2f6b52',0],['Ungu','#7a5b86',30],['Abu','#6d7077',30],['Marun','#8d2f3e',40]];
+const ACC=[['none','Tanpa',0],['kacamata','Kacamata',0],['bando','Ikat kepala salju',50],['syal','Syal salju',40],['topi','Topi',70]];
+const ACCC=[['Merah','#e04458',0],['Kuning','#f2b134',0],['Hijau','#47b89a',0],['Ungu','#8a79d1',0]];
+const CATS=[['hair','Rambut',HAIR],['hairC','Warna rambut',HAIRC],['skin','Kulit',SKIN],['suit','Seragam',SUIT],['suitC','Warna seragam',SUITC],['acc','Aksesori',ACC],['accC','Warna aksesori',ACCC]];
+const owned=(cat,i)=>{const arr=CATS.find(c=>c[0]===cat)[2];const p=arr[i][arr[i].length-1];return typeof p!=='number'||p===0||S.own[cat+i]};
+
+/* ===== three: dasar ===== */
+const cv=$('gl');
+const renderer=new THREE.WebGLRenderer({canvas:cv,antialias:true,alpha:true,powerPreference:'default'});
+const DPR=Math.min(window.devicePixelRatio||1,1.75);
+renderer.setPixelRatio(DPR);
+renderer.setClearColor(0x000000,0);
+renderer.outputColorSpace=THREE.SRGBColorSpace;
+const scene=new THREE.Scene();
+const cam=new THREE.PerspectiveCamera(38,1,.1,120);
+let camW=8.8,camTarget=new THREE.Vector3(0,1.1,0),camPitch=.62,camX=0;
+const hemi=new THREE.HemisphereLight(0xfff4e0,0x5a6a8a,1.05);scene.add(hemi);
+const sun=new THREE.DirectionalLight(0xffffff,1.25);sun.position.set(-4,9,6);scene.add(sun);
+const warm1=new THREE.PointLight(0xffc27a,14,12,2);warm1.position.set(-3,3.6,-1);scene.add(warm1);
+const warm2=new THREE.PointLight(0xffd9a0,12,12,2);warm2.position.set(3.5,3.6,-1);scene.add(warm2);
+
+const mats={};
+const M=(c,o={})=>{const k=c+JSON.stringify(o);return mats[k]||(mats[k]=new THREE.MeshStandardMaterial(Object.assign({color:c,roughness:.8,metalness:0},o)))};
+const box=(w,h,d,m)=>new THREE.Mesh(new THREE.BoxGeometry(w,h,d),m);
+const sph=(r,m,ws=14,hs=10)=>new THREE.Mesh(new THREE.SphereGeometry(r,ws,hs),m);
+const cyl=(rt,rb,h,m,s=14)=>new THREE.Mesh(new THREE.CylinderGeometry(rt,rb,h,s),m);
+const at=(o,x,y,z)=>{o.position.set(x,y,z);return o};
+function canvasTex(w,h,fn){const c=document.createElement('canvas');c.width=w;c.height=h;fn(c.getContext('2d'),w,h);const t=new THREE.CanvasTexture(c);t.colorSpace=THREE.SRGBColorSpace;t.anisotropy=4;return t}
+const logoTex=new THREE.TextureLoader().load('icons/icon-512.png',t=>{t.colorSpace=THREE.SRGBColorSpace});
+const flakeTex=canvasTex(128,128,(g,w,h)=>{g.fillStyle='#111';g.fillRect(0,0,w,h);g.strokeStyle='#fff';g.lineWidth=7;g.lineCap='round';g.translate(w/2,h/2);for(let i=0;i<6;i++){g.rotate(Math.PI/3);g.beginPath();g.moveTo(0,0);g.lineTo(0,-48);g.moveTo(0,-30);g.lineTo(-13,-42);g.moveTo(0,-30);g.lineTo(13,-42);g.stroke()}});
+const boardTex=canvasTex(512,256,(g,w,h)=>{g.fillStyle='#f8fbff';g.fillRect(0,0,w,h);g.fillStyle='#1d63d8';g.font='700 120px "KF Gothic",sans-serif';g.textAlign='center';g.textBaseline='middle';g.fillText('あ か さ',w/2,h*.45);g.fillStyle='#d64550';g.font='700 40px system-ui';g.fillText('a   ka   sa',w/2,h*.85)});
+
+/* ===== model manusia ===== */
+function mkMouth(){const m=new THREE.Mesh(new THREE.TorusGeometry(.07,.014,6,12,Math.PI),M('#7a2c2c'));m.rotation.z=Math.PI;return m}
+function buildHuman(sp){
+  const g=new THREE.Group();
+  const skin=M(sp.skin),pants=M(sp.pants||'#1c2230'),suitM=M(sp.suitCol),shoe=M('#12161e');
+  const legs=[],arms=[];
+  [-1,1].forEach(s=>{
+    const lg=new THREE.Group();lg.position.set(s*.17,.72,0);
+    lg.add(at(box(.25,.72,.27,pants),0,-.36,0));lg.add(at(box(.27,.13,.36,shoe),0,-.66,.05));
+    g.add(lg);legs.push(lg);
+  });
+  const sleeve=sp.suit==='pelaut'||sp.suit==='gi'?M('#f4f6fb'):suitM;
+  [-1,1].forEach(s=>{
+    const a=new THREE.Group();a.position.set(s*.41,1.43,0);
+    a.add(at(box(.18,.62,.21,sleeve),0,-.31,0));a.add(at(sph(.1,skin,10,8),0,-.68,0));
+    g.add(a);arms.push(a);
+  });
+  const torsoCol=(sp.suit==='pelaut'||sp.suit==='gi')?M('#f4f6fb'):suitM;
+  g.add(at(box(.64,.8,.38,torsoCol),0,1.1,0));
+  if(sp.suit==='blazer'){
+    g.add(at(box(.24,.62,.02,M('#ffffff')),0,1.14,.195));
+    g.add(at(box(.075,.46,.025,M(sp.tie||'#8d2f3e')),0,1.08,.21));
+    [-1,1].forEach(s=>{const l=box(.13,.6,.03,suitM);l.position.set(s*.17,1.13,.2);l.rotation.z=s*-.18;g.add(l)});
+    if(sp.pocket)g.add(at(box(.12,.05,.03,M('#fff')),-.2,1.34,.205));
+  }else if(sp.suit==='pelaut'){
+    g.add(at(box(.74,.05,.46,suitM),0,1.5,-.02));
+    [-1,1].forEach(s=>{const l=box(.12,.46,.02,suitM);l.position.set(s*.11,1.24,.2);l.rotation.z=s*.32;g.add(l)});
+    g.add(at(box(.14,.1,.03,M('#e04458')),0,1.04,.21));
+  }else if(sp.suit==='gakuran'){
+    g.add(at(box(.46,.1,.34,suitM),0,1.53,0));
+    for(let i=0;i<4;i++)g.add(at(sph(.03,M('#e8c25a'),6,6),0,1.4-i*.17,.2));
+  }else if(sp.suit==='gi'){
+    [-1,1].forEach(s=>{const l=box(.12,.62,.02,M('#cfdcee'));l.position.set(s*.12,1.2,.2);l.rotation.z=s*.38;g.add(l)});
+    g.add(at(box(.68,.11,.42,M('#15181f')),0,.84,0));
+    const p=new THREE.Mesh(new THREE.PlaneGeometry(.2,.2),new THREE.MeshBasicMaterial({map:logoTex,transparent:true}));p.position.set(.17,1.32,.2);g.add(p);
+  }
+  /* kepala */
+  const head=new THREE.Group();head.position.y=1.74;g.add(head);
+  const hs=sph(.34,skin,18,14);hs.scale.set(1,1.05,1);head.add(hs);
+  [-1,1].forEach(s=>{head.add(at(sph(.06,skin,8,6),s*.34,-.02,0));head.add(at((()=>{const e=sph(.036,M('#15151a'),8,6);e.scale.set(1,1.35,.6);return e})(),s*.125,.02,.31));
+    const b=new THREE.Mesh(new THREE.CircleGeometry(.055,10),new THREE.MeshBasicMaterial({color:0xff8fa3,transparent:true,opacity:.45}));b.position.set(s*.21,-.08,.318);b.rotation.y=s*.25;head.add(b);
+    if(sp.brow!==false){const br=box(.09,.02,.02,M('#2a2024'));br.position.set(s*.125,.13,.315);br.rotation.z=s*-.08;head.add(br)}});
+  head.add(at(mkMouth(),0,-.1,.325));
+  const hc=M(sp.hairCol||'#25222e');
+  const cap=(r=.375,ph=.4)=>{const c=new THREE.Mesh(new THREE.SphereGeometry(r,18,10,0,Math.PI*2,0,Math.PI*ph),hc);c.position.set(0,.035,-.012);return c};
+  const hs2=sp.hair;
+  if(hs2!=='none'){head.add(cap());head.add(at(box(.68,.36,.12,hc),0,.0,-.27));
+    if(hs2==='belah'){[-1,1].forEach(s=>{const f=box(.3,.09,.16,hc);f.position.set(s*.17,.255,.235);f.rotation.z=s*.42;head.add(f);const f2=box(.1,.34,.2,hc);f2.position.set(s*.35,.02,.02);head.add(f2)});
+      if(sp.hl)[-.2,.04,.2].forEach((x,i)=>{const h=box(.05,.05,.05,M(sp.hl));h.position.set(x,.3,.22+i*.01);head.add(h)})}
+    else if(hs2==='sisi'){const f=box(.4,.09,.15,hc);f.position.set(.04,.24,.24);f.rotation.z=-.22;head.add(f);[-1,1].forEach(s=>head.add(at(box(.06,.22,.2,hc),s*.345,.03,.02)))}
+    else if(hs2==='rapi'){head.add(at(box(.46,.08,.14,hc),0,.27,.2));[-1,1].forEach(s=>head.add(at(box(.05,.2,.2,hc),s*.34,.04,.02)))}
+    else if(hs2==='pendek'){head.add(at(box(.46,.09,.13,hc),0,.22,.25));[-1,1].forEach(s=>head.add(at(box(.06,.22,.22,hc),s*.34,.04,.02)))}
+    else if(hs2==='bob'){head.add(at(box(.46,.09,.13,hc),0,.22,.25));head.add(at(box(.8,.5,.1,hc),0,-.06,-.29));[-1,1].forEach(s=>head.add(at(box(.08,.46,.52,hc),s*.355,-.05,-.02)))}
+    else if(hs2==='panjang'){head.add(at(box(.46,.09,.13,hc),0,.22,.25));head.add(at(box(.76,.95,.1,hc),0,-.3,-.3));[-1,1].forEach(s=>head.add(at(box(.08,.78,.3,hc),s*.355,-.2,-.08)))}
+    else if(hs2==='kuncir'){head.add(at(box(.46,.08,.13,hc),0,.24,.24));[-1,1].forEach(s=>head.add(at(box(.05,.2,.2,hc),s*.34,.04,.02)));head.add(at(sph(.12,hc,10,8),0,.05,-.4));head.add(at(box(.12,.42,.12,hc),0,-.2,-.42));head.add(at(box(.15,.04,.15,M(sp.tieHair||'#e04458')),0,.0,-.38))}
+    else if(hs2==='jabrik'){head.add(at(box(.44,.08,.13,hc),0,.24,.24));for(let i=0;i<7;i++){const a=i/7*Math.PI*2,c=new THREE.Mesh(new THREE.ConeGeometry(.07,.3,5),hc);c.position.set(Math.sin(a)*.2,.4,Math.cos(a)*.2);c.rotation.set(Math.cos(a)*.5,0,-Math.sin(a)*.5);head.add(c)}}
+    else if(hs2==='bun'){head.add(at(box(.46,.08,.13,hc),0,.25,.24));head.add(at(sph(.14,hc,10,8),0,.1,-.4));[-1,1].forEach(s=>head.add(at(box(.05,.2,.2,hc),s*.34,.04,.02)))}
+  }
+  if(sp.glasses){const gm=M(sp.glassC||'#1a1a1a',{roughness:.4});[-1,1].forEach(s=>{const t=new THREE.Mesh(new THREE.TorusGeometry(.095,.014,6,16),gm);t.position.set(s*.125,.02,.335);head.add(t)});head.add(at(box(.07,.015,.015,gm),0,.03,.335));[-1,1].forEach(s=>head.add(at(box(.015,.015,.3,gm),s*.222,.03,.19)))}
+  const ac=sp.acc&&sp.acc.k,acm=M(sp.acc?sp.acc.c:'#e04458');
+  if(ac==='bando'){const b=cyl(.375,.375,.09,acm,18);b.position.y=.17;head.add(b);const s=sph(.05,M('#fff'),8,6);s.position.set(0,.17,.37);head.add(s)}
+  if(ac==='syal'){const t=new THREE.Mesh(new THREE.TorusGeometry(.26,.085,8,16),acm);t.rotation.x=Math.PI/2;t.position.set(0,-.33,0);head.add(t);head.add(at(box(.14,.46,.07,acm),.12,-.6,.25))}
+  if(ac==='topi'){head.add(at(cyl(.3,.37,.2,acm,16),0,.36,0));head.add(at(box(.5,.03,.3,acm),0,.27,.3))}
+  /* bayangan */
+  const sh=new THREE.Mesh(new THREE.CircleGeometry(.5,16),new THREE.MeshBasicMaterial({color:0,transparent:true,opacity:.28}));sh.rotation.x=-Math.PI/2;sh.position.y=.012;g.add(sh);
+  g.userData={head,legs,arms,pdist:1.9,hy:1.74,kind:'human'};
+  return g;
+}
+function playerSpec(){
+  const L=S.look,sk=SKIN[L.skin][0],ac=ACC[L.acc][0];
+  return {skin:sk,hair:HAIR[L.hair][0],hairCol:HAIRC[L.hairC][1],suit:SUIT[L.suit][0],suitCol:SUITC[L.suitC][1],tie:'#e8c25a',glasses:ac==='kacamata',acc:(ac==='none'||ac==='kacamata')?null:{k:ac,c:ACCC[L.accC][1]},pants:'#1c2434'};
+}
+function buildYuki(){
+  const g=new THREE.Group(),w=M('#f6fbff',{roughness:.95}),blk=M('#16181d');
+  const body=sph(.64,w,20,16);body.scale.set(1,.95,1);body.position.y=.62;g.add(body);
+  const head=new THREE.Group();head.position.y=1.62;g.add(head);
+  head.add(sph(.52,w,22,16));
+  const band=new THREE.Mesh(new THREE.CylinderGeometry(.525,.525,.2,24,1,true),new THREE.MeshStandardMaterial({color:'#16181d',side:THREE.DoubleSide,roughness:.7}));band.position.y=.27;band.rotation.x=-.08;head.add(band);
+  const fl=new THREE.Mesh(new THREE.PlaneGeometry(.2,.2),new THREE.MeshBasicMaterial({map:flakeTex}));fl.position.set(0,.285,.53);head.add(fl);
+  [-1,1].forEach(s=>{const e=sph(.055,blk,8,6);e.position.set(s*.2,.06,.47);head.add(e)});
+  const nose=new THREE.Mesh(new THREE.SphereGeometry(.09,10,8),M('#ff8a2a'));nose.scale.set(1,1,1.3);nose.position.set(0,-.05,.5);head.add(nose);
+  const sm=new THREE.Mesh(new THREE.TorusGeometry(.17,.018,6,14,Math.PI),blk);sm.rotation.z=Math.PI;sm.position.set(0,-.12,.48);head.add(sm);
+  /* gi */
+  [-1,1].forEach(s=>{const l=box(.14,.7,.04,M('#dfe9f6'));l.position.set(s*.16,.82,.6);l.rotation.z=s*.42;l.rotation.x=-.18;g.add(l)});
+  const belt=new THREE.Mesh(new THREE.TorusGeometry(.63,.07,8,24),blk);belt.rotation.x=Math.PI/2;belt.position.y=.5;g.add(belt);
+  g.add(at(box(.1,.3,.06,blk),-.1,.28,.66));g.add(at(box(.1,.3,.06,blk),.14,.3,.66));
+  const p=new THREE.Mesh(new THREE.PlaneGeometry(.26,.26),new THREE.MeshBasicMaterial({map:logoTex,transparent:true}));p.position.set(.26,.95,.56);p.rotation.y=.4;g.add(p);
+  const arms=[];
+  [-1,1].forEach(s=>{const a=new THREE.Group();a.position.set(s*.6,1.0,.05);
+    const up=new THREE.Mesh(new THREE.CapsuleGeometry(.12,.38,4,8),w);up.position.set(s*.12,.12,0);up.rotation.z=s*-.75;a.add(up);
+    const h=sph(.14,w,10,8);h.position.set(s*.34,.38,0);a.add(h);
+    if(s===1){[-.05,.05].forEach(x=>{const f=new THREE.Mesh(new THREE.CapsuleGeometry(.035,.12,3,6),w);f.position.set(s*.34+x,.55,0);f.rotation.z=x*4;a.add(f)})}
+    g.add(a);arms.push(a)});
+  const sh=new THREE.Mesh(new THREE.CircleGeometry(.75,18),new THREE.MeshBasicMaterial({color:0,transparent:true,opacity:.28}));sh.rotation.x=-Math.PI/2;sh.position.y=.012;g.add(sh);
+  g.userData={head,legs:[],arms,pdist:2.7,hy:1.62,kind:'yuki'};
+  return g;
+}
+const STAFF={
+  cania:{skin:'#e7b890',hair:'bun',hairCol:'#1e1b22',suit:'blazer',suitCol:'#16171c',tie:'#111',glasses:true,glassC:'#222'},
+  farhan:{skin:'#e7b890',hair:'rapi',hairCol:'#1a1820',suit:'blazer',suitCol:'#16315f',tie:'#16315f',pocket:true},
+  andrian:{skin:'#e7b890',hair:'belah',hairCol:'#3a2a1f',hl:'#a9824e',suit:'blazer',suitCol:'#17181d',tie:'#1d3470'},
+  sopian:{skin:'#d9a97e',hair:'none',suit:'blazer',suitCol:'#101114',tie:'#111',brow:true},
+  diki:{skin:'#e7b890',hair:'sisi',hairCol:'#17151a',suit:'blazer',suitCol:'#17181d',tie:'#25356e'}
+};
+
+/* ===== diorama lobi Kayuki ===== */
+const world=new THREE.Group();scene.add(world);
+(function buildRoom(){
+  const floor=box(15,.3,10,M('#e8dcc8',{roughness:.55}));floor.position.set(0,-.15,0);world.add(floor);
+  const rug=box(5.2,.02,3.2,M('#1d3f8f'));rug.position.set(0,.01,1.2);world.add(rug);
+  const rug2=box(5.6,.015,3.6,M('#f2b134'));rug2.position.set(0,.005,1.2);world.add(rug2);
+  const back=box(15,5.4,.3,M('#d8ccb6'));back.position.set(0,2.7,-4.85);world.add(back);
+  const left=box(.3,5.4,10,M('#cfc3ad'));left.position.set(-7.35,2.7,0);world.add(left);
+  /* panel kayu */
+  for(let i=0;i<14;i++){const s=box(.22,4.6,.14,M(i%2?'#7a4a2a':'#8a5732'));s.position.set(-6.8+i*.3,2.35,-4.66);world.add(s)}
+  /* plakat logo */
+  const frame=box(2.5,2.5,.12,M('#c99a3b',{metalness:.4,roughness:.4}));frame.position.set(1.2,2.7,-4.62);world.add(frame);
+  const logo=new THREE.Mesh(new THREE.PlaneGeometry(2.3,2.3),new THREE.MeshBasicMaterial({map:logoTex}));logo.position.set(1.2,2.7,-4.54);world.add(logo);
+  const sign=box(3.4,.4,.08,M('#102b50'));sign.position.set(1.2,1.18,-4.6);world.add(sign);
+  /* papan tulis kelas */
+  const wb=box(.1,2.1,3.4,M('#c9cdd4'));wb.position.set(-7.12,2.6,-1.2);world.add(wb);
+  const wp=new THREE.Mesh(new THREE.PlaneGeometry(3.1,1.8),new THREE.MeshBasicMaterial({map:boardTex}));wp.position.set(-7.06,2.62,-1.2);wp.rotation.y=Math.PI/2;world.add(wp);
+  /* meja resepsionis */
+  const desk=box(4.2,1.05,1.1,M('#6b4528'));desk.position.set(4.3,.52,-3.5);world.add(desk);
+  const top=box(4.4,.12,1.3,M('#efe6d6',{roughness:.4}));top.position.set(4.3,1.1,-3.5);world.add(top);
+  const strip=box(4.0,.06,.04,new THREE.MeshBasicMaterial({color:0xffc060}));strip.position.set(4.3,.18,-2.93);world.add(strip);
+  /* meja & kursi kelas */
+  [[-4.7,-0.2],[-4.7,1.5]].forEach(([x,z])=>{const t=box(1.5,.1,.8,M('#b98a56'));t.position.set(x,.78,z);world.add(t);[[-.65,-.3],[.65,-.3],[-.65,.3],[.65,.3]].forEach(([a,b])=>world.add(at(box(.08,.78,.08,M('#7a5a3a')),x+a,.39,z+b)));world.add(at(box(.5,.08,.5,M('#4a79c9')),x,.45,z+.75));world.add(at(box(.5,.5,.08,M('#4a79c9')),x,.72,z+1.0))});
+  /* tanaman */
+  [[-6.4,-3.8],[6.5,-1.2]].forEach(([x,z])=>{world.add(at(cyl(.4,.3,.6,M('#cfc7bb')),x,.3,z));const lm=M('#3f8f58');[[0,1.0,0,.45],[.25,1.4,.1,.35],[-.22,1.35,-.1,.33]].forEach(([a,b,c,r])=>{const l=sph(r,lm,8,6);l.position.set(x+a,b,z+c);world.add(l)})});
+  /* kepingan salju melayang */
+  const N=70,pos=new Float32Array(N*3);for(let i=0;i<N;i++){pos[i*3]=(Math.random()-.5)*13;pos[i*3+1]=Math.random()*4.8;pos[i*3+2]=(Math.random()-.5)*8}
+  const pg=new THREE.BufferGeometry();pg.setAttribute('position',new THREE.BufferAttribute(pos,3));
+  const pm=new THREE.PointsMaterial({color:0xffffff,size:.09,transparent:true,opacity:.75,depthWrite:false});
+  snow=new THREE.Points(pg,pm);world.add(snow);
+})();
+var snow;
+
+/* aktor */
+const actors={};
+function place(o,x,z,ry=0){o.position.set(x,0,z);o.rotation.y=ry;return o}
+const player=new THREE.Group();scene.add(player);
+let pModel=null;
+function rebuildPlayer(){if(pModel)player.remove(pModel);pModel=buildHuman(playerSpec());player.add(pModel);player.userData=pModel.userData;player.userData.name=S.name||'Kamu'}
+const yuki=place(buildYuki(),1.8,-1.2,-.5);yuki.userData.name='Yuki Sensei';scene.add(yuki);
+const cania=place(buildHuman(STAFF.cania),-3.4,-2.6,.5);cania.userData.name='Cania Sensei';scene.add(cania);
+const farhan=place(buildHuman(STAFF.farhan),.4,-.8,0);farhan.userData.name='Farhan Sensei';scene.add(farhan);farhan.visible=false;
+actors.yuki=yuki;actors.cania=cania;actors.farhan=farhan;actors.me=player;
+yuki.userData.id='yuki';cania.userData.id='cania';farhan.userData.id='farhan';
+/* penanda misi */
+const markTex=canvasTex(128,128,(g)=>{g.fillStyle='#f2b134';g.beginPath();g.arc(64,64,52,0,7);g.fill();g.lineWidth=8;g.strokeStyle='#fff';g.stroke();g.fillStyle='#3a2800';g.font='900 84px system-ui';g.textAlign='center';g.textBaseline='middle';g.fillText('!',64,70)});
+function mkMark(){const s=new THREE.Sprite(new THREE.SpriteMaterial({map:markTex,depthTest:false,transparent:true}));s.scale.set(.6,.6,1);s.renderOrder=9;return s}
+const marks={yuki:mkMark(),cania:mkMark()};
+yuki.add(marks.yuki);marks.yuki.position.y=2.65;cania.add(marks.cania);marks.cania.position.y=2.55;
+marks.yuki.visible=marks.cania.visible=false;
+
+/* ===== kamera & loop ===== */
+let mode='idle',aspect=1;
+function resize(){const w=innerWidth,h=innerHeight;renderer.setSize(w,h,false);aspect=w/h;cam.aspect=aspect;cam.updateProjectionMatrix()}
+addEventListener('resize',resize);resize();
+let tCam=0,camMode='title';
+function updateCam(dt){
+  const t=performance.now()/1000;
+  let tx,ty,tz,W=camW,pitch=camPitch;
+  if(camMode==='title'){tx=Math.sin(t*.15)*1.2;ty=1.2;tz=-.8;W=9.5;pitch=.5}
+  else if(camMode==='creator'){tx=player.position.x;ty=-.15;tz=player.position.z;W=3.1;pitch=.2}
+  else if(camMode==='kons'){tx=0;ty=1.3;tz=-.2;W=6.4;pitch=.34}
+  else{tx=THREE.MathUtils.clamp(player.position.x*.7,-3,3);ty=1.1;tz=-.3;W=8.6;pitch=.58}
+  camX+=(tx-camX)*Math.min(1,dt*3.5);
+  const d=Math.max(W/(2*Math.tan(THREE.MathUtils.degToRad(cam.fov/2))*Math.min(aspect,1.6)),6);
+  /* naikkan target sedikit agar adegan tidak tertutup dialog */
+  const lift=(mode==='dialog'||mode==='creator')?(camMode==='creator'?-.55:-.9):0;
+  cam.position.set(camX,ty+Math.sin(pitch)*d+lift*0,tz+Math.cos(pitch)*d);
+  cam.lookAt(camX,ty+lift,tz);
+}
+const clock=new THREE.Clock();
+const walk={on:false,tx:0,tz:0,cb:null};
+const PBOUND={x:[-6.2,6.2],z:[-3.2,3.8]};
+function animHuman(o,t,moving){
+  const u=o.userData;if(!u||!u.legs)return;
+  if(u.kind==='yuki'){u.arms[1].rotation.z=Math.sin(t*3)*.18;u.arms[0].rotation.z=-Math.sin(t*3+1)*.12;o.position.y=Math.abs(Math.sin(t*2.2))*.05;return}
+  const s=moving?Math.sin(t*11)*.7:0;
+  u.legs[0].rotation.x=s;u.legs[1].rotation.x=-s;u.arms[0].rotation.x=-s*.8;u.arms[1].rotation.x=s*.8;
+  const base=o===player?0:0;
+  u.head.position.y=u.hy+(moving?Math.abs(Math.sin(t*11))*.04:Math.sin(t*2)*.012);
+}
+function loop(){
+  requestAnimationFrame(loop);
+  if(document.hidden)return;
+  const dt=Math.min(clock.getDelta(),.05),t=clock.elapsedTime;
+  /* jalan */
+  let moving=false;
+  if(walk.on&&mode==='idle'){
+    const dx=walk.tx-player.position.x,dz=walk.tz-player.position.z,d=Math.hypot(dx,dz);
+    if(d<.08){walk.on=false;const cb=walk.cb;walk.cb=null;if(cb)cb()}
+    else{const sp=3.4*dt,k=Math.min(1,sp/d);player.position.x+=dx*k;player.position.z+=dz*k;player.rotation.y=Math.atan2(dx,dz);moving=true}
+  }
+  animHuman(player,t,moving);
+  animHuman(yuki,t,false);
+  [cania,farhan].forEach(a=>animHuman(a,t+a.id,false));
+  if(camMode==='creator'&&mode==='creator')player.rotation.y=Math.sin(t*.8)*.5;
+  if(snow){const p=snow.geometry.attributes.position;for(let i=0;i<p.count;i++){let y=p.getY(i)-dt*.15;if(y<0)y=4.8;p.setY(i,y);p.setX(i,p.getX(i)+Math.sin(t+i)*dt*.05)}p.needsUpdate=true}
+  Object.values(marks).forEach(m=>{if(m.visible)m.position.y=(m.parent===yuki?2.65:2.55)+Math.sin(t*4)*.08});
+  updateCam(dt);
+  renderer.render(scene,cam);
+  if(!$('dlg').hidden&&portraitOn){ptick++;if(ptick%2===0)renderPortrait()}
+}
+
+/* ===== potret dialog (renderer kedua) ===== */
+const pcv=$('pc');
+const pr=new THREE.WebGLRenderer({canvas:pcv,antialias:true,alpha:false});pr.setPixelRatio(1);pr.setSize(168,168,false);pr.setClearColor(0xfff3d6,1);pr.outputColorSpace=THREE.SRGBColorSpace;
+const pcam=new THREE.PerspectiveCamera(30,1,.1,40);
+let portraitOn=false,portraitWho=null,ptick=0;
+function renderPortrait(){
+  const o=portraitWho;if(!o)return;
+  const u=o.userData,hp=new THREE.Vector3();u.head.getWorldPosition(hp);
+  const ry=o.rotation.y+(o.parent?o.parent.rotation.y:0);
+  pcam.position.set(hp.x+Math.sin(ry)*u.pdist,hp.y+.02+(u.kind==='yuki'?.05:0),hp.z+Math.cos(ry)*u.pdist);
+  pcam.lookAt(hp.x,hp.y-(u.kind==='yuki'?.05:.12),hp.z);
+  /* sembunyikan penanda saat render potret */
+  const mv=Object.values(marks).map(m=>m.visible);Object.values(marks).forEach(m=>m.visible=false);
+  pr.render(scene,pcam);
+  Object.values(marks).forEach((m,i)=>m.visible=mv[i]);
+}
+
+/* ===== dialog ===== */
+const NAMES={yuki:'Yuki Sensei',cania:'Cania Sensei',farhan:'Farhan Sensei',andrian:'Andrian Sensei',sopian:'Sopian Sensei',diki:'Diki Sensei'};
+let dlgTap=null,typing=null;
+function face(a,b){const dx=b.position.x-a.position.x,dz=b.position.z-a.position.z;a.rotation.y=Math.atan2(dx,dz)}
+function showLine(w,text,choices){
+  return new Promise(res=>{
+    const d=$('dlg');d.hidden=false;
+    const act=actors[w]||null;
+    $('dbox').classList.toggle('noPc',!act||!act.visible);
+    if(act&&act.visible){portraitWho=act;portraitOn=true;renderPortrait()}else portraitOn=false;
+    $('dName').textContent=w==='me'?(S.name||'Kamu'):(NAMES[w]||'');
+    $('dName').hidden=w==='narr';
+    const tx=$('dText'),ch=$('dChoices');tx.textContent='';ch.innerHTML='';$('dMore').hidden=true;
+    let i=0;clearInterval(typing);
+    const full=()=>{clearInterval(typing);typing=null;tx.textContent=text;i=text.length;
+      if(choices){choices.forEach((c,k)=>{const b=document.createElement('button');b.textContent=c;b.onclick=e=>{e.stopPropagation();sfx.tap();dlgTap=null;res(k)};ch.appendChild(b)});dlgTap=null}
+      else{$('dMore').hidden=false;dlgTap=()=>{dlgTap=null;sfx.tap();res()}}};
+    typing=setInterval(()=>{i+=2;tx.textContent=text.slice(0,i);if(i>=text.length)full()},22);
+    dlgTap=()=>{full()};
+  });
+}
+$('dlg').addEventListener('click',()=>{if(dlgTap)dlgTap()});
+function hideDlg(){clearInterval(typing);$('dlg').hidden=true;portraitOn=false;dlgTap=null}
+async function say(lines){for(const [w,t] of lines){await showLine(w,t)}}
+async function ask(w,text,choices){return showLine(w,text,choices)}
+
+/* ===== panel ===== */
+function panel(html,wire){return new Promise(res=>{const p=$('pan');$('panBody').innerHTML=html;p.hidden=false;const close=v=>{p.hidden=true;res(v)};wire(close,$('panBody'))})}
+const hearts=(n,max)=>'❤️'.repeat(n)+'🖤'.repeat(Math.max(0,max-n));
+
+/* ===== materi ===== */
+const MAT={
+  m1:{title:'Kenalan dulu: baris あ か さ',rows:['あいうえお','かきくけこ','さしすせそ'],note:'Ketuk huruf untuk mendengar suaranya. Ingat: し dibaca "shi", bukan "si".'},
+  m2:{title:'Lanjut: baris た な は',rows:['たちつてと','なにぬねの','はひふへほ'],note:'Awas yang tricky: ち = "chi", つ = "tsu", ふ = "fu".'},
+  m4:{title:'Tanda tenten (゛) dan maru (゜)',rows:['がぎぐげご','ざじずぜぞ','だでど','ばびぶべぼ','ぱぴぷぺぽ'],note:'Tenten (゛) bikin bunyi jadi "berat": か→が, さ→ざ, た→だ, は→ば. Maru (゜) khusus baris は: は→ぱ. ぢ/づ jarang dipakai, kita lewati dulu.'}
+};
+function materi(id){const m=MAT[id];
+  const h=`<h2>${m.title}</h2><p class="hint">${m.note}</p>`+m.rows.map(r=>`<div class="chips">${[...r].map(k=>`<button class="jp" data-k="${k}"><b>${k}</b><small>${RM[k]}</small></button>`).join('')}${'<i class="gap"></i>'.repeat(Math.max(0,5-r.length))}</div>`).join('')+`<button class="btn" id="mOk" style="width:100%;margin-top:8px">Siap, aku paham!</button>`;
+  return panel(h,(close,b)=>{b.querySelectorAll('.chips button').forEach(x=>x.onclick=()=>{sfx.tap();speak(x.dataset.k)});b.querySelector('#mOk').onclick=()=>close()})}
+
+/* ===== mesin soal ===== */
+function optsLetter(ans,pool){
+  const rom=RM[ans],c=new Set();
+  (SIM[ans]||[]).filter(x=>pool.includes(x)&&RM[x]!==rom).slice(0,2).forEach(x=>c.add(RM[x]));
+  for(const x of shuffle(pool)){if(c.size>=3)break;if(RM[x]!==rom)c.add(RM[x])}
+  return shuffle([rom,...c]);
+}
+function optsWord(w){
+  const ks=[...w],rom=romOf(w),set=new Set();let n=0;
+  while(set.size<3&&n++<80){
+    const p=rnd(ks.length),o=ks[p];
+    const alts=(SIM[o]||[]).concat([...rowOf(o)||'']).filter(x=>x!==o&&RM[x]);
+    if(!alts.length)continue;
+    const nk=ks.slice();nk[p]=pick(alts);const r=romOf(nk.join(''));
+    if(r!==rom)set.add(r);
+  }
+  const all=Object.keys(RM);let g=0;
+  while(set.size<3&&g++<200){const nk=ks.slice();nk[rnd(ks.length)]=pick(all);const r=romOf(nk.join(''));if(r!==rom)set.add(r)}
+  return shuffle([rom,...set]);
+}
+const L=s=>[...s];
+function makeQs(m){
+  if(m.kind==='L'){
+    const pool=m.pool,rev=m.rev||[];
+    let base=shuffle(pool).slice(0,m.n-(rev.length?3:0));
+    const r=shuffle(rev).slice(0,3);
+    const items=shuffle([...base,...r]);
+    const all=[...new Set([...pool,...rev])];
+    return items.map(k=>({t:'L',jp:k,rom:RM[k],opts:optsLetter(k,all),tip:TIPS[k]}));
+  }
+  if(m.kind==='W'){
+    return shuffle(m.words).slice(0,m.n).map(([w,mean])=>({t:'W',jp:w,rom:romOf(w),mean,opts:optsWord(w)}));
+  }
+  if(m.kind==='X'){
+    const lets=shuffle(m.pool).slice(0,5).map(k=>({t:'L',jp:k,rom:RM[k],opts:optsLetter(k,m.pool),tip:TIPS[k]}));
+    const wds=shuffle(m.words).slice(0,m.n-5).map(([w,mean])=>({t:'W',jp:w,rom:romOf(w),mean,opts:optsWord(w)}));
+    return shuffle([...lets,...wds]);
+  }
+}
+const ROW_A=L('あいうえおかきくけこさしすせそ'),ROW_B=L('たちつてとなにぬねのはひふへほ'),DAK=L('がぎぐげござじずぜぞだでどばびぶべぼぱぴぷぺぽ');
+const MISSIONS=[
+ {id:'m1',npc:'cania',title:'Papan Nama Kelas',sub:'Baca huruf あ か さ',hearts:5,n:8,kind:'L',pool:ROW_A,mat:'m1',
+  intro:[['cania','Nah, kita mulai dari yang paling dasar. Hiragana itu huruf yang dipakai buat kata-kata asli Jepang. Hari ini kita kenalan sama tiga baris: あ, か, dan さ.'],['cania','Lihat dulu materinya, ketuk huruf buat dengar suaranya. Setelah itu kita latihan baca ya!']],
+  outro:[['cania','Bagus! Kamu sudah bisa membaca huruf pertamamu. Kalau ada yang masih lupa, nggak apa-apa, nanti kita ulang lagi.']]},
+ {id:'m2',npc:'cania',title:'Baris Lanjutan',sub:'Baca huruf た な は',hearts:5,n:8,kind:'L',pool:ROW_B,rev:ROW_A,mat:'m2',need:'m1',
+  intro:[['cania','Siap lanjut? Sekarang tiga baris berikutnya: た, な, dan は. Sebagian bakal dicampur sama huruf yang tadi, biar nggak lupa.']],
+  outro:[['cania','Mantap! Sekarang kamu sudah kenal 30 huruf dasar. Coba ngobrol sama Yuki Sensei, beliau punya tantangan buat kamu.']]},
+ {id:'m3',npc:'yuki',title:'Kata-kata di Kelas',sub:'Baca kata 2–4 huruf',hearts:5,n:8,kind:'W',words:WORDS_A,need:'m2',
+  intro:[['yuki','Konnichiwa! Sekarang naik level: baca kata utuh! Gabungkan bunyi tiap huruf jadi satu kata, misalnya ね + こ = ne-ko.'],['yuki','Tiap kata ada artinya, jadi sambil belajar kamu nambah kosakata. Yuk!']],
+  outro:[['yuki','Hebat banget! Membaca kata utuh itu bukan hal kecil. Satu tantangan lagi, ya.']]},
+ {id:'m4',npc:'yuki',title:'Tantangan Yuki Sensei',sub:'Tenten, maru, dan campuran',hearts:4,n:10,kind:'X',pool:DAK,words:WORDS_B,mat:'m4',need:'m3',
+  intro:[['yuki','Ini tantangan terakhir Babak 1. Kamu bakal ketemu huruf dengan tanda tenten dan maru. Lihat dulu materinya, lalu kita adu! Semangatmu cuma 4 ❤️ di sini.']],
+  outro:[]}
+];
+const mById=id=>MISSIONS.find(m=>m.id===id);
+const mOpen=m=>!m.need||S.done[m.need];
+const nextMission=npc=>MISSIONS.find(m=>m.npc===npc&&!S.done[m.id]&&mOpen(m));
+
+async function runQuiz(m){
+  const qs=makeQs(m);let h=m.hearts,wrong=0,combo=0,gain=0;
+  const Q=$('quiz');Q.hidden=false;$('qTitle').textContent=m.title;
+  const upd=()=>{$('qHearts').textContent=hearts(h,m.hearts);$('qPoin').textContent='❄️ '+S.poin};
+  upd();
+  let ok=true;
+  for(let i=0;i<qs.length;i++){
+    const q=qs[i];window.__Q=q;
+    $('qBar').firstElementChild.style.width=(i/qs.length*100)+'%';
+    $('qPrompt').textContent=q.t==='L'?'Huruf ini dibaca apa?':'Kata ini dibaca apa?';
+    const jp=$('qJP');jp.textContent=q.jp;jp.style.fontSize=q.jp.length>2?'clamp(2.8rem,17vw,5rem)':'';jp.className='jp pop';
+    $('qMean').textContent=q.t==='W'?'':'';
+    $('qFb').textContent=m.id==='m4'&&i===0?'Ingat: tenten bikin bunyi jadi lebih "berat".':'Pilih bunyi yang benar.';
+    $('qNext').hidden=true;
+    const box=$('qOpts');box.innerHTML='';
+    const pickIdx=await new Promise(res=>{
+      q.opts.forEach((o,k)=>{const b=document.createElement('button');b.textContent=o;b.onclick=()=>res(k);box.appendChild(b)});
+      $('qSpk').onclick=()=>speak(q.jp);
+    });
+    const good=q.opts[pickIdx]===q.rom;
+    [...box.children].forEach((b,k)=>{b.disabled=true;if(q.opts[k]===q.rom)b.classList.add('ok');else if(k===pickIdx)b.classList.add('bad');else b.classList.add('dim')});
+    let msg;
+    if(good){combo++;const g=4+Math.min(5,combo-1);gain+=g;setPoin(g);sfx.ok();
+      msg=`Benar! +${g} ❄️${combo>2?`  Kombo ×${combo} 🔥`:''}`}
+    else{combo=0;h--;wrong++;setPoin(-2);sfx.bad();document.getElementById('qCard').classList.remove('shake');void document.getElementById('qCard').offsetWidth;document.getElementById('qCard').classList.add('shake');
+      msg=`Belum tepat. Jawabannya "${q.rom}". −1 ❤️, −2 ❄️`}
+    if(q.t==='W'){$('qMean').textContent=`${q.rom} = ${q.mean}`}
+    $('qFb').textContent=msg+(q.tip?`\nTips: ${q.tip}`:'');
+    upd();speak(q.jp);
+    if(h<=0){ok=false;await sleep(900);break}
+    $('qNext').hidden=false;
+    await new Promise(r=>{$('qNext').onclick=()=>{sfx.tap();r()}});
+  }
+  $('qBar').firstElementChild.style.width='100%';
+  Q.hidden=true;
+  return {ok,wrong,h,gain};
+}
+
+async function startMission(m){
+  mode='dialog';walk.on=false;
+  const a=actors[m.npc];face(a,player);face(player,a);
+  await say(m.intro);hideDlg();
+  if(m.mat)await materi(m.mat);
+  let again=true,res;
+  while(again){
+    mode='quiz';res=await runQuiz(m);
+    if(res.ok){again=false;break}
+    setPoin(-10);
+    const c=await panel(`<h2 class="cen">Semangatmu habis 😵</h2><p class="hint cen">Nggak apa-apa, ini bagian dari belajar. Kamu kehilangan 10 ❄️. Mau coba lagi?</p><div class="list"><button class="btn" id="r1">Coba lagi</button><button class="btn sec" id="r2">Keluar dulu</button></div>`,(cl,b)=>{b.querySelector('#r1').onclick=()=>cl(1);b.querySelector('#r2').onclick=()=>cl(0)});
+    if(!c){mode='idle';return}
+  }
+  const stars=res.wrong<=1?3:res.wrong<=3?2:1;
+  const first=!S.done[m.id];
+  const bonus=first?15+stars*5:5;
+  S.done[m.id]=true;S.stars[m.id]=Math.max(S.stars[m.id]||0,stars);setPoin(bonus);save();sfx.win();
+  await panel(`<h2 class="cen">Misi selesai! 🎉</h2><div class="stars">${'⭐'.repeat(stars)}${'☆'.repeat(3-stars)}</div><p class="cen big">+${res.gain+bonus} ❄️</p><p class="hint cen">${first?`Bonus misi pertama: +${bonus} ❄️`:'Bonus ulang: +5 ❄️'}<br>Salah: ${res.wrong}× · Semangat tersisa: ${hearts(res.h,m.hearts)}</p><button class="btn" id="ok" style="width:100%">Lanjut</button>`,(cl,b)=>{b.querySelector('#ok').onclick=()=>cl()});
+  mode='dialog';
+  if(m.outro.length){await say(m.outro);hideDlg()}
+  if(m.id==='m4'&&first)await endBab1();
+  mode='idle';refreshMarks();
+}
+async function endBab1(){
+  mode='dialog';
+  await say([['yuki','Selamat! Babak 1 selesai! Kamu sudah bisa membaca hiragana dasar, lengkap dengan tenten dan maru. Itu pondasi yang kuat banget.'],['cania','Kami bangga sama kamu. Berikutnya ada katakana, dan kamu juga akan ketemu dengan para sensei lain.'],['yuki','Babak 2 dan seterusnya lagi disiapkan. Sambil nunggu, kamu bisa ngobrol sama Farhan Sensei lewat menu "Pratinjau sesi konseling" ya!']]);
+  hideDlg();
+  await panel(`<h2 class="cen">Babak 1 tamat 🏆</h2><p class="hint cen">Babak 2: Hiragana lanjutan, kalimat &amp; partikel akan segera hadir. Poinmu tersimpan, dan bisa dipakai buat ganti penampilan.</p><button class="btn" id="ok" style="width:100%">Oke</button>`,(cl,b)=>{b.querySelector('#ok').onclick=()=>cl()});
+}
+
+/* ===== sesi konseling ===== */
+const KONS=[
+ {q:'Konnichiwa! Apa kabar? Gimana perasaanmu hari ini? Sebelum mulai, Sensei mau tahu dulu: kamu lagi sehat, capek, atau lagi semangat?',
+  o:[['Alhamdulillah baik',0,'Syukurlah! Energi baik kayak gini bagus banget buat belajar. Sensei senang dengarnya.'],['Capek, tapi semangat',0,'Capek tapi tetap semangat itu keren, tandanya kamu serius. Kalau butuh istirahat, istirahat ya, jangan dipaksa.'],['Lagi banyak pikiran',0,'Makasih sudah jujur ya. Banyak pikiran itu wajar, apalagi kalau lagi mikirin masa depan. Kita ngobrol santai aja di sini, nggak ada jawaban yang salah.'],['Agak gugup',0,'Tenang, ini bukan ujian kok. Anggap aja ngobrol sama kakak di kelas. Pelan-pelan aja.']]},
+ {q:'Kalau boleh tahu, kenapa kamu mau mulai belajar bahasa Jepang?',
+  o:[['Suka budaya, anime, atau musik Jepang',2,'Mulai dari rasa suka itu bagus. Belajar jadi nggak terasa berat. Tugas kita nanti, mengubah rasa suka itu jadi kemampuan nyata.'],['Untuk kerja ke Jepang',3,'Tujuannya sudah jelas dari awal, itu modal besar. Bahasa memang pintu pertama buat kerja di Jepang.'],['Untuk kuliah atau beasiswa',3,'Keren. Belajar di Jepang butuh bahasa yang kuat dan persiapan yang rapi. Kamu sudah mulai dari fondasinya.'],['Diajak atau disuruh orang lain',0,'Terima kasih sudah jujur. Nggak apa-apa awalnya karena diajak. Banyak yang menemukan alasannya sendiri di tengah jalan. Nanti kita lihat bareng ya.','ext'],['Iseng, mau coba dulu',1,'Seru kok mulai dari penasaran. Banyak yang akhirnya nemu tujuan di tengah jalan. Yang penting kamu sudah melangkah.']]},
+ {q:'Terus, apa yang bikin kamu pengin ke Jepang?',
+  o:[['Pengin kerja dan bantu keluarga',3,'Niat membantu keluarga itu mulia, dan itu bahan bakar yang kuat. Tapi ingat, kamu juga harus jaga diri sendiri di sana. Sehat dan stabil dulu, baru bisa bantu orang lain.'],['Pengin kuliah atau cari ilmu baru',3,'Ilmu baru itu investasi yang nggak pernah rugi. Orang yang belajar di luar negeri biasanya pulang dengan cara pandang yang jauh lebih luas.'],['Penasaran sama budayanya',2,'Penasaran itu pintu masuk yang bagus. Lama-lama kamu juga akan lihat sisi lain Jepang: disiplin, tepat waktu, kerja keras. Siap ya?'],['Belum tahu pasti, ikut-ikutan teman',1,'Nggak apa-apa kalau belum tahu pasti. Itu jujur, dan jujur itu awal yang baik. Ayo kita cari tahu pelan-pelan alasanmu sendiri.']]},
+ {q:'Keputusan ini datangnya dari siapa? Dari kamu sendiri, atau ada yang menyarankan?',
+  o:[['Dari diri sendiri, keluarga mendukung',3,'Kombinasi terbaik! Keputusan dari hati sendiri plus restu keluarga itu fondasi yang kuat. Jaga komunikasi dengan mereka ya.'],['Dari diri sendiri, tapi keluarga belum setuju',2,'Sensei paham, ini nggak mudah. Restu keluarga itu penting. Coba ajak ngobrol pelan-pelan, tunjukkan kamu serius dan sudah mulai belajar. Banyak orang tua luluh karena melihat usaha anaknya.'],['Disuruh orang tua atau keluarga',0,'Terima kasih sudah jujur, itu berani. Keputusan sebesar ini sebaiknya datang dari hatimu sendiri. Coba ngobrol santai dengan orang tuamu: apa yang kamu rasakan dan apa yang kamu mau. Nggak ada tekanan dari Sensei. Kapan pun kamu sudah yakin, kamu tahu Sensei ada di sini.','ext'],['Awalnya ikut-ikutan, sekarang mulai mikir sendiri',2,'Wah, itu perkembangan bagus. Berani mempertanyakan keputusan sendiri itu tanda dewasa. Terus digali ya, sampai kamu benar-benar yakin.']]},
+ {q:'Jepang itu jauh dari keluarga, makanannya beda, dan aturannya disiplin. Menurutmu, bagian mana yang paling berat?',
+  o:[['Jauh dari keluarga',2,'Wajar banget. Kangen itu manusiawi. Banyak yang melewatinya dengan rutin telepon keluarga dan punya teman sepenasiban. Kamu nggak sendiri.'],['Bahasa',2,'Bagus kamu sadar itu. Bahasa memang kunci. Belajar sedikit tapi tiap hari jauh lebih ampuh daripada sekali banyak.'],['Disiplin dan kerja keras',3,'Disiplin itu bisa dilatih kok. Mulai dari hal kecil: tepat waktu, rapi, bertanggung jawab. Kebiasaan ini yang nanti jadi nilai plusmu.'],['Belum kepikiran',1,'Nggak apa-apa, sekarang kita mulai kepikiran. Sebelum berangkat, penting banget membayangkan sisi nyatanya, bukan cuma yang indah-indahnya.']]},
+ {q:'Sejauh ini, apa yang sudah kamu lakukan untuk mewujudkannya?',
+  o:[['Belajar rutin',3,'Luar biasa! Konsistensi itu yang membedakan orang yang sekadar bermimpi dengan yang benar-benar sampai.'],['Nabung atau siapkan dokumen',3,'Persiapan praktis sering terlupakan, tapi penting. Kamu sudah berpikir jauh ke depan.'],['Baru belajar huruf',2,'Itu sudah langkah nyata. Semua orang yang sekarang fasih dulu juga mulai dari hiragana.'],['Belum ngapa-ngapain',1,'Nggak apa-apa mulai dari nol. Hari ini kamu sudah belajar baca huruf bareng Yuki Sensei, dan itu langkah pertama.']]},
+ {q:'Kalau dikasih pilih sekarang, kamu lebih tertarik kerja dulu atau lanjut belajar?',
+  o:[['Kerja',0,'Oke, jalur kerja. Nanti Andrian Sensei yang akan menemani, beliau paham betul jalannya.'],['Study',0,'Jalur belajar, mantap. Kamu akan ketemu banyak hal baru. Siap-siap ya!'],['Masih bingung',0,'Wajar. Dua-duanya jalan yang bagus. Kerja: kamu mulai berkarya sambil belajar dari pengalaman nyata. Study: kamu membangun ilmu dulu dengan fokus penuh. Menurutmu, sekarang yang lebih cocok yang mana?']]}
+];
+async function konseling(){
+  mode='dialog';
+  await fadeTo(true);$('hud').hidden=true;$('goal').hidden=true;
+  yuki.visible=cania.visible=false;Object.values(marks).forEach(m=>m.visible=false);farhan.visible=true;
+  player.position.set(-.3,0,1.3);player.rotation.y=Math.PI*.1;farhan.position.set(.5,0,-.2);face(farhan,player);
+  camMode='kons';
+  await fadeTo(false);
+  const ans={};let skor=0,ext=false;
+  await say([['narr','Ruang konseling Kayuki. Seorang pria berjas navy tersenyum hangat dan mempersilakan kamu duduk.']]);
+  for(let i=0;i<KONS.length;i++){
+    const k=KONS[i];
+    const c=await ask('farhan',k.q,k.o.map(o=>o[0]));
+    const o=k.o[c];ans['s'+(i+1)]=c;skor+=o[1];if(o[3]==='ext')ext=true;
+    await showLine('me',o[0]);
+    await showLine('farhan',o[2]);
+    if(i===KONS.length-1&&c===2){
+      const c2=await ask('farhan','Kalau kamu harus memilih satu untuk saat ini, mana yang lebih menarik?',['Kerja','Study']);
+      ans.s7=c2;
+      await showLine('me',c2?'Study':'Kerja');
+      await showLine('farhan',c2?'Jalur belajar, pilihan yang bagus. Kita siapkan fondasinya bareng-bareng.':'Jalur kerja, oke. Persiapannya banyak, tapi bisa dilalui selangkah demi selangkah.');
+    }
+  }
+  const jalur=ans.s7===2?1:ans.s7;
+  const tier=skor>=12?'siap':skor>=8?'hampir':'waktu';
+  const penutup={siap:'Sensei lihat kesiapanmu sudah bagus: alasanmu jelas, usahamu nyata.',hampir:'Kamu ada di jalur yang benar. Tinggal diperkuat di beberapa hal, dan itu sangat bisa dikejar.',waktu:'Kamu butuh sedikit waktu untuk menemukan alasanmu sendiri, dan itu sama sekali nggak masalah. Orang yang berangkat dengan yakin hasilnya beda.'}[tier];
+  await say([['farhan',penutup],['farhan','Apa pun pilihanmu, ingat tiga hal: bahasa yang kuat, mental yang siap, dan restu keluarga. Kalau tiga ini terpenuhi, langkahmu jauh lebih ringan. Dan kalau butuh arahan, selalu ada orang-orang yang bisa kamu ajak bicara.']]);
+  if(ext)await say([['farhan','Satu lagi: kalau ada yang masih ganjil di hatimu, luangkan waktu untuk ngobrol dengan keluarga dulu. Nggak ada yang buru-buru. Pintu tetap terbuka.']]);
+  await say([['farhan','Terima kasih sudah jujur hari ini. Semangat belajarnya, ya!']]);
+  hideDlg();
+  S.kons={ans,skor,tier,ext,jalur,at:Date.now()};save();
+  await panel(`<h2 class="cen">Sesi konseling selesai 🤝</h2><p class="hint cen">Jalur pilihanmu: <b>${jalur===1?'Study 🎓':'Kerja 💼'}</b><br>Babak 5 (perjalanan ke Jepang) akan menyesuaikan jalur ini. Segera hadir!</p><button class="btn" id="ok" style="width:100%">Kembali ke kelas</button>`,(cl,b)=>{b.querySelector('#ok').onclick=()=>cl()});
+  await fadeTo(true);$('hud').hidden=false;
+  farhan.visible=false;yuki.visible=cania.visible=true;camMode='play';
+  player.position.set(0,0,2.5);player.rotation.y=Math.PI;
+  await fadeTo(false);
+  mode='idle';refreshMarks();
+}
+function fadeTo(on){$('fade').classList.toggle('on',on);return sleep(450)}
+
+/* ===== interaksi dunia ===== */
+function refreshMarks(){
+  marks.yuki.visible=!!nextMission('yuki')&&mode!=='kons';
+  marks.cania.visible=!!nextMission('cania')&&mode!=='kons';
+  const nm=MISSIONS.find(m=>!S.done[m.id]&&mOpen(m));
+  $('goal').hidden=false;
+  $('goalT').textContent=nm?`Tujuan: bicara dengan ${NAMES[nm.npc]} (${nm.title})`:'Babak 1 selesai! Buka menu untuk pratinjau konseling';
+}
+async function talkTo(id){
+  if(mode!=='idle')return;
+  const m=nextMission(id);
+  mode='dialog';const a=actors[id];face(a,player);face(player,a);
+  if(m){await startMission(m);return}
+  const chat={yuki:[['yuki','Kamu sudah menyelesaikan semua misi Babak 1! Kalau mau latihan lagi, buka Peta Misi (🗺️) dan ulangi misi kapan saja.']],cania:[['cania','Kalau masih ada huruf yang suka lupa, ulangi misi dari Peta Misi ya. Latihan ulang itu bagus banget.']]}[id];
+  const need=MISSIONS.find(x=>!S.done[x.id]&&mOpen(x));
+  if(need&&need.npc!==id)await say([[id,`Coba temui ${NAMES[need.npc]} dulu ya, ada misi buat kamu.`]]);
+  else await say(chat);
+  hideDlg();mode='idle';
+}
+const ray=new THREE.Raycaster(),ptr=new THREE.Vector2(),gplane=new THREE.Plane(new THREE.Vector3(0,1,0),0);
+let down=null;
+cv.addEventListener('pointerdown',e=>{down={x:e.clientX,y:e.clientY}});
+cv.addEventListener('pointerup',e=>{
+  if(!down||mode!=='idle')return;
+  if(Math.hypot(e.clientX-down.x,e.clientY-down.y)>10){down=null;return}
+  down=null;
+  ptr.set(e.clientX/innerWidth*2-1,-(e.clientY/innerHeight)*2+1);ray.setFromCamera(ptr,cam);
+  const hit=ray.intersectObjects([yuki,cania],true)[0];
+  if(hit){let o=hit.object;while(o&&!o.userData.id)o=o.parent;if(o){const id=o.userData.id;
+    const dx=player.position.x-o.position.x,dz=player.position.z-o.position.z,d=Math.hypot(dx,dz)||1;
+    walk.tx=o.position.x+dx/d*1.7;walk.tz=o.position.z+dz/d*1.7;walk.on=true;walk.cb=()=>talkTo(id);return}}
+  const p=new THREE.Vector3();if(ray.ray.intersectPlane(gplane,p)){
+    walk.tx=THREE.MathUtils.clamp(p.x,...PBOUND.x);walk.tz=THREE.MathUtils.clamp(p.z,...PBOUND.z);walk.on=true;walk.cb=null}
+});
+
+/* ===== kreator ===== */
+function renderCreator(shop){
+  const root=$('cOpts');root.innerHTML='';
+  CATS.forEach(([cat,label,arr])=>{
+    const h=document.createElement('h3');h.textContent=label;root.appendChild(h);
+    const row=document.createElement('div');row.className='row';
+    arr.forEach((a,i)=>{
+      const price=typeof a[a.length-1]==='number'?a[a.length-1]:0;
+      const lock=price>0&&!S.own[cat+i];
+      const b=document.createElement('button');
+      const swatch=(cat==='hairC'||cat==='skin'||cat==='suitC'||cat==='accC');
+      if(swatch){b.className='opt sw'+(S.look[cat]===i?' on':'')+(lock?' lock':'');b.innerHTML=`<i style="background:${cat==='skin'?a[0]:a[1]}"></i>`;b.title=a[0]}
+      else{b.className='opt'+(S.look[cat]===i?' on':'')+(lock?' lock':'');b.textContent=a[1]}
+      if(lock){const p=document.createElement('span');p.className='pr';p.textContent='❄️'+price;b.appendChild(p)}
+      b.onclick=()=>{
+        if(lock){
+          if(S.poin>=price){S.own[cat+i]=true;setPoin(-price);toast('Dibeli! −'+price+' ❄️')}
+          else{toast(`Butuh ${price} ❄️. Poinmu ${S.poin}. Kumpulkan dari misi ya!`);return}
+        }
+        S.look[cat]=i;save();rebuildPlayer();renderCreator(shop)
+      };
+      row.appendChild(b);
+    });
+    root.appendChild(row);
+  });
+}
+
+/* ===== menu & peta ===== */
+function menuPanel(){
+  mode='menu';
+  return panel(`<h2>Menu</h2><div class="list">
+   <button class="btn" id="a1">▶ Lanjutkan</button>
+   <button class="btn sec" id="a2">👕 Ganti penampilan</button>
+   <button class="btn sec" id="a3">🤝 Pratinjau sesi konseling (uji coba)</button>
+   <button class="btn sec" id="a4">${S.sound?'🔊 Suara: nyala':'🔇 Suara: mati'}</button>
+   <a class="btn sec" href="index.html" style="text-decoration:none;text-align:center">← Kembali ke HiraKana</a>
+   <button class="btn sec" id="a5" style="color:#a02030">Hapus progres game</button></div>`,(cl,b)=>{
+    b.querySelector('#a1').onclick=()=>cl('x');b.querySelector('#a2').onclick=()=>cl('look');
+    b.querySelector('#a3').onclick=()=>cl('kons');
+    b.querySelector('#a4').onclick=()=>{S.sound=!S.sound;save();cl('x');toast(S.sound?'Suara nyala':'Suara mati')};
+    b.querySelector('#a5').onclick=()=>{if(confirm('Hapus semua progres game ini?')){localStorage.removeItem(KEY);location.reload()}};
+  });
+}
+async function openMenu(){
+  if(mode!=='idle')return;
+  const r=await menuPanel();
+  if(r==='look'){await lookPanel()}
+  else if(r==='kons'){await konseling();return}
+  mode='idle';
+}
+async function lookPanel(){
+  mode='creator';camMode='creator';player.position.set(0,0,2.5);yuki.visible=cania.visible=false;
+  $('creator').hidden=false;$('nm').value=S.name;$('bGo').textContent='Selesai ✓';
+  $('nm').style.display='none';
+  renderCreator();
+  await new Promise(r=>{$('bGo').onclick=()=>r()});
+  $('creator').hidden=true;camMode='play';mode='idle';yuki.visible=cania.visible=true;
+}
+async function mapPanel(){
+  if(mode!=='idle')return;mode='menu';
+  const babs=['Hari Pertama di Kayuki','Kelas Makin Seru','Dunia Katakana','Sesi Konseling','Berangkat ke Jepang'];
+  const h=`<h2>Peta Misi</h2><p class="hint">Jalan Menuju Jepang · 5 babak</p><div class="list">`+
+   `<div class="li"><div>Babak 1 · ${babs[0]}<small>Hiragana rumpun あ–ほ</small></div><span>${MISSIONS.every(m=>S.done[m.id])?'✅':'▶'}</span></div>`+
+   MISSIONS.map(m=>`<div class="li ${mOpen(m)?'':'lk'}" style="margin-left:14px"><div>${m.title}<small>${m.sub} · ${NAMES[m.npc]}</small></div><span>${S.done[m.id]?'⭐'.repeat(S.stars[m.id]||1):mOpen(m)?'▶':'🔒'}</span></div>`).join('')+
+   babs.slice(1).map((b,i)=>`<div class="li lk"><div>Babak ${i+2} · ${b}<small>Segera hadir</small></div><span>🔒</span></div>`).join('')+
+   `</div><div class="sp"></div><div class="row"><button class="btn" id="mc" style="flex:1">Tutup</button></div>`;
+  const r=await panel(h,(cl,b)=>{b.querySelector('#mc').onclick=()=>cl()});
+  mode='idle';
+}
+$('bMenu').onclick=openMenu;$('bMap').onclick=mapPanel;
+
+/* ===== alur awal ===== */
+async function prologue(){
+  const p=$('prolog');p.hidden=false;
+  p.innerHTML='<div><b>Cianjur, pagi hari.</b><br>Kamu berdiri di depan sebuah gedung dengan logo bunga dan salju.<br>Hari pertamamu di <b>Nihongo Gakkou Kayuki</b>.<br><br>Mimpimu besar: <b>Jepang</b>.<br><small style="opacity:.6">ketuk untuk lanjut</small></div>';
+  await new Promise(r=>p.onclick=()=>r());p.hidden=true;p.onclick=null;
+}
+async function intro(){
+  mode='dialog';
+  await say([['yuki','Konnichiwa! Selamat datang di Nihongo Gakkou Kayuki! Aku Yuki Sensei, maskot sekaligus pemandu belajarmu. Salam kenal!'],
+   ['me',`Konnichiwa, Sensei! Aku ${S.name}.`],
+   ['yuki',`${S.name}, nama yang bagus! Di sini kamu akan belajar membaca hiragana dan katakana, selangkah demi selangkah, sampai siap menuju Jepang.`],
+   ['cania','Hai, aku Cania Sensei. Aku yang akan menemani kamu belajar di kelas bareng Yuki Sensei.'],
+   ['yuki','Cara mainnya gampang: ketuk lantai untuk berjalan, ketuk Sensei yang punya tanda ❗ untuk mulai misi. Jawab benar dapat kepingan salju ❄️, jawab salah mengurangi semangat ❤️ kamu.'],
+   ['cania','Mulai dari aku dulu ya. Hampiri aku di dekat papan tulis!']]);
+  hideDlg();S.intro=true;save();mode='idle';refreshMarks();
+}
+async function newGame(){
+  hide(['title']);
+  S=blank();save();
+  mode='creator';camMode='creator';rebuildPlayer();player.position.set(0,0,2.5);
+  $('nm').style.display='';$('nm').value='';$('bGo').textContent='Mulai sekolah ▶';
+  yuki.visible=cania.visible=false;$('creator').hidden=false;renderCreator();
+  await new Promise(r=>{$('bGo').onclick=()=>{const n=$('nm').value.trim();if(!n){toast('Isi nama kamu dulu ya');$('nm').focus();return}S.name=n;save();r()}});
+  $('creator').hidden=true;
+  await fadeTo(true);yuki.visible=cania.visible=true;await prologue();
+  camMode='play';player.position.set(0,0,2.8);player.rotation.y=Math.PI;$('hud').hidden=false;$('poin').textContent=S.poin;
+  await fadeTo(false);
+  await intro();
+}
+async function continueGame(){
+  hide(['title']);rebuildPlayer();player.position.set(0,0,2.8);player.rotation.y=Math.PI;
+  camMode='play';$('hud').hidden=false;$('poin').textContent=S.poin;mode='idle';
+  if(!S.intro)await intro();else refreshMarks();
+}
+function hide(ids){ids.forEach(i=>$(i).hidden=true)}
+function titleScreen(){
+  mode='title';camMode='title';yuki.visible=cania.visible=true;
+  player.visible=false;
+  $('title').hidden=false;
+  const has=!!S.name&&S.intro;
+  $('bCont').hidden=!has;$('bStart').textContent=has?'Mulai baru':'▶ Mulai petualangan';
+  $('bStart').onclick=async()=>{if(has&&!confirm('Mulai baru akan menghapus progres game ini. Lanjut?'))return;player.visible=true;await newGame()};
+  $('bCont').onclick=async()=>{player.visible=true;await continueGame()};
+}
+rebuildPlayer();
+titleScreen();
+loop();
+if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').catch(()=>{});
+window.__G={get S(){return S},get mode(){return mode},scene,cam,actors,makeQs,MISSIONS,KONS,startMission,konseling,talkTo,setPoin,save,renderer};
+</script>
+</body>
+</html>
