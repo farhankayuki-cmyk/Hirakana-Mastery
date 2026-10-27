@@ -67,6 +67,7 @@ button{font:inherit;cursor:pointer}
 /* kreator */
 #creator{justify-content:flex-end;pointer-events:none}
 #creator .sheet{pointer-events:auto;background:var(--cream);border-radius:26px 26px 0 0;border-top:3px solid #fff;box-shadow:0 -10px 40px #0008;max-height:54vh;overflow:auto;padding:14px 14px calc(14px + env(safe-area-inset-bottom))}
+@media (min-aspect-ratio:21/20){#creator{align-items:flex-end;flex-direction:row;justify-content:flex-end}#creator .sheet{width:min(440px,46vw);height:100%;max-height:100%;border-radius:26px 0 0 26px;border-top:0;border-left:3px solid #fff;padding-top:calc(14px + env(safe-area-inset-top))}}
 #creator h3{margin:10px 0 6px;font-size:.78rem;letter-spacing:.08em;color:#4b5d78;text-transform:uppercase}
 #nm{width:100%;border:3px solid var(--navy);border-radius:14px;padding:11px 12px;font-size:1rem;font-weight:700;color:var(--navy);background:#fff;outline:none;user-select:text;-webkit-user-select:text}
 .opt{position:relative;border:3px solid var(--navy);background:#fff;border-radius:13px;padding:8px 12px;font-weight:700;color:var(--navy);font-size:.9rem;min-width:44px}
@@ -414,18 +415,22 @@ function resize(){const w=innerWidth,h=innerHeight;renderer.setSize(w,h,false);a
 addEventListener('resize',resize);resize();
 let tCam=0,camMode='title';
 function updateCam(dt){
-  const t=performance.now()/1000;
-  let tx,ty,tz,W=camW,pitch=camPitch;
-  if(camMode==='title'){tx=Math.sin(t*.15)*1.2;ty=1.2;tz=-.8;W=9.5;pitch=.5}
-  else if(camMode==='creator'){tx=player.position.x;ty=-.15;tz=player.position.z;W=3.1;pitch=.2}
-  else if(camMode==='kons'){tx=0;ty=1.3;tz=-.2;W=6.4;pitch=.34}
-  else{tx=THREE.MathUtils.clamp(player.position.x*.7,-3,3);ty=1.1;tz=-.3;W=8.6;pitch=.58}
-  camX+=(tx-camX)*Math.min(1,dt*3.5);
-  const d=Math.max(W/(2*Math.tan(THREE.MathUtils.degToRad(cam.fov/2))*Math.min(aspect,1.6)),6);
-  /* naikkan target sedikit agar adegan tidak tertutup dialog */
-  const lift=(mode==='dialog'||mode==='creator')?(camMode==='creator'?-.55:-.9):0;
-  cam.position.set(camX,ty+Math.sin(pitch)*d+lift*0,tz+Math.cos(pitch)*d);
-  cam.lookAt(camX,ty+lift,tz);
+  const t=performance.now()/1000,wide=aspect>1.05;
+  let tx,ty,tz,W=camW,H=0,pitch=camPitch,shift=0;
+  if(camMode==='title'){tx=Math.sin(t*.15)*1.2;ty=1.2;tz=-.8;W=9.5;H=7.5;pitch=.5}
+  else if(camMode==='creator'){tx=player.position.x;ty=wide?.95:-.15;tz=player.position.z;W=3.1;H=wide?3.9:0;pitch=.2;shift=wide?.2:0}
+  else if(camMode==='kons'){tx=0;ty=1.3;tz=-.2;W=6.4;H=5.6;pitch=.34}
+  else{tx=THREE.MathUtils.clamp(player.position.x*.7,-3,3);ty=1.1;tz=-.3;W=8.6;H=wide?8.6:0;pitch=.58}
+  const th=2*Math.tan(THREE.MathUtils.degToRad(cam.fov/2));
+  const d=Math.max(W/(th*Math.min(aspect,1.6)),H/th,6);
+  /* di layar lebar, panel kreator ada di kanan: geser subjek ke kiri */
+  const visW=d*th*aspect;
+  const gx=tx+visW*shift;
+  camX+=(gx-camX)*Math.min(1,dt*3.5);
+  /* di layar lebar saat dialog, naikkan sedikit supaya karakter tidak tertutup kotak dialog */
+  const up=(wide&&(camMode==='play'))?-.9:0;
+  cam.position.set(camX,ty+up*0+Math.sin(pitch)*d,tz+Math.cos(pitch)*d);
+  cam.lookAt(camX,ty+up,tz);
 }
 const clock=new THREE.Clock();
 const walk={on:false,tx:0,tz:0,cb:null};
