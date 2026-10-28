@@ -47,6 +47,7 @@ button{font:inherit;cursor:pointer}
 #kb{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(10px + env(safe-area-inset-bottom));z-index:8;color:#ffffffaa;font-size:.75rem;pointer-events:none;display:none}
 @media (hover:hover) and (pointer:fine) and (min-width:700px){#kb{display:block}}
 #goal{position:fixed;left:10px;right:10px;top:calc(58px + env(safe-area-inset-top));z-index:9;pointer-events:none;display:flex;justify-content:center}
+#goal button{font:inherit}
 #goal span{background:#102b50cc;color:#fff;padding:6px 14px;border-radius:999px;font-size:.82rem;font-weight:700;backdrop-filter:blur(4px)}
 
 /* dialog */
@@ -1138,11 +1139,21 @@ function makeCode(){
     return 'KYK1.'+btoa(unescape(encodeURIComponent(JSON.stringify(o))))}catch(e){return ''}
 }
 async function comingSoon(){
-  const k=myPath()==='s';
-  const ch=[['🏠','Sakura House · Kenalan dengan 10 penghuni','Perkenalan diri dan barang bawaan (Bab 1–2)'],['🏪','Konbini & Stasiun','Belanja, jam kerja, naik kereta (Bab 3–5)'],['🍜','Kedai Ramen & Taman Sakura','Makan, hobi, musim, dan festival (Bab 6–12)'],['🎓','Ujian N5 Bab 1–25','5 bagian, 5 ujian, dan kartu bagian untuk dibagikan']];
-  const wa='https://wa.me/'+WA_NUM+'?text='+encodeURIComponent('Halo MinKi, aku '+(S.name||'siswa Kayuki')+'. Aku sudah tamat game Petualangan Kayuki dan pengin tahu cara akses lanjutan ceritanya di Super Web App Kayuki Premium.');
-  const code=makeCode();
-  await panel(`<h2 class="cen">Musim 2 · Hidup di Jepang 🇯🇵</h2><p class="hint cen">Ceritamu berlanjut di <b>Super Web App Kayuki Premium</b>, bukan di HiraKana lagi. Khusus siswa yang punya <b>akun Super Web App</b>.</p><div class="list">${ch.map(c=>`<div class="li lk"><div>${c[0]} ${c[1]}<small>${c[2]}</small></div><span>🔒</span></div>`).join('')}</div><p class="hint cen" style="margin-top:10px"><b>Bawa karaktermu!</b> Salin Kode Perjalanan di bawah, lalu tempel di Musim 2 supaya nama, penampilan, dan poinmu ikut terbawa.</p><textarea id="csCode" readonly style="width:100%;min-height:58px;border:3px solid #102b50;border-radius:12px;padding:8px;font:11px/1.3 ui-monospace,monospace;color:#102b50;user-select:text;-webkit-user-select:text;resize:none">${code}</textarea><div class="sp"></div><button class="btn" id="csCp" style="width:100%">📋 Salin Kode Perjalanan</button><div class="sp"></div><a class="btn blue" href="https://kayukijapanese.netlify.app/petualangan/" target="_blank" rel="noopener" style="display:block;text-align:center;text-decoration:none">🌸 Buka Musim 2 (Super Web App)</a><div class="sp"></div><button class="btn" id="csWa" style="width:100%;background:#25d366;color:#fff">💬 Tanya MinKi soal akun &amp; Premium</button><div class="sp"></div><button class="btn sec" id="csOk" style="width:100%">Tutup</button>`,(cl,b)=>{b.querySelector('#csWa').onclick=()=>window.open(wa,'_blank','noopener');b.querySelector('#csOk').onclick=()=>cl();b.querySelector('#csCp').onclick=async()=>{const t=b.querySelector('#csCode');try{await navigator.clipboard.writeText(code);toast('Kode tersalin')}catch(e){t.select();try{document.execCommand('copy');toast('Kode tersalin')}catch(e2){toast('Tekan lama lalu salin kodenya ya')}}}});
+  const code=makeCode(),M2='https://kayukijapanese.netlify.app/petualangan/';
+  const wa='https://wa.me/'+WA_NUM+'?text='+encodeURIComponent('Halo MinKi, aku '+(S.name||'siswa Kayuki')+'. Aku sudah tamat game Petualangan Kayuki dan pengin akses Musim 2 di Super Web App Kayuki.');
+  const savedMail=(()=>{try{return localStorage.getItem('kayuki-m2-email')||''}catch(e){return ''}})();
+  await panel(`<h2 class="cen">Lanjut ke Musim 2 🌸</h2><p class="hint cen"><b>Hidup di Jepang</b>: tinggal di Sakura House bareng 10 penghuni dan menaklukkan materi N5 Bab 1–25. Musim 2 ada di <b>Super Web App Kayuki</b> dan khusus siswa Kayuki yang terdaftar.</p>
+  <div class="list"><div class="li" style="display:block"><b>🎓 Aku siswa Kayuki</b><small>Langsung masuk ke Super Web App, lalu login dengan akun Google yang sama seperti biasa.</small><div class="sp"></div><a class="btn" id="m2a" href="${M2}" target="_blank" rel="noopener" style="display:block;text-align:center;text-decoration:none">Buka Musim 2</a></div>
+  <div class="li" style="display:block"><b>✉️ Bukan siswa / belum pernah login</b><small>Masukkan emailmu. Hanya email yang terdaftar sebagai siswa Kayuki yang bisa lanjut. Kalau belum terdaftar, kamu tidak bisa masuk.</small><div class="sp"></div><input id="m2e" type="email" inputmode="email" autocomplete="email" placeholder="email@gmail.com" value="${savedMail.replace(/"/g,'')}" style="width:100%;border:3px solid #102b50;border-radius:14px;padding:11px 12px;font-size:1rem;font-weight:700;color:#102b50;user-select:text;-webkit-user-select:text"><div class="sp"></div><button class="btn blue" id="m2b" style="width:100%">Cek &amp; lanjut</button><div id="m2m" class="hint" style="margin:8px 0 0"></div></div></div>
+  <p class="hint cen" style="margin-top:10px"><b>Bawa karaktermu!</b> Salin Kode Perjalanan lalu tempel di Musim 2 supaya nama, penampilan, dan poinmu ikut terbawa.</p><textarea id="csCode" readonly style="width:100%;min-height:58px;border:3px solid #102b50;border-radius:12px;padding:8px;font:11px/1.3 ui-monospace,monospace;color:#102b50;user-select:text;-webkit-user-select:text;resize:none">${code}</textarea><div class="sp"></div><button class="btn" id="csCp" style="width:100%">📋 Salin Kode Perjalanan</button><div class="sp"></div><button class="btn" id="csWa" style="width:100%;background:#25d366;color:#fff">💬 Tanya MinKi soal pendaftaran</button><div class="sp"></div><button class="btn sec" id="csOk" style="width:100%">Tutup</button>`,(cl,b)=>{
+    b.querySelector('#csWa').onclick=()=>window.open(wa,'_blank','noopener');b.querySelector('#csOk').onclick=()=>cl();
+    b.querySelector('#csCp').onclick=async()=>{const t=b.querySelector('#csCode');try{await navigator.clipboard.writeText(code);toast('Kode tersalin')}catch(e){t.select();try{document.execCommand('copy');toast('Kode tersalin')}catch(e2){toast('Tekan lama lalu salin kodenya ya')}}};
+    b.querySelector('#m2b').onclick=()=>{const em=b.querySelector('#m2e').value.trim().toLowerCase(),m=b.querySelector('#m2m');
+      if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(em)){m.textContent='Format email belum benar.';return}
+      try{localStorage.setItem('kayuki-m2-email',em)}catch(e){}
+      m.innerHTML='Email dicatat. Di Super Web App kamu akan diminta login Google dengan email ini. Kalau emailmu belum terdaftar sebagai siswa Kayuki, Musim 2 tidak akan terbuka. Belum terdaftar? Hubungi MinKi lewat tombol WhatsApp di bawah.';
+      window.open(M2+'?email='+encodeURIComponent(em),'_blank','noopener')};
+  });
 }
 /* ===== sertifikat, kartu ending, bagikan ===== */
 const loadImg=src=>new Promise(r=>{const i=new Image();i.onload=()=>r(i);i.onerror=()=>r(null);i.src=src});
@@ -1274,6 +1285,7 @@ async function konseling(official){
 function fadeTo(on){$('fade').classList.toggle('on',on);return sleep(450)}
 
 /* ===== interaksi dunia ===== */
+const nm0=()=>MISSIONS.find(m=>!S.done[m.id]&&mOpen(m))||(!konsDone()&&S.done.m17);
 function refreshMarks(){
   syncTheme(false);
   ['yuki','cania','diki','andrian','sopian'].forEach(id=>{marks[id].visible=actors[id].visible&&!!nextMission(id)&&mode!=='kons'});
@@ -1284,7 +1296,9 @@ function refreshMarks(){
   if(nm)t=`Tujuan: bicara dengan ${NAMES[nm.npc]} (${nm.title})`;
   else if(!konsDone()&&S.done.m17)t='Tujuan: temui Farhan Sensei di ruang konseling';
   else t='Tamat! Lihat sertifikat dan kartu ending di menu ☰, atau ulangi misi dari 🗺️';
+  const fin=!nm0();
   $('goalT').textContent=t;
+  if(fin&&(S.done.m21k||S.done.m21s)){$('goalT').innerHTML='Tamat! ';const b=document.createElement('button');b.textContent='🌸 Lanjut ke Musim 2';b.id='m2go';b.style.cssText='pointer-events:auto;border:0;border-radius:999px;background:#f2b134;color:#3a2800;font-weight:800;padding:5px 12px;margin-left:4px';b.onclick=()=>{if(mode==='idle'){mode='dialog';comingSoon().then(()=>{mode='idle'})}};$('goalT').appendChild(b)}
 }
 async function talkTo(id){
   if(mode!=='idle')return;
