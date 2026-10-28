@@ -1133,11 +1133,16 @@ async function endBab5(){
   await panel(`<h2 class="cen">Petualangan tamat 🎉</h2><p class="hint cen">Terima kasih sudah bermain. Kamu masih bisa mengulang misi dari Peta Misi 🗺️, dan membuka lagi sertifikat atau kartu ending dari menu ☰.</p><button class="btn" id="ok" style="width:100%">Oke</button>`,(cl,b)=>{b.querySelector('#ok').onclick=()=>cl()});
   await comingSoon();
 }
+function makeCode(){
+  try{const o={n:S.name||'',l:S.look,o:S.own,p:S.poin,j:(typeof myPath==='function'?myPath():'')||'',g:S.cert?S.cert.grade:-1};
+    return 'KYK1.'+btoa(unescape(encodeURIComponent(JSON.stringify(o))))}catch(e){return ''}
+}
 async function comingSoon(){
   const k=myPath()==='s';
-  const ch=[['🏪','Belanja & Konbini','Baca label, harga, dan bertanya ke kasir'],['🚆','Naik Kereta & Tanya Jalan','Peron, tiket, dan pengumuman stasiun'],[k?'🎓':'💼',k?'Kuliah & Teman Baru':'Rapat & Teman Kerja',k?'Perkenalan diri dan diskusi kelas':'Laporan singkat dan sapaan kantor'],['🌸','Musim Semi di Jepang','Festival, sapaan musiman, dan cerita penutup Musim 2']];
+  const ch=[['🏠','Sakura House · Kenalan dengan 10 penghuni','Perkenalan diri dan barang bawaan (Bab 1–2)'],['🏪','Konbini & Stasiun','Belanja, jam kerja, naik kereta (Bab 3–5)'],['🍜','Kedai Ramen & Taman Sakura','Makan, hobi, musim, dan festival (Bab 6–12)'],['🎓','Ujian N5 Bab 1–25','5 bagian, 5 ujian, dan kartu bagian untuk dibagikan']];
   const wa='https://wa.me/'+WA_NUM+'?text='+encodeURIComponent('Halo MinKi, aku '+(S.name||'siswa Kayuki')+'. Aku sudah tamat game Petualangan Kayuki dan pengin tahu cara akses lanjutan ceritanya di Super Web App Kayuki Premium.');
-  await panel(`<h2 class="cen">Musim 2 · Hidup di Jepang 🇯🇵</h2><p class="hint cen"><b>Coming Soon.</b> Ceritamu belum selesai! Lanjutannya hadir di <b>Super Web App Kayuki Premium</b>, bukan di HiraKana lagi.</p><div class="list">${ch.map(c=>`<div class="li lk"><div>${c[0]} ${c[1]}<small>${c[2]}</small></div><span>🔒</span></div>`).join('')}</div><p class="hint cen" style="margin-top:10px">Yang bisa masuk ke lanjutan ini: siswa yang punya <b>akun Super Web App Kayuki</b>.</p><button class="btn" id="csWa" style="width:100%;background:#25d366;color:#fff">💬 Tanya MinKi soal akun &amp; Premium</button><div class="sp"></div><button class="btn sec" id="csOk" style="width:100%">Tutup</button>`,(cl,b)=>{b.querySelector('#csWa').onclick=()=>window.open(wa,'_blank','noopener');b.querySelector('#csOk').onclick=()=>cl()});
+  const code=makeCode();
+  await panel(`<h2 class="cen">Musim 2 · Hidup di Jepang 🇯🇵</h2><p class="hint cen">Ceritamu berlanjut di <b>Super Web App Kayuki Premium</b>, bukan di HiraKana lagi. Khusus siswa yang punya <b>akun Super Web App</b>.</p><div class="list">${ch.map(c=>`<div class="li lk"><div>${c[0]} ${c[1]}<small>${c[2]}</small></div><span>🔒</span></div>`).join('')}</div><p class="hint cen" style="margin-top:10px"><b>Bawa karaktermu!</b> Salin Kode Perjalanan di bawah, lalu tempel di Musim 2 supaya nama, penampilan, dan poinmu ikut terbawa.</p><textarea id="csCode" readonly style="width:100%;min-height:58px;border:3px solid #102b50;border-radius:12px;padding:8px;font:11px/1.3 ui-monospace,monospace;color:#102b50;user-select:text;-webkit-user-select:text;resize:none">${code}</textarea><div class="sp"></div><button class="btn" id="csCp" style="width:100%">📋 Salin Kode Perjalanan</button><div class="sp"></div><a class="btn blue" href="https://kayukijapanese.netlify.app/petualangan/" target="_blank" rel="noopener" style="display:block;text-align:center;text-decoration:none">🌸 Buka Musim 2 (Super Web App)</a><div class="sp"></div><button class="btn" id="csWa" style="width:100%;background:#25d366;color:#fff">💬 Tanya MinKi soal akun &amp; Premium</button><div class="sp"></div><button class="btn sec" id="csOk" style="width:100%">Tutup</button>`,(cl,b)=>{b.querySelector('#csWa').onclick=()=>window.open(wa,'_blank','noopener');b.querySelector('#csOk').onclick=()=>cl();b.querySelector('#csCp').onclick=async()=>{const t=b.querySelector('#csCode');try{await navigator.clipboard.writeText(code);toast('Kode tersalin')}catch(e){t.select();try{document.execCommand('copy');toast('Kode tersalin')}catch(e2){toast('Tekan lama lalu salin kodenya ya')}}}});
 }
 /* ===== sertifikat, kartu ending, bagikan ===== */
 const loadImg=src=>new Promise(r=>{const i=new Image();i.onload=()=>r(i);i.onerror=()=>r(null);i.src=src});
@@ -1444,7 +1449,7 @@ rebuildPlayer();
 titleScreen();
 loop();
 if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').catch(()=>{});
-window.__G={konsDone,myPath,showCard,applyPresence,BANDARA,SENT_BDR,KERJAW,STUDYW,SENT_KERJA,SENT_STUDY,LMIX,GRADES,andrian,sopian,farhan,worlds,syncTheme,inp,keys,KW,KA1,KA2,KA3,KDAK,KYOON,KSER,diki,refreshMarks,romWord,optsWord,optsSent,optsLetter,parseS,sentRom,sentJP,SENTS,WORDS_A,WORDS_B,WORDS_C,WORDS_D,YOON,R2A,R2B,get S(){return S},get mode(){return mode},scene,cam,actors,makeQs,MISSIONS,KONS,startMission,konseling,talkTo,setPoin,save,renderer};
+window.__G={makeCode,konsDone,myPath,showCard,applyPresence,BANDARA,SENT_BDR,KERJAW,STUDYW,SENT_KERJA,SENT_STUDY,LMIX,GRADES,andrian,sopian,farhan,worlds,syncTheme,inp,keys,KW,KA1,KA2,KA3,KDAK,KYOON,KSER,diki,refreshMarks,romWord,optsWord,optsSent,optsLetter,parseS,sentRom,sentJP,SENTS,WORDS_A,WORDS_B,WORDS_C,WORDS_D,YOON,R2A,R2B,get S(){return S},get mode(){return mode},scene,cam,actors,makeQs,MISSIONS,KONS,startMission,konseling,talkTo,setPoin,save,renderer};
 </script>
 </body>
 </html>
