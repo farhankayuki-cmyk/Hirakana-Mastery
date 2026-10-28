@@ -137,6 +137,12 @@ button{font:inherit;cursor:pointer}
 </style>
 </head>
 <body>
+<div id="errbox" style="display:none;position:fixed;inset:0;z-index:99;background:#102b50;color:#fff;padding:24px;font:15px/1.5 system-ui;overflow:auto"><h2 style="color:#f2b134;margin:0 0 8px">Waduh, game-nya belum bisa jalan 🙏</h2><p>Coba: (1) tutup lalu buka lagi, (2) pakai Chrome terbaru, (3) kalau masih gagal, kirim foto layar ini ke MinKi.</p><button id="errReload" style="padding:12px 18px;border:0;border-radius:12px;background:#f2b134;font-weight:700">Muat ulang bersih</button><pre id="errTxt" style="white-space:pre-wrap;font-size:12px;opacity:.8;margin-top:16px"></pre></div>
+<script>(function(){var shown=0;window.addEventListener('error',function(){},true);function show(m){if(shown++>2)return;var b=document.getElementById('errbox'),t=document.getElementById('errTxt');if(!b)return;b.style.display='block';t.textContent+=m+'\n'+(navigator.userAgent||'')+'\nmem:'+(navigator.deviceMemory||'?')+' dpr:'+devicePixelRatio+'\n\n'}
+window.addEventListener('error',function(e){if(e.target&&e.target.src&&e.target!==window){show('gagal memuat '+e.target.src.split('/').pop());return}show((e.message||'error')+' @'+(e.lineno||'')+(e.filename?' '+e.filename.split('/').pop():''))},true);
+setTimeout(function(){if(!window.__G)show('timeout: game belum siap setelah 8 detik')},8000);
+window.addEventListener('unhandledrejection',function(e){show('promise: '+(e.reason&&e.reason.message||e.reason))});
+document.getElementById('errReload').onclick=function(){try{caches.keys().then(function(k){return Promise.all(k.map(function(x){return caches.delete(x)}))}).then(function(){return navigator.serviceWorker.getRegistrations()}).then(function(r){return Promise.all(r.map(function(x){return x.unregister()}))}).then(function(){location.reload()},function(){location.reload()})}catch(e){location.reload()}}})();</script>
 <canvas id="gl"></canvas>
 
 <div id="hud" hidden>
@@ -283,8 +289,9 @@ const owned=(cat,i)=>{const arr=CATS.find(c=>c[0]===cat)[2];const p=arr[i][arr[i
 
 /* ===== three: dasar ===== */
 const cv=$('gl');
-const renderer=new THREE.WebGLRenderer({canvas:cv,antialias:true,alpha:true,powerPreference:'default'});
-const DPR=Math.min(window.devicePixelRatio||1,1.75);
+const LOW=(navigator.deviceMemory&&navigator.deviceMemory<=4)||(navigator.hardwareConcurrency&&navigator.hardwareConcurrency<=6)||/Redmi|Android [1-9]\b|SM-A0|SM-A1/i.test(navigator.userAgent);
+const renderer=new THREE.WebGLRenderer({canvas:cv,antialias:!LOW,alpha:true,powerPreference:'default'});
+const DPR=Math.min(window.devicePixelRatio||1,LOW?1.25:1.75);
 renderer.setPixelRatio(DPR);
 renderer.setClearColor(0x000000,0);
 renderer.outputColorSpace=THREE.SRGBColorSpace;
@@ -416,6 +423,7 @@ const STAFF={
 
 /* ===== diorama lobi Kayuki ===== */
 const worlds=[];
+const LZ=[];function lazyW(f){const w=newWorld();const i=worlds.length-1;LZ[i]=()=>{LZ[i]=null;f(w)}}
 function newWorld(){const w=new THREE.Group();scene.add(w);w.visible=false;worlds.push(w);return w}
 (function buildRoom(){const world=newWorld();
   const floor=box(15,.3,10,M('#e8dcc8',{roughness:.55}));floor.position.set(0,-.15,0);world.add(floor);
@@ -569,7 +577,7 @@ const JP='"KF Gothic",sans-serif';
   mkParticles(w,0xffd9a0,.06,.7,40);
 })();
 /* ===== Babak 5: bandara Jepang ===== */
-(function buildAirport(){const w=newWorld();
+lazyW(function buildAirport(w){
   slab(w,15,.3,10,'#d9dde3',0,-.15,0,{roughness:.3});
   for(let i=-3;i<=3;i++)slab(w,.03,.02,10,'#c3c9d2',i*2,.01,0);
   slab(w,15,.3,.3,'#1a2b4a',0,5.25,-4.85);
@@ -587,9 +595,9 @@ const JP='"KF Gothic",sans-serif';
   slab(w,1.1,2.4,.08,'#102b50',6.2,1.3,-3.6);plane(w,txtTex(220,480,(g,W,H)=>{g.fillStyle='#102b50';g.fillRect(0,0,W,H);g.fillStyle='#f2b134';g.font='700 40px '+JP;g.fillText('花雪',W/2,330);g.fillStyle='#fffaf0';g.font='700 24px system-ui';g.fillText('Kayuki',W/2,375);g.font='600 18px system-ui';g.fillText('Nihongo Gakkou',W/2,408)}),1.0,2.2,6.2,1.3,-3.55);
   const lg=new THREE.Mesh(new THREE.PlaneGeometry(.8,.8),new THREE.MeshBasicMaterial({map:logoTex,transparent:true}));lg.position.set(6.2,1.95,-3.54);w.add(lg);
   [[-6.6,-.4],[6.7,.6]].forEach(([x,z])=>{w.add(at(cyl(.4,.3,.6,M('#cfc7bb')),x,.3,z));const lm=M('#3f8f58');[[0,1.0,0,.45],[.25,1.4,.1,.35],[-.22,1.35,-.1,.33]].forEach(([a,b,c,r])=>{const l=sph(r,lm,8,6);l.position.set(x+a,b,z+c);w.add(l)})});
-})();
+});
 /* ===== Babak 5 (Kerja): kantor Sakura Tech ===== */
-(function buildOffice(){const w=newWorld();
+lazyW(function buildOffice(w){
   slab(w,15,.3,10,'#c9ced6',0,-.15,0,{roughness:.8});
   slab(w,15,5.4,.3,'#e9edf2',0,2.7,-4.85);slab(w,.3,5.4,10,'#dfe4ec',-7.35,2.7,0);
   slab(w,15,.5,.1,'#102b50',0,1.0,-4.68);slab(w,15,.1,.1,'#f2b134',0,1.3,-4.66);
@@ -613,9 +621,9 @@ const JP='"KF Gothic",sans-serif';
   slab(w,2.4,1.5,.08,'#cbd2dc',3.0,2.7,-4.64);
   plane(w,txtTex(480,300,(g,W,H)=>{g.fillStyle='#fff';g.fillRect(0,0,W,H);g.fillStyle='#102b50';g.font='700 50px '+JP;g.fillText('スケジュール',W/2,H*.18);g.textAlign='left';g.font='700 38px '+JP;g.fillStyle='#1d63d8';g.fillText('09:00  ミーティング',24,H*.46);g.fillStyle='#c8372d';g.fillText('09:30  しごと',24,H*.68);g.fillStyle='#16a34a';g.fillText('12:00  やすみ',24,H*.9)}),2.25,1.4,3.0,2.7,-4.58);
   [[-6.2,-3.9],[6.7,-1.2]].forEach(([x,z])=>{w.add(at(cyl(.4,.3,.6,M('#cfc7bb')),x,.3,z));const lm=M('#3f8f58');[[0,1.0,0,.45],[.25,1.4,.1,.35],[-.22,1.35,-.1,.33]].forEach(([a,b,c,r])=>{const l=sph(r,lm,8,6);l.position.set(x+a,b,z+c);w.add(l)})});
-})();
+});
 /* ===== Babak 5 (Study): kampus Sakura ===== */
-(function buildCampus(){const w=newWorld();
+lazyW(function buildCampus(w){
   slab(w,70,.3,50,'#86c97f',0,-.15,8,{roughness:.95});
   slab(w,3.6,.03,13,'#d9d2c3',0,.02,1.8);
   slab(w,15,4.6,.5,'#f1ece0',0,2.3,-4.85);slab(w,15.4,.4,.9,'#8a2f3c',0,4.7,-4.75);
@@ -633,7 +641,7 @@ const JP='"KF Gothic",sans-serif';
   slab(w,1.6,.1,.5,'#a5733f',-4.4,.5,1.8);slab(w,1.6,.5,.08,'#a5733f',-4.4,.8,1.58);[-.7,.7].forEach(a=>slab(w,.08,.5,.4,'#4a3320',-4.4+a,.25,1.8));
   [0,1,2].forEach(i=>{const t1=new THREE.Mesh(new THREE.TorusGeometry(.28,.04,6,14),M('#333'));t1.position.set(4.6+i*.55,.3,1.2);w.add(t1);const t2=t1.clone();t2.position.set(4.6+i*.55,.3,1.7);w.add(t2);slab(w,.05,.05,.5,'#c8372d',4.6+i*.55,.55,1.45)});
   mkParticles(w,0xffb7c5,.13,.9,60);
-})();
+});
 
 let curTheme=-1,themeOverride=null;
 const themeIdx=()=>{
@@ -652,7 +660,7 @@ function applyPresence(){
   sopian.visible=t>=4;
   if(t===3&&mode!=='kons'){farhan.position.set(.9,0,-1.3);farhan.rotation.y=.25}
 }
-async function syncTheme(fade){const want=Math.min(themeIdx(),worlds.length-1);if(want===curTheme)return;if(fade&&curTheme>=0)await fadeTo(true);worlds.forEach((w,i)=>w.visible=i===want);curTheme=want;applyPresence();document.body.style.background=BGS[want];snow=worlds[want].userData.snow;if(fade)await fadeTo(false)}
+async function syncTheme(fade){const want=Math.min(themeIdx(),worlds.length-1);if(want===curTheme)return;if(fade&&curTheme>=0)await fadeTo(true);if(LZ[want])LZ[want]();worlds.forEach((w,i)=>w.visible=i===want);curTheme=want;applyPresence();document.body.style.background=BGS[want];snow=worlds[want].userData.snow;if(fade)await fadeTo(false)}
 
 /* aktor */
 const actors={};
@@ -764,7 +772,7 @@ function loop(){
 
 /* ===== potret dialog (renderer kedua) ===== */
 const pcv=$('pc');
-const pr=new THREE.WebGLRenderer({canvas:pcv,antialias:true,alpha:false});pr.setPixelRatio(1);pr.setSize(168,168,false);pr.setClearColor(0xfff3d6,1);pr.outputColorSpace=THREE.SRGBColorSpace;
+const pr=new THREE.WebGLRenderer({canvas:pcv,antialias:false,alpha:false});pr.setPixelRatio(1);pr.setSize(168,168,false);pr.setClearColor(0xfff3d6,1);pr.outputColorSpace=THREE.SRGBColorSpace;
 const pcam=new THREE.PerspectiveCamera(30,1,.1,40);
 let portraitOn=false,portraitWho=null,ptick=0;
 function renderPortrait(){
