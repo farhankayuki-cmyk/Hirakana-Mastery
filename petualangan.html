@@ -1131,6 +1131,13 @@ async function endBab5(){
   hideDlg();
   await showCard('end');
   await panel(`<h2 class="cen">Petualangan tamat 🎉</h2><p class="hint cen">Terima kasih sudah bermain. Kamu masih bisa mengulang misi dari Peta Misi 🗺️, dan membuka lagi sertifikat atau kartu ending dari menu ☰.</p><button class="btn" id="ok" style="width:100%">Oke</button>`,(cl,b)=>{b.querySelector('#ok').onclick=()=>cl()});
+  await comingSoon();
+}
+async function comingSoon(){
+  const k=myPath()==='s';
+  const ch=[['🏪','Belanja & Konbini','Baca label, harga, dan bertanya ke kasir'],['🚆','Naik Kereta & Tanya Jalan','Peron, tiket, dan pengumuman stasiun'],[k?'🎓':'💼',k?'Kuliah & Teman Baru':'Rapat & Teman Kerja',k?'Perkenalan diri dan diskusi kelas':'Laporan singkat dan sapaan kantor'],['🌸','Musim Semi di Jepang','Festival, sapaan musiman, dan cerita penutup Musim 2']];
+  const wa='https://wa.me/'+WA_NUM+'?text='+encodeURIComponent('Halo MinKi, aku '+(S.name||'siswa Kayuki')+'. Aku sudah tamat game Petualangan Kayuki dan pengin tahu cara akses lanjutan ceritanya di Super Web App Kayuki Premium.');
+  await panel(`<h2 class="cen">Musim 2 · Hidup di Jepang 🇯🇵</h2><p class="hint cen"><b>Coming Soon.</b> Ceritamu belum selesai! Lanjutannya hadir di <b>Super Web App Kayuki Premium</b>, bukan di HiraKana lagi.</p><div class="list">${ch.map(c=>`<div class="li lk"><div>${c[0]} ${c[1]}<small>${c[2]}</small></div><span>🔒</span></div>`).join('')}</div><p class="hint cen" style="margin-top:10px">Yang bisa masuk ke lanjutan ini: siswa yang punya <b>akun Super Web App Kayuki</b>.</p><button class="btn" id="csWa" style="width:100%;background:#25d366;color:#fff">💬 Tanya MinKi soal akun &amp; Premium</button><div class="sp"></div><button class="btn sec" id="csOk" style="width:100%">Tutup</button>`,(cl,b)=>{b.querySelector('#csWa').onclick=()=>window.open(wa,'_blank','noopener');b.querySelector('#csOk').onclick=()=>cl()});
 }
 /* ===== sertifikat, kartu ending, bagikan ===== */
 const loadImg=src=>new Promise(r=>{const i=new Image();i.onload=()=>r(i);i.onerror=()=>r(null);i.src=src});
@@ -1337,13 +1344,14 @@ function menuPanel(){
    <button class="btn" id="a1">▶ Lanjutkan</button>
    <button class="btn sec" id="a2">👕 Ganti penampilan</button>
    <button class="btn sec" id="a3">🤝 Pratinjau sesi konseling (tidak disimpan)</button>${S.cert?'<button class="btn sec" id="a6">🏅 Sertifikat Kelulusan</button>':''}${(S.done.m21k||S.done.m21s)?'<button class="btn sec" id="a7">🎴 Kartu Ending</button>':''}
+   <button class="btn sec" id="a8">🔒 Musim 2: Coming Soon</button>
    <button class="btn sec" id="a4">${S.sound?'🔊 Suara: nyala':'🔇 Suara: mati'}</button>
    <a class="btn sec" href="index.html" style="text-decoration:none;text-align:center">← Kembali ke HiraKana</a>
    <button class="btn sec" id="a5" style="color:#a02030">Hapus progres game</button></div>`,(cl,b)=>{
     b.querySelector('#a1').onclick=()=>cl('x');b.querySelector('#a2').onclick=()=>cl('look');
     b.querySelector('#a3').onclick=()=>cl('kons');
     const a6=b.querySelector('#a6');if(a6)a6.onclick=()=>cl('cert');const a7=b.querySelector('#a7');if(a7)a7.onclick=()=>cl('end');
-    b.querySelector('#a4').onclick=()=>{S.sound=!S.sound;save();cl('x');toast(S.sound?'Suara nyala':'Suara mati')};
+    b.querySelector('#a8').onclick=()=>cl('cs');b.querySelector('#a4').onclick=()=>{S.sound=!S.sound;save();cl('x');toast(S.sound?'Suara nyala':'Suara mati')};
     b.querySelector('#a5').onclick=()=>{if(confirm('Hapus semua progres game ini?')){localStorage.removeItem(KEY);location.reload()}};
   });
 }
@@ -1352,6 +1360,7 @@ async function openMenu(){
   const r=await menuPanel();
   if(r==='look'){await lookPanel()}
   else if(r==='kons'){await konseling(false);return}
+  else if(r==='cs'){mode='dialog';await comingSoon();mode='idle'}
   else if(r==='cert'||r==='end'){mode='dialog';await showCard(r)}
   mode='idle';
 }
@@ -1378,9 +1387,11 @@ async function mapPanel(){
     h+=ms.map(m=>`<${mOpen(m)?'button data-id="'+m.id+'"':'div'} class="li ${mOpen(m)?'':'lk'}" style="margin-left:14px;text-align:left;width:calc(100% - 14px)"><div>${m.title}<small>${m.sub} · ${NAMES[m.npc]}</small></div><span>${S.done[m.id]?'⭐'.repeat(S.stars[m.id]||1):mOpen(m)?'▶':'🔒'}</span></${mOpen(m)?'button':'div'}>`).join('');
     if(i===4&&!konsDone())h+=`<div class="li lk" style="margin-left:14px;width:calc(100% - 14px)"><div>Hari Pertama di Jepang<small>Sesuai jalur pilihanmu</small></div><span>🔒</span></div>`;
   });
+  h+=`<button class="li" id="mcs" style="text-align:left;width:100%"><div>Musim 2 · Hidup di Jepang<small>Coming Soon · di Super Web App Kayuki Premium</small></div><span>🔒</span></button>`;
   h+=`</div><div class="sp"></div><div class="row"><button class="btn" id="mc" style="flex:1">Tutup</button></div>`;
-  const sel=await panel(h,(cl,b)=>{b.querySelector('#mc').onclick=()=>cl();b.querySelectorAll('button[data-id]').forEach(x=>x.onclick=()=>cl(x.dataset.id))});
+  const sel=await panel(h,(cl,b)=>{b.querySelector('#mc').onclick=()=>cl();b.querySelector('#mcs').onclick=()=>cl('__cs');b.querySelectorAll('button[data-id]').forEach(x=>x.onclick=()=>cl(x.dataset.id))});
   mode='idle';
+  if(sel==='__cs'){await comingSoon();return}
   if(sel)await startMission(mById(sel));
 }
 $('bMenu').onclick=openMenu;$('bMap').onclick=mapPanel;
